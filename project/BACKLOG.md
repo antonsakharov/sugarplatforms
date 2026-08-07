@@ -6,22 +6,22 @@ The daily build selects the first unblocked item whose dependencies are complete
 
 ## Epic 1 — Foundation
 
-- [ ] FND-001 Create Next.js TypeScript application
-- [ ] FND-002 Add lint, format, type-check, and test commands
-- [ ] FND-003 Add environment validation and feature flags
-- [ ] FND-004 Add product layout and navigation
-- [ ] FND-005 Add Dockerfile and Vercel configuration
-- [ ] FND-006 Add health endpoint and structured logging
+- [-] FND-001 Create Next.js TypeScript application
+- [-] FND-002 Add lint, format, type-check, and test commands
+- [-] FND-003 Add environment validation and feature flags
+- [-] FND-004 Add product layout and navigation
+- [-] FND-005 Add Dockerfile and Vercel configuration
+- [-] FND-006 Add health endpoint and structured logging
 
 ## Epic 2 — Entry and assessment setup
 
-- [ ] ASM-001 Build landing page with Analyze My Platform and View Sample Diagnostic
-- [ ] ASM-002 Build assessment setup form
-- [ ] ASM-003 Add focus-area selection
-- [ ] ASM-004 Add primary-entity and business-concern inputs
-- [ ] ASM-005 Display and acknowledge MVP limits
-- [ ] ASM-006 Persist assessment draft in demo/local adapter
-- [ ] ASM-007 Add assessment schema validation tests
+- [-] ASM-001 Build landing page with Analyze My Platform and View Sample Diagnostic
+- [-] ASM-002 Build assessment setup form
+- [-] ASM-003 Add focus-area selection
+- [-] ASM-004 Add primary-entity and business-concern inputs
+- [-] ASM-005 Display and acknowledge MVP limits
+- [-] ASM-006 Persist assessment draft in demo/local adapter
+- [-] ASM-007 Add assessment schema validation tests
 
 ## Epic 3 — Sample assessment
 
@@ -140,14 +140,4 @@ The daily build selects the first unblocked item whose dependencies are complete
 
 ## Definition of done
 
-A feature is complete only when:
-
-- the intended user action works;
-- code and configuration are present;
-- tests or explicit validation are present;
-- build/type/lint pass;
-- limits and authorization are server-enforced where applicable;
-- evidence links are preserved;
-- documentation is updated;
-- sample assessment remains functional;
-- no placeholder business logic is presented as complete.
+A feature is complete only when the intended user action works; code/configuration and tests are present; build/type/lint pass; limits and authorization are server-enforced where applicable; evidence links are preserved; docs are updated; the sample remains functional; and no placeholder business logic is presented as complete.
