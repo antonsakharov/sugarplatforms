@@ -1,20 +1,23 @@
 # Validation status
 
-## Completed
+## 2026-08-07 assessment setup increment
 
-- Source-policy lint script created.
-- Node test files created.
-- Route and configuration structure reviewed.
+Completed locally:
 
-## Blocked in the current execution environment
+- source-policy lint passes;
+- 5/5 Node tests pass, including assessment contract checks;
+- JSON schemas parse successfully;
+- server-side assessment validation and MVP-limit acknowledgement reviewed.
 
-`npm install` could not complete because the configured package mirror returned 404 for scoped packages including `@types/node`. TypeScript checks and the production Next.js build therefore could not run in this environment.
+## Environment limitation
 
-Run locally or in GitHub Actions:
+The local runtime cannot resolve `registry.npmjs.org` (`EAI_AGAIN`), so dependency-backed TypeScript checking and the Next.js production build cannot run here.
+
+GitHub Actions CI is included in this increment to run the full validation in GitHub's standard environment:
 
 ```bash
-npm install
+npm install --no-audit --no-fund
 npm run validate
 ```
 
-The backlog keeps the foundation feature in progress until these checks pass.
+The foundation and assessment features remain marked in progress until CI passes.
