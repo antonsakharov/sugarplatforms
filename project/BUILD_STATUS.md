@@ -1,19 +1,32 @@
-# Build status — 2026-08-06
+# Build Status
 
-## In progress
+## 2026-08-07
 
-- FND-001 Next.js TypeScript application foundation
-- FND-002 Validation commands and tests
-- FND-003 Environment validation and feature limits
-- FND-004 Product layout and navigation
-- FND-005 Docker and Vercel configuration
-- FND-006 Health endpoint
-- ASM-001 Public entry page with Analyze My Platform and View Sample Diagnostic
+### Implemented in this increment
 
-## Validation
+- [-] ASM-002 Build assessment setup form
+- [-] ASM-003 Add focus-area selection
+- [-] ASM-004 Add primary-entity and business-concern inputs
+- [-] ASM-005 Display and acknowledge MVP limits
+- [-] ASM-006 Persist assessment draft in demo/local adapter
+- [-] ASM-007 Add assessment schema validation tests
 
-Source, test, and deployment files are present. Full dependency installation, type checking, and production build remain pending because the current execution environment's npm mirror returned 404 for scoped packages such as `@types/node`.
+These remain in progress until dependency-backed type checking and the production build pass in CI.
 
-## Next feature
+### Foundation dependency
 
-Complete validation in GitHub Actions or a standard npm environment, then implement ASM-002 through ASM-005: the guided assessment setup form, focus-area selection, primary entity, business concern, and limits acknowledgement.
+- [-] FND-001–FND-006 remain on PR #1 pending CI validation and merge.
+
+### User flow now enabled
+
+`landing -> create assessment -> choose one focus -> define primary entity -> acknowledge limits -> server validation -> save local demo draft -> assessment workspace`
+
+### Validation completed locally
+
+- 5/5 Node tests pass
+- source-policy lint passes
+- JSON schemas parse successfully
+
+### Exact next feature
+
+After CI confirms the stacked foundation and assessment slice, build `UPL-001` guided artifact upload UI plus server-side count/type/size validation (`UPL-002`–`UPL-004`).
