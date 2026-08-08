@@ -49,3 +49,8 @@ Use explicit rules for repeatable platform diagnostics and AI for cross-document
 **Status:** Accepted
 
 When credentials are unavailable, use working local adapters without changing domain interfaces.
+
+## ADR-011 — Demo uploads validate without persistence
+**Status:** Accepted
+
+Until authenticated tenant-scoped private object storage is available, the demo upload route validates multipart file metadata server-side and returns only safe metadata. It does not read or persist artifact bytes. This allows the upload UX and policy controls to be exercised without implying production-grade confidential-file handling.
