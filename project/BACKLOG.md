@@ -47,16 +47,16 @@ The daily build selects the first unblocked item whose dependencies are complete
 
 ## Epic 5 — Guided upload and validation
 
-- [ ] UPL-001 Build private upload UI
-- [ ] UPL-002 Enforce maximum 10 files
-- [ ] UPL-003 Enforce 25 MB file limit
-- [ ] UPL-004 Add supported-type allowlist
+- [-] UPL-001 Build private upload UI
+- [-] UPL-002 Enforce maximum 10 files
+- [-] UPL-003 Enforce 25 MB file limit
+- [-] UPL-004 Add supported-type allowlist
 - [ ] UPL-005 Add checksum duplicate detection
 - [ ] UPL-006 Add page-count estimation and 150-page limit
 - [ ] UPL-007 Add probable-secret and prohibited-data warnings
 - [ ] UPL-008 Add remove/replace workflow
 - [ ] UPL-009 Build readiness summary
-- [ ] UPL-010 Add validation tests
+- [-] UPL-010 Add validation tests
 
 ## Epic 6 — Parsing and evidence
 
