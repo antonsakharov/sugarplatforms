@@ -10,7 +10,7 @@ Status: in progress — implemented; full dependency-backed build validation pen
 
 User can upload up to 10 supported files, see file type/size/duplicate/page checks, receive possible-secret warnings, remove or replace files, and see readiness for analysis.
 
-Status: planned — next.
+Status: in progress — file selection plus server-side count, 25 MB/file, and extension/MIME allowlist validation implemented. Demo mode returns validated metadata without persisting file content. Duplicate, page-count, secret scanning, replacement, readiness, authentication, and private object storage remain planned.
 
 ## MVP priority 3 — Artifact parsing and evidence
 
