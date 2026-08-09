@@ -14,15 +14,19 @@ npm run dev
 npm run validate
 ```
 
-The validation command runs TypeScript checks, source-policy lint checks, Node tests, and a production Next.js build.
+`npm run validate` runs TypeScript checks, source-policy lint, Node tests, and a production Next.js build. The Node tests include behavioral tests for the dependency-free artifact content policy using Node 22 type stripping.
 
 ## Current routes
 
 - `/` — product entry page
-- `/assessment/new` — assessment setup entry route
+- `/assessment/new` — guided assessment setup
+- `/assessment/[id]` — local/demo assessment workspace
+- `/assessment/[id]/upload` — upload readiness workflow
+- `/api/assessments` — assessment validation/creation API
+- `/api/assessments/[id]/artifacts` — transient artifact inspection API
 - `/sample` — Acme sample entry route
 - `/api/health` — health endpoint
 
-## Current limits
+## Current upload behavior
 
-Limits are parsed and validated in `lib/config.ts`. They will also be enforced server-side in the upload and assessment APIs as those features are implemented.
+The demo adapter does not persist file bytes. After metadata checks pass, the server reads each file transiently to compute SHA-256, estimate pages, and perform best-effort probable-secret/prohibited-data scanning. It returns safe inspection metadata and a readiness state. Do not use the demo for confidential customer material.
