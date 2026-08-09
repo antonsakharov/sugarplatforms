@@ -4,19 +4,19 @@
 
 User can create a workspace, name an assessment, choose one focus area, specify one primary entity, describe the business concern, and accept assessment limits.
 
-Status: in progress — implemented; full dependency-backed build validation pending.
+Status: in progress — implemented; dependency-backed production build validation remains pending.
 
 ## MVP priority 2 — Guided upload
 
-User can upload up to 10 supported files, see file type/size/duplicate/page checks, receive possible-secret warnings, remove or replace files, and see readiness for analysis.
+User can select up to 10 supported files, receive server-side type/size/duplicate/page validation, receive probable-secret and prohibited-data warnings, remove or replace files, and see whether the artifact set is ready for parsing.
 
-Status: in progress — file selection plus server-side count, 25 MB/file, and extension/MIME allowlist validation implemented. Demo mode returns validated metadata without persisting file content. Duplicate, page-count, secret scanning, replacement, readiness, authentication, and private object storage remain planned.
+Status: in progress — the complete demo/local upload-readiness workflow is implemented. The server reads bytes only transiently to calculate SHA-256 checksums, estimate page counts, and perform best-effort content-risk scanning; uploaded bytes are not persisted. Real confidential uploads still require authentication, tenant authorization, private object storage, malware scanning, and production security validation.
 
 ## MVP priority 3 — Artifact parsing and evidence
 
 User can see processing status, inspect parsed content and source coordinates, see extracted-object provenance, and inspect parsing failures.
 
-Status: planned
+Status: planned — next priority.
 
 ## MVP priority 4 — Extraction review
 
