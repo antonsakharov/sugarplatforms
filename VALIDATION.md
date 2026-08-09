@@ -1,25 +1,26 @@
 # Validation status
 
-## 2026-08-08 guided upload increment
+## 2026-08-09 upload-readiness increment
 
 Completed locally:
 
-- 3/3 new upload contract tests pass;
-- server-side file-count enforcement is present;
-- server-side 25 MB per-file enforcement is present;
-- extension + MIME allowlist validation is present;
-- demo upload route returns metadata only and does not read or persist artifact bytes.
+- 13/13 Node behavioral and contract tests pass;
+- behavioral SHA-256, page-estimation, and content-risk scanner tests pass;
+- upload route contract tests cover duplicate detection, 150-page enforcement, transient-only byte handling, and readiness status;
+- guided UI contract tests cover remove/replace and warning/readiness display;
+- source-policy lint passes after fixing its pre-existing self-match bug;
+- all 4 JSON schemas parse successfully.
 
-Prior 2026-08-07 checks remain applicable: source-policy lint passed, 5/5 assessment/config Node tests passed, and JSON schemas parsed successfully.
+The demo endpoint now reads accepted file bytes transiently in request memory only. It does not write artifact bytes to disk, object storage, logs, or browser storage. Safe metadata including checksums, page estimates, warning categories/messages, and readiness may be stored in localStorage.
 
 ## Environment limitation
 
-The local runtime cannot resolve external package registries or GitHub over normal network access, so dependency-backed TypeScript checking and the Next.js production build cannot run here.
+The current runtime has Node and TypeScript installed globally but cannot resolve external npm/GitHub network hosts. Project dependencies are therefore unavailable, so dependency-backed `tsc --noEmit` and the Next.js production build cannot be completed here. A direct global TypeScript run fails on missing installed Next/React/Zod/Node declarations rather than a demonstrated application type defect.
 
-The repository contains a GitHub Actions CI workflow on the stacked assessment branch, but that workflow is not yet present on `main`, so PR-triggered CI cannot be relied upon until the baseline PR lands.
+The GitHub workflow remains present on the stacked feature branch but is not yet on `main`, so PR-triggered CI cannot be relied upon until the baseline lands.
 
 Foundation, assessment, and guided-upload features therefore remain marked in progress rather than complete.
 
 ## Security limitation
 
-Real confidential uploads are not enabled. Authentication, tenant authorization, private object storage, checksum duplicate detection, total page-count enforcement, probable-secret scanning, and malware controls remain required before confidential enterprise artifacts should be accepted.
+Probable-secret and prohibited-data scanning is intentionally best-effort. PDF scanning can miss compressed/encrypted content. Authentication, tenant authorization, private storage, malware scanning, deletion, audit events, provider controls, and tenant-isolation verification remain mandatory before confidential enterprise artifacts can be accepted.
