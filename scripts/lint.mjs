@@ -4,6 +4,7 @@ import path from "node:path";
 const roots = ["app", "lib", "tests", "scripts"];
 const allowed = new Set([".ts", ".tsx", ".mjs"]);
 const violations = [];
+const forbiddenConsole = new RegExp("console\\.log\\(");
 
 function walk(dir) {
   for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
@@ -12,7 +13,7 @@ function walk(dir) {
     else if (allowed.has(path.extname(entry.name))) {
       const text = fs.readFileSync(full, "utf8");
       if (/\t/.test(text)) violations.push(`${full}: tabs are not allowed`);
-      if (/console\.log\(/.test(text)) violations.push(`${full}: console.log is not allowed`);
+      if (forbiddenConsole.test(text)) violations.push(`${full}: debug console output is not allowed`);
     }
   }
 }
