@@ -50,7 +50,17 @@ Use explicit rules for repeatable platform diagnostics and AI for cross-document
 
 When credentials are unavailable, use working local adapters without changing domain interfaces.
 
-## ADR-011 — Demo uploads validate without persistence
+## ADR-011 — Demo uploads initially validate metadata without persistence
+**Status:** Superseded by ADR-012
+
+The first guided-upload increment validated multipart metadata only and did not read artifact bytes. This conservative starting point established count, size, and type controls before content inspection was introduced.
+
+## ADR-012 — Transient in-memory inspection is permitted in demo mode
 **Status:** Accepted
 
-Until authenticated tenant-scoped private object storage is available, the demo upload route validates multipart file metadata server-side and returns only safe metadata. It does not read or persist artifact bytes. This allows the upload UX and policy controls to be exercised without implying production-grade confidential-file handling.
+After metadata validation succeeds, the demo upload endpoint may read each selected artifact into bounded request memory solely to compute SHA-256, estimate pages, and run best-effort prohibited-content checks. Raw bytes must not be persisted, logged, echoed, or sent to an external model/provider. Only safe inspection metadata may be returned and stored in the local browser adapter.
+
+## ADR-013 — Upload readiness is conservative and reviewable
+**Status:** Accepted
+
+Duplicate content and measurable page-limit violations block the artifact set. Probable-secret/prohibited-data signals and unmeasurable page counts produce `review_required`; the demo does not provide a bypass control. Detection is explicitly best-effort and never represented as a guarantee that uploaded content is safe.
