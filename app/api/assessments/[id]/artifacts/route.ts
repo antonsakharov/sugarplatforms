@@ -1,32 +1,94 @@
 import { NextResponse } from "next/server";
 import { PRODUCT_LIMITS } from "@/lib/config";
+import { inspectArtifactBytes } from "@/lib/artifact-content-policy";
 import { validateArtifactSet } from "@/lib/upload";
 
 export const runtime = "nodejs";
+
+type InspectedArtifact = {
+  name: string;
+  size: number;
+  type: string;
+  status: "validated" | "review_required" | "blocked";
+  errors: string[];
+  checksumSha256: string;
+  pageEstimate: { pages: number | null; method: string; confidence: string };
+  riskWarnings: Array<{ category: string; code: string; message: string }>;
+  scanCoverage: string;
+};
 
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const formData = await request.formData();
   const entries = formData.getAll("files");
   const files = entries.filter((entry): entry is File => entry instanceof File);
-
   if (entries.length !== files.length) {
     return NextResponse.json({ error: "Only file uploads are accepted." }, { status: 400 });
   }
 
-  const validation = validateArtifactSet(files);
-  if (!validation.accepted) {
-    return NextResponse.json({ assessmentId: id, ...validation }, { status: 400 });
+  const metadataValidation = validateArtifactSet(files);
+  if (!metadataValidation.accepted) {
+    return NextResponse.json({ assessmentId: id, ...metadataValidation }, { status: 400 });
   }
 
-  return NextResponse.json(
-    {
+  const artifacts: InspectedArtifact[] = [];
+  const checksums = new Map<string, string>();
+  for (const file of files) {
+    const bytes = new Uint8Array(await file.arrayBuffer());
+    const inspection = inspectArtifactBytes(file.name, bytes);
+    const errors: string[] = [];
+    const firstName = checksums.get(inspection.checksumSha256);
+    if (firstName) errors.push(`Duplicate content: ${file.name} matches ${firstName}.`);
+    else checksums.set(inspection.checksumSha256, file.name);
+    artifacts.push({
+      name: file.name,
+      size: file.size,
+      type: file.type || "application/octet-stream",
+      status: errors.length > 0 ? "blocked" : inspection.riskWarnings.length > 0 || inspection.pageEstimate.pages === null ? "review_required" : "validated",
+      errors,
+      ...inspection
+    });
+  }
+
+  const measurablePages = artifacts.reduce((total, artifact) => total + (artifact.pageEstimate.pages ?? 0), 0);
+  const unmeasurableFiles = artifacts.filter((artifact) => artifact.pageEstimate.pages === null).length;
+  const setErrors: string[] = [];
+  if (measurablePages > PRODUCT_LIMITS.maxTotalPages) {
+    setErrors.push(`Estimated total page count ${measurablePages} exceeds the ${PRODUCT_LIMITS.maxTotalPages}-page limit.`);
+  }
+  if (artifacts.some((artifact) => artifact.errors.length > 0)) {
+    setErrors.push("Duplicate artifact content must be removed or replaced.");
+  }
+
+  if (setErrors.length > 0) {
+    return NextResponse.json({
       assessmentId: id,
-      accepted: true,
-      storageMode: "validation-only",
-      limits: { maxFiles: PRODUCT_LIMITS.maxFiles, maxFileBytes: PRODUCT_LIMITS.maxFileBytes },
-      artifacts: validation.artifacts.map(({ name, size, type }) => ({ name, size, type, status: "validated" }))
-    },
-    { status: 200 }
-  );
+      accepted: false,
+      setErrors,
+      artifacts,
+      limits: { maxFiles: PRODUCT_LIMITS.maxFiles, maxFileBytes: PRODUCT_LIMITS.maxFileBytes, maxTotalPages: PRODUCT_LIMITS.maxTotalPages }
+    }, { status: 400 });
+  }
+
+  const warningCount = artifacts.reduce((total, artifact) => total + artifact.riskWarnings.length, 0);
+  const readyForAnalysis = warningCount === 0 && unmeasurableFiles === 0;
+  const readiness = {
+    status: readyForAnalysis ? "ready" : "review_required",
+    readyForAnalysis,
+    totalPages: measurablePages,
+    unmeasurableFiles,
+    warningCount,
+    message: readyForAnalysis
+      ? "Artifact set passed upload readiness checks and is ready for parsing."
+      : "Replace or remove flagged artifacts before analysis. Page counts and content-risk scanning are best-effort and do not guarantee sensitive-data detection."
+  } as const;
+
+  return NextResponse.json({
+    assessmentId: id,
+    accepted: true,
+    storageMode: "transient-validation-only",
+    limits: { maxFiles: PRODUCT_LIMITS.maxFiles, maxFileBytes: PRODUCT_LIMITS.maxFileBytes, maxTotalPages: PRODUCT_LIMITS.maxTotalPages },
+    artifacts,
+    readiness
+  });
 }
