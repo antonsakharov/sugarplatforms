@@ -13,11 +13,15 @@ type ValidatedArtifact = {
   riskWarnings: RiskWarning[]; scanCoverage: string;
 };
 type Readiness = { status: "ready" | "review_required"; readyForAnalysis: boolean; totalPages: number; unmeasurableFiles: number; warningCount: number; message: string };
+type SourceSegment = { id: string; title?: string; locator: { type: string; value: string }; content: string };
+type ParsedArtifact = { artifactId: string; artifactName: string; parser: string; sourceSegments: SourceSegment[]; warnings: string[]; stats: { segmentCount: number; characterCount: number } };
+type Parsing = { status: "ready" | "partial" | "withheld"; parsedArtifacts: ParsedArtifact[]; errors: Array<{ artifactName: string; message: string }>; segmentCount: number };
 
 export function UploadForm({ assessmentId }: { assessmentId: string }) {
   const [files, setFiles] = useState<File[]>([]);
   const [artifacts, setArtifacts] = useState<ValidatedArtifact[]>([]);
   const [readiness, setReadiness] = useState<Readiness | null>(null);
+  const [parsing, setParsing] = useState<Parsing | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const replacementIndex = useRef<number | null>(null);
@@ -25,8 +29,10 @@ export function UploadForm({ assessmentId }: { assessmentId: string }) {
   useEffect(() => {
     const storedArtifacts = localStorage.getItem(`sugar:artifacts:${assessmentId}`);
     const storedReadiness = localStorage.getItem(`sugar:readiness:${assessmentId}`);
+    const storedParsing = localStorage.getItem(`sugar:parsing:${assessmentId}`);
     if (storedArtifacts) setArtifacts(JSON.parse(storedArtifacts));
     if (storedReadiness) setReadiness(JSON.parse(storedReadiness));
+    if (storedParsing) setParsing(JSON.parse(storedParsing));
   }, [assessmentId]);
 
   const clientWarnings = useMemo(() => {
@@ -37,9 +43,10 @@ export function UploadForm({ assessmentId }: { assessmentId: string }) {
   }, [files]);
 
   function resetValidatedState() {
-    setArtifacts([]); setReadiness(null); setError(null);
+    setArtifacts([]); setReadiness(null); setParsing(null); setError(null);
     localStorage.removeItem(`sugar:artifacts:${assessmentId}`);
     localStorage.removeItem(`sugar:readiness:${assessmentId}`);
+    localStorage.removeItem(`sugar:parsing:${assessmentId}`);
   }
   function removeFile(index: number) { setFiles((current) => current.filter((_, itemIndex) => itemIndex !== index)); resetValidatedState(); }
   function replaceFile(index: number, replacement: File | null) {
@@ -49,7 +56,7 @@ export function UploadForm({ assessmentId }: { assessmentId: string }) {
   }
 
   async function validateUploads() {
-    setSubmitting(true); setError(null); setArtifacts([]); setReadiness(null);
+    setSubmitting(true); setError(null); setArtifacts([]); setReadiness(null); setParsing(null);
     const body = new FormData(); files.forEach((file) => body.append("files", file));
     try {
       const response = await fetch(`/api/assessments/${assessmentId}/artifacts`, { method: "POST", body });
@@ -60,16 +67,17 @@ export function UploadForm({ assessmentId }: { assessmentId: string }) {
         setError(messages.join(" ") || "Upload validation failed.");
         return;
       }
-      setArtifacts(payload.artifacts); setReadiness(payload.readiness);
+      setArtifacts(payload.artifacts); setReadiness(payload.readiness); setParsing(payload.parsing ?? null);
       localStorage.setItem(`sugar:artifacts:${assessmentId}`, JSON.stringify(payload.artifacts));
       localStorage.setItem(`sugar:readiness:${assessmentId}`, JSON.stringify(payload.readiness));
+      if (payload.parsing) localStorage.setItem(`sugar:parsing:${assessmentId}`, JSON.stringify(payload.parsing));
     } catch { setError("Upload validation could not be completed. Try again."); }
     finally { setSubmitting(false); }
   }
 
   return <>
     <div className="eyebrow">Assessment · Upload artifacts</div><h1>Add architecture evidence</h1>
-    <p className="lede">Files are inspected transiently for type, size, duplicate content, page limits, and probable sensitive content. Uploaded bytes are not persisted in demo mode.</p>
+    <p className="lede">Files are inspected transiently for type, size, duplicate content, page limits, and probable sensitive content. Ready text, Markdown, JSON, YAML, and OpenAPI artifacts are also converted into source-addressable evidence segments. Uploaded bytes are not persisted in demo mode.</p>
     <div className="upload-warning"><strong>Architecture metadata only.</strong> Do not upload customer or patient records, production data, passwords, API keys, tokens, private keys, or other secrets. Automated scanning is best-effort and cannot guarantee detection.</div>
     <div className="panel upload-panel">
       <label className="drop-zone"><span><strong>Choose architecture artifacts</strong><small>PDF, Markdown/text, JSON/YAML, CSV, or SQL DDL · up to 10 files · 25 MB each · 150 pages total where measurable</small></span>
@@ -86,7 +94,11 @@ export function UploadForm({ assessmentId }: { assessmentId: string }) {
         {artifact.riskWarnings?.length > 0 && <ul>{artifact.riskWarnings.map((warning) => <li key={warning.code}>{warning.message}</li>)}</ul>}
       </article>)}</div>}
       {readiness && <div className={readiness.readyForAnalysis ? "readiness-ready" : "readiness-review"}><strong>{readiness.readyForAnalysis ? "Ready for analysis" : "Review required"}</strong><span>{readiness.totalPages} measurable pages · {readiness.warningCount} content warning{readiness.warningCount === 1 ? "" : "s"} · {readiness.unmeasurableFiles} unmeasurable file{readiness.unmeasurableFiles === 1 ? "" : "s"}</span><p>{readiness.message}</p></div>}
-      <div className="form-actions"><button className="button" type="button" disabled={files.length === 0 || clientWarnings.length > 0 || submitting} onClick={validateUploads}>{submitting ? "Inspecting…" : "Validate readiness"}</button>
+      {parsing && parsing.status !== "withheld" && <div className="inspection-results"><h3>Evidence inventory</h3><p>{parsing.segmentCount} source-addressable segment{parsing.segmentCount === 1 ? "" : "s"} created from {parsing.parsedArtifacts.length} parsed artifact{parsing.parsedArtifacts.length === 1 ? "" : "s"}.</p>{parsing.parsedArtifacts.map((artifact) => <article className="inspection-row" key={artifact.artifactId}>
+        <div><strong>{artifact.artifactName}</strong><small>{artifact.parser} · {artifact.stats.segmentCount} segments · {artifact.stats.characterCount} characters</small></div>
+        <ul>{artifact.sourceSegments.slice(0, 3).map((segment) => <li key={segment.id}><strong>{segment.title ?? `Segment ${segment.id.split(":").at(-1)}`}</strong> — {segment.locator.value}</li>)}</ul>
+      </article>)}{parsing.errors.length > 0 && <div className="form-error">{parsing.errors.map((item) => `${item.artifactName}: ${item.message}`).join(" ")}</div>}</div>}
+      <div className="form-actions"><button className="button" type="button" disabled={files.length === 0 || clientWarnings.length > 0 || submitting} onClick={validateUploads}>{submitting ? "Inspecting…" : "Validate & parse"}</button>
         {artifacts.length > 0 && <button className="button button-secondary" type="button" onClick={() => { setFiles([]); resetValidatedState(); }}>Replace artifact set</button>}
         <a className="button button-secondary" href={`/assessment/${assessmentId}`}>Back to assessment</a></div>
     </div>
