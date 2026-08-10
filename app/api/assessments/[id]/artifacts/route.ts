@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { PRODUCT_LIMITS } from "@/lib/config";
 import { inspectArtifactBytes } from "@/lib/artifact-content-policy";
+import { parseArtifact, type ParsedArtifact } from "@/lib/artifact-parser";
 import { validateArtifactSet } from "@/lib/upload";
 
 export const runtime = "nodejs";
@@ -15,6 +16,13 @@ type InspectedArtifact = {
   pageEstimate: { pages: number | null; method: string; confidence: string };
   riskWarnings: Array<{ category: string; code: string; message: string }>;
   scanCoverage: string;
+};
+
+type ParsingResult = {
+  status: "ready" | "partial" | "withheld";
+  parsedArtifacts: ParsedArtifact[];
+  errors: Array<{ artifactName: string; message: string }>;
+  segmentCount: number;
 };
 
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
@@ -32,9 +40,11 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   }
 
   const artifacts: InspectedArtifact[] = [];
+  const fileBytes = new Map<string, Uint8Array>();
   const checksums = new Map<string, string>();
   for (const file of files) {
     const bytes = new Uint8Array(await file.arrayBuffer());
+    fileBytes.set(file.name, bytes);
     const inspection = inspectArtifactBytes(file.name, bytes);
     const errors: string[] = [];
     const firstName = checksums.get(inspection.checksumSha256);
@@ -83,12 +93,27 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
       : "Replace or remove flagged artifacts before analysis. Page counts and content-risk scanning are best-effort and do not guarantee sensitive-data detection."
   } as const;
 
+  const parsing: ParsingResult = { status: readyForAnalysis ? "ready" : "withheld", parsedArtifacts: [], errors: [], segmentCount: 0 };
+  if (readyForAnalysis) {
+    for (const file of files) {
+      try {
+        const parsed = parseArtifact(file.name, fileBytes.get(file.name) ?? new Uint8Array());
+        parsing.parsedArtifacts.push(parsed);
+        parsing.segmentCount += parsed.sourceSegments.length;
+      } catch (error) {
+        parsing.errors.push({ artifactName: file.name, message: error instanceof Error ? error.message : "Artifact parsing failed." });
+      }
+    }
+    if (parsing.errors.length > 0) parsing.status = "partial";
+  }
+
   return NextResponse.json({
     assessmentId: id,
     accepted: true,
-    storageMode: "transient-validation-only",
+    storageMode: "transient-validation-and-parsing-only",
     limits: { maxFiles: PRODUCT_LIMITS.maxFiles, maxFileBytes: PRODUCT_LIMITS.maxFileBytes, maxTotalPages: PRODUCT_LIMITS.maxTotalPages },
     artifacts,
-    readiness
+    readiness,
+    parsing
   });
 }
