@@ -12,12 +12,12 @@ test("upload metadata policy enforces count, size, and extension plus MIME allow
   assert.match(policy, /SUPPORTED_ARTIFACT_TYPES\.some/);
 });
 
-test("server performs transient content inspection without persisting uploaded bytes", () => {
+test("server performs transient content inspection and parsing without persisting uploaded bytes", () => {
   assert.match(route, /file\.arrayBuffer\(\)/);
   assert.match(route, /inspectArtifactBytes/);
   assert.match(route, /checksumSha256/);
   assert.match(route, /maxTotalPages/);
-  assert.match(route, /storageMode: "transient-validation-only"/);
+  assert.match(route, /storageMode: "transient-validation-and-parsing-only"/);
   assert.doesNotMatch(route, /writeFile|putObject|storage\.from|upload\(/);
 });
 
