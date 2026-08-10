@@ -3,12 +3,14 @@ name: validate
 on:
   pull_request:
   push:
-    branches: [main]
+    branches:
+      - main
+      - 'agent/**'
 
 jobs:
   validate:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -16,3 +18,16 @@ jobs:
           node-version: 22
       - run: npm install --no-audit --no-fund
       - run: npm run validate
+      - name: Package repository snapshot
+        if: always()
+        run: |
+          rm -rf .git node_modules .next
+          zip -r sugar-platform-diagnostic-${{ github.run_id }}.zip . -x '*.DS_Store'
+      - name: Upload repository snapshot
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sugar-platform-diagnostic-${{ github.run_id }}
+          path: sugar-platform-diagnostic-${{ github.run_id }}.zip
+          if-no-files-found: error
+          retention-days: 14
