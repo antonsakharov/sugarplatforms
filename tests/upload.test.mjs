@@ -35,3 +35,9 @@ test("guided UI supports remove and replace, displays risk results, and persists
   assert.match(form, /localStorage\.setItem/);
   assert.doesNotMatch(form, /arrayBuffer\(/);
 });
+
+test("processing status and evidence inventory are surfaced", () => {
+  assert.match(route, /processingArtifacts/);
+  assert.match(form, /Processing status/);
+  assert.match(form, /Evidence inventory/);
+});

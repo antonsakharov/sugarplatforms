@@ -34,6 +34,35 @@ test("YAML top-level sections preserve line coordinates", () => {
   assert.equal(result.sourceSegments[1].locator.startLine, 3);
 });
 
+test("CSV parser handles quoted commas and preserves row ranges", () => {
+  const result = parseArtifact("systems.csv", bytes('system,owner,notes\nCRM,Sales,"primary, customer system"\nBilling,Finance,ledger\n'));
+  assert.equal(result.parser, "csv");
+  assert.equal(result.sourceSegments.length, 1);
+  assert.equal(result.sourceSegments[0].locator.value, "rows 2-3");
+  assert.match(result.sourceSegments[0].content, /"primary, customer system"/);
+});
+
+test("SQL DDL parser segments CREATE statements with line provenance", () => {
+  const result = parseArtifact("schema.sql", bytes("CREATE TABLE customer (\n id uuid primary key\n);\n\nCREATE VIEW active_customer AS\nSELECT * FROM customer;\n"));
+  assert.equal(result.parser, "sql-ddl");
+  assert.equal(result.sourceSegments.length, 2);
+  assert.equal(result.sourceSegments[0].title, "customer");
+  assert.equal(result.sourceSegments[1].locator.startLine, 5);
+});
+
+test("PDF direct-text adapter emits page-addressable evidence and warns about coverage", () => {
+  const value = "%PDF-1.7\n1 0 obj << /Type /Page >> endobj\nstream\nBT (CRM owns customer ID) Tj ET\nendstream\n%%EOF";
+  const result = parseArtifact("architecture.pdf", bytes(value));
+  assert.equal(result.parser, "pdf-text");
+  assert.equal(result.sourceSegments[0].locator.value, "page 1");
+  assert.match(result.sourceSegments[0].content, /CRM owns customer ID/);
+  assert.ok(result.warnings.some((warning) => /production PDF adapter/.test(warning)));
+});
+
+test("PDF parser fails closed for unsupported compressed/scanned content", () => {
+  assert.throws(() => parseArtifact("architecture.pdf", bytes("%PDF-1.7\n1 0 obj << /Type /Page >> endobj\n%%EOF")), /production PDF adapter/);
+});
+
 test("unsupported formats fail closed instead of pretending to parse", () => {
-  assert.throws(() => parseArtifact("architecture.pdf", bytes("%PDF")), /No deterministic parser/);
+  assert.throws(() => parseArtifact("architecture.docx", bytes("not supported")), /No deterministic parser/);
 });

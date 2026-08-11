@@ -62,12 +62,12 @@ The daily build selects the first unblocked item whose dependencies are complete
 
 - [-] PAR-001 Implement text and Markdown parser
 - [-] PAR-002 Implement JSON/YAML/OpenAPI parser
-- [ ] PAR-003 Implement CSV parser
-- [ ] PAR-004 Implement SQL DDL parser
-- [ ] PAR-005 Implement PDF parser
+- [-] PAR-003 Implement CSV parser
+- [-] PAR-004 Implement SQL DDL parser
+- [-] PAR-005 Implement PDF parser
 - [-] PAR-006 Create source-addressable segments
-- [ ] PAR-007 Build processing-status UI
-- [ ] PAR-008 Build artifact/evidence inventory
+- [-] PAR-007 Build processing-status UI
+- [-] PAR-008 Build artifact/evidence inventory
 - [ ] PAR-009 Add retry and quarantine states
 
 ## Epic 7 — AI extraction and review

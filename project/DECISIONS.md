@@ -69,3 +69,8 @@ Duplicate content and measurable page-limit violations block the artifact set. P
 **Status:** Accepted
 
 All deterministic parsers emit bounded source segments with stable artifact/segment IDs, per-segment SHA-256, and a locator that can be resolved back to the submitted artifact. Text, Markdown, and YAML use line ranges; JSON/OpenAPI JSON use JSON Pointer. Unsupported parser formats fail or remain partial rather than fabricating evidence. These segment contracts become the provenance boundary for later AI extraction and findings.
+
+## ADR-015 — PDF parsing remains fail-closed in demo mode
+**Status:** Accepted
+
+The demo may extract directly addressable PDF text operators with page-level locators. Encrypted, scanned, compressed, or otherwise unsupported PDFs must produce a visible parsing failure instead of inferred or fabricated evidence. A production PDF adapter with complete text/layout handling is required before claiming general PDF coverage.
