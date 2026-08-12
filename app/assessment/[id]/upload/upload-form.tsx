@@ -17,12 +17,16 @@ type SourceSegment = { id: string; title?: string; locator: { type: string; valu
 type ParsedArtifact = { artifactId: string; artifactName: string; parser: string; sourceSegments: SourceSegment[]; warnings: string[]; stats: { segmentCount: number; characterCount: number } };
 type ProcessingArtifact = { artifactName: string; status: "parsed" | "failed" | "withheld"; parser?: string; segmentCount?: number; warnings?: string[]; message?: string };
 type Parsing = { status: "ready" | "partial" | "withheld"; parsedArtifacts: ParsedArtifact[]; processingArtifacts: ProcessingArtifact[]; errors: Array<{ artifactName: string; message: string }>; segmentCount: number };
+type EvidenceReference = { segmentId: string; artifactId: string; artifactName: string; locator: string; evidenceType: "direct" };
+type ExtractedObject = { id: string; kind: "system" | "entity" | "identifier" | "integration" | "capability" | "owner"; name: string; normalizedName: string; confidence: number; extractionMethod: string; evidence: EvidenceReference[]; attributes: Record<string, string> };
+type Extraction = { schemaVersion: "1.0"; provider: string; promptVersion: string; status: "ready" | "partial" | "withheld"; objects: ExtractedObject[]; warnings: string[]; stats: { objectCount: number; evidenceReferenceCount: number } };
 
 export function UploadForm({ assessmentId }: { assessmentId: string }) {
   const [files, setFiles] = useState<File[]>([]);
   const [artifacts, setArtifacts] = useState<ValidatedArtifact[]>([]);
   const [readiness, setReadiness] = useState<Readiness | null>(null);
   const [parsing, setParsing] = useState<Parsing | null>(null);
+  const [extraction, setExtraction] = useState<Extraction | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const replacementIndex = useRef<number | null>(null);
@@ -31,9 +35,11 @@ export function UploadForm({ assessmentId }: { assessmentId: string }) {
     const storedArtifacts = localStorage.getItem(`sugar:artifacts:${assessmentId}`);
     const storedReadiness = localStorage.getItem(`sugar:readiness:${assessmentId}`);
     const storedParsing = localStorage.getItem(`sugar:parsing:${assessmentId}`);
+    const storedExtraction = localStorage.getItem(`sugar:extraction:${assessmentId}`);
     if (storedArtifacts) setArtifacts(JSON.parse(storedArtifacts));
     if (storedReadiness) setReadiness(JSON.parse(storedReadiness));
     if (storedParsing) setParsing(JSON.parse(storedParsing));
+    if (storedExtraction) setExtraction(JSON.parse(storedExtraction));
   }, [assessmentId]);
 
   const clientWarnings = useMemo(() => {
@@ -44,10 +50,11 @@ export function UploadForm({ assessmentId }: { assessmentId: string }) {
   }, [files]);
 
   function resetValidatedState() {
-    setArtifacts([]); setReadiness(null); setParsing(null); setError(null);
+    setArtifacts([]); setReadiness(null); setParsing(null); setExtraction(null); setError(null);
     localStorage.removeItem(`sugar:artifacts:${assessmentId}`);
     localStorage.removeItem(`sugar:readiness:${assessmentId}`);
     localStorage.removeItem(`sugar:parsing:${assessmentId}`);
+    localStorage.removeItem(`sugar:extraction:${assessmentId}`);
   }
   function removeFile(index: number) { setFiles((current) => current.filter((_, itemIndex) => itemIndex !== index)); resetValidatedState(); }
   function replaceFile(index: number, replacement: File | null) {
@@ -57,7 +64,7 @@ export function UploadForm({ assessmentId }: { assessmentId: string }) {
   }
 
   async function validateUploads() {
-    setSubmitting(true); setError(null); setArtifacts([]); setReadiness(null); setParsing(null);
+    setSubmitting(true); setError(null); setArtifacts([]); setReadiness(null); setParsing(null); setExtraction(null);
     const body = new FormData(); files.forEach((file) => body.append("files", file));
     try {
       const response = await fetch(`/api/assessments/${assessmentId}/artifacts`, { method: "POST", body });
@@ -68,10 +75,11 @@ export function UploadForm({ assessmentId }: { assessmentId: string }) {
         setError(messages.join(" ") || "Upload validation failed.");
         return;
       }
-      setArtifacts(payload.artifacts); setReadiness(payload.readiness); setParsing(payload.parsing ?? null);
+      setArtifacts(payload.artifacts); setReadiness(payload.readiness); setParsing(payload.parsing ?? null); setExtraction(payload.extraction ?? null);
       localStorage.setItem(`sugar:artifacts:${assessmentId}`, JSON.stringify(payload.artifacts));
       localStorage.setItem(`sugar:readiness:${assessmentId}`, JSON.stringify(payload.readiness));
       if (payload.parsing) localStorage.setItem(`sugar:parsing:${assessmentId}`, JSON.stringify(payload.parsing));
+      if (payload.extraction) localStorage.setItem(`sugar:extraction:${assessmentId}`, JSON.stringify(payload.extraction));
     } catch { setError("Upload validation could not be completed. Try again."); }
     finally { setSubmitting(false); }
   }
@@ -96,7 +104,8 @@ export function UploadForm({ assessmentId }: { assessmentId: string }) {
       </article>)}</div>}
       {readiness && <div className={readiness.readyForAnalysis ? "readiness-ready" : "readiness-review"}><strong>{readiness.readyForAnalysis ? "Ready for analysis" : "Review required"}</strong><span>{readiness.totalPages} measurable pages · {readiness.warningCount} content warning{readiness.warningCount === 1 ? "" : "s"} · {readiness.unmeasurableFiles} unmeasurable file{readiness.unmeasurableFiles === 1 ? "" : "s"}</span><p>{readiness.message}</p></div>}
       {parsing && <div className="inspection-results"><h3>Processing status</h3><div className="artifact-list">{parsing.processingArtifacts?.map((item) => <article className={`inspection-row status-${item.status === "failed" ? "blocked" : item.status === "withheld" ? "review_required" : "validated"}`} key={item.artifactName}><strong>{item.artifactName}</strong><span className="status-pill">{item.status}</span><small>{item.status === "parsed" ? `${item.parser} · ${item.segmentCount ?? 0} segments` : item.message}</small>{item.warnings?.map((warning) => <p key={warning}>{warning}</p>)}</article>)}</div>{parsing.status !== "withheld" && <><h3>Evidence inventory</h3><p>{parsing.segmentCount} source-addressable segment{parsing.segmentCount === 1 ? "" : "s"} created from {parsing.parsedArtifacts.length} parsed artifact{parsing.parsedArtifacts.length === 1 ? "" : "s"}.</p>{parsing.parsedArtifacts.map((artifact) => <details className="inspection-row" open key={artifact.artifactId}><summary><strong>{artifact.artifactName}</strong><span>{artifact.parser} · {artifact.stats.segmentCount} segments</span></summary><div className="artifact-list">{artifact.sourceSegments.map((segment) => <article className="artifact-row" key={segment.id}><div><strong>{segment.title ?? `Segment ${segment.id.split(":").at(-1)}`}</strong><code>{segment.locator.value}</code></div><p>{segment.content.slice(0, 320)}{segment.content.length > 320 ? "…" : ""}</p></article>)}</div></details>)}{parsing.errors.length > 0 && <div className="form-error">{parsing.errors.map((item) => `${item.artifactName}: ${item.message}`).join(" ")}</div>}</>}</div>}
-      <div className="form-actions"><button className="button" type="button" disabled={files.length === 0 || clientWarnings.length > 0 || submitting} onClick={validateUploads}>{submitting ? "Inspecting…" : "Validate & parse"}</button>
+      {extraction && <div className="inspection-results"><h3>Extracted architecture objects</h3><p>{extraction.stats.objectCount} evidence-linked object{extraction.stats.objectCount === 1 ? "" : "s"} · {extraction.stats.evidenceReferenceCount} direct evidence reference{extraction.stats.evidenceReferenceCount === 1 ? "" : "s"} · {extraction.provider}</p>{extraction.warnings.map((warning) => <div className="upload-warning" key={warning}>{warning}</div>)}{extraction.objects.length > 0 && <div className="artifact-list">{extraction.objects.map((item) => <details className="inspection-row" key={item.id}><summary><strong>{item.name}</strong><span className="status-pill">{item.kind}</span></summary><small>{Math.round(item.confidence * 100)}% confidence · {item.extractionMethod}</small><div className="artifact-list">{item.evidence.map((evidence) => <article className="artifact-row" key={`${item.id}:${evidence.segmentId}`}><div><strong>{evidence.artifactName}</strong><code>{evidence.locator}</code></div><small>Direct evidence · {evidence.segmentId}</small></article>)}</div></details>)}</div>}<p><strong>Review boundary:</strong> these are candidate objects only. Rename, reject, merge, confirm, and approval actions are intentionally deferred to the next review slice; no silent merge or publication occurs here.</p></div>}
+      <div className="form-actions"><button className="button" type="button" disabled={files.length === 0 || clientWarnings.length > 0 || submitting} onClick={validateUploads}>{submitting ? "Inspecting…" : "Validate, parse & extract"}</button>
         {artifacts.length > 0 && <button className="button button-secondary" type="button" onClick={() => { setFiles([]); resetValidatedState(); }}>Replace artifact set</button>}
         <a className="button button-secondary" href={`/assessment/${assessmentId}`}>Back to assessment</a></div>
     </div>
