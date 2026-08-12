@@ -3,6 +3,7 @@ import { PRODUCT_LIMITS } from "@/lib/config";
 import { inspectArtifactBytes } from "@/lib/artifact-content-policy";
 import { parseArtifact, type ParsedArtifact } from "@/lib/artifact-parser";
 import { validateArtifactSet } from "@/lib/upload";
+import { DeterministicExtractionProvider, validateExtractionEnvelope, type ExtractionEnvelope } from "@/lib/extraction";
 
 export const runtime = "nodejs";
 
@@ -76,5 +77,16 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     if (parsing.errors.length > 0) parsing.status = "partial";
   }
 
-  return NextResponse.json({ assessmentId: id, accepted: true, storageMode: "transient-validation-and-parsing-only", limits: { maxFiles: PRODUCT_LIMITS.maxFiles, maxFileBytes: PRODUCT_LIMITS.maxFileBytes, maxTotalPages: PRODUCT_LIMITS.maxTotalPages }, artifacts, readiness, parsing });
+  let extraction: ExtractionEnvelope = { schemaVersion: "1.0", provider: "local-deterministic-v1", promptVersion: "platform-extraction-v1", status: "withheld", objects: [], warnings: ["Extraction withheld until parsing produces reviewable evidence."], stats: { objectCount: 0, evidenceReferenceCount: 0 } };
+  if (parsing.parsedArtifacts.length > 0) {
+    try {
+      const provider = new DeterministicExtractionProvider();
+      extraction = validateExtractionEnvelope(await provider.extract({ assessmentId: id, parsedArtifacts: parsing.parsedArtifacts }));
+      if (parsing.status === "partial") extraction = { ...extraction, status: "partial", warnings: [...extraction.warnings, "Extraction is partial because one or more artifacts failed parsing."] };
+    } catch (error) {
+      extraction = { ...extraction, status: "partial", warnings: [error instanceof Error ? error.message : "Architecture extraction failed."] };
+    }
+  }
+
+  return NextResponse.json({ assessmentId: id, accepted: true, storageMode: "transient-validation-parsing-and-extraction-only", limits: { maxFiles: PRODUCT_LIMITS.maxFiles, maxFileBytes: PRODUCT_LIMITS.maxFileBytes, maxTotalPages: PRODUCT_LIMITS.maxTotalPages }, artifacts, readiness, parsing, extraction });
 }
