@@ -74,3 +74,10 @@ All deterministic parsers emit bounded source segments with stable artifact/segm
 **Status:** Accepted
 
 The demo may extract directly addressable PDF text operators with page-level locators. Encrypted, scanned, compressed, or otherwise unsupported PDFs must produce a visible parsing failure instead of inferred or fabricated evidence. A production PDF adapter with complete text/layout handling is required before claiming general PDF coverage.
+
+## ADR-016 — Extraction is evidence-first and local by default
+**Status:** Accepted
+
+The demo extraction path uses a deterministic local provider. Every emitted architecture object must include at least one direct source-segment reference; unsupported or missing facts are not invented. Exact duplicate claims may reconcile by normalized object kind and name only when all supporting evidence references are retained. Ambiguous objects are not silently merged.
+
+A production OpenAI Responses adapter is implemented behind the same provider interface with schema-constrained output, explicit prompt versioning, bounded output, prompt-injection isolation, `store: false`, and a server-only API key. It is not activated by the demo upload route. External model activation remains gated on production privacy, tenant-isolation, retention, deletion, and audit controls.
