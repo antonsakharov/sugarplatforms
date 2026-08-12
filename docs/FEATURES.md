@@ -16,13 +16,13 @@ Status: in progress — the complete demo/local upload-readiness workflow is imp
 
 User can see processing status, inspect parsed content and source coordinates, see extracted-object provenance, and inspect parsing failures.
 
-Status: in progress — text/Markdown and JSON/YAML/OpenAPI parsing now produce source-addressable segments with stable locators and hashes, and the upload screen surfaces an evidence inventory. CSV, SQL DDL, PDF, richer processing state, and the complete evidence inventory remain next.
+Status: in progress — text/Markdown, JSON/YAML/OpenAPI, CSV, SQL DDL, and bounded direct-text PDF parsing produce source-addressable segments with stable locators and hashes. The upload screen shows per-file processing state and a complete evidence inventory. Production-grade PDF coverage, retry/quarantine, authenticated storage, and persistence remain open.
 
 ## MVP priority 4 — Extraction review
 
 User can review extracted systems, entities, identifiers, integrations, capabilities, and owners; rename/reject/merge/confirm objects; inspect evidence; and approve extraction for analysis.
 
-Status: planned
+Status: in progress — the extraction provider interface, structured extraction contract, prompt version, deterministic local/demo adapter, OpenAI Responses adapter boundary, and evidence-linked candidate object inventory are implemented. OpenAI activation, durable persistence, rename/reject/merge/confirm actions, and extraction approval remain next.
 
 ## MVP priority 5 — Entity and ID map
 
