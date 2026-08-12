@@ -72,13 +72,13 @@ The daily build selects the first unblocked item whose dependencies are complete
 
 ## Epic 7 — AI extraction and review
 
-- [ ] EXT-001 Implement AI provider interface
-- [ ] EXT-002 Implement OpenAI Responses adapter
-- [ ] EXT-003 Add structured-output schema validation
-- [ ] EXT-004 Add prompt versioning
-- [ ] EXT-005 Add token/cost limits
-- [ ] EXT-006 Extract systems/entities/IDs/integrations/capabilities/owners
-- [ ] EXT-007 Persist evidence-linked objects
+- [-] EXT-001 Implement AI provider interface
+- [-] EXT-002 Implement OpenAI Responses adapter
+- [-] EXT-003 Add structured-output schema validation
+- [-] EXT-004 Add prompt versioning
+- [-] EXT-005 Add token/cost limits
+- [-] EXT-006 Extract systems/entities/IDs/integrations/capabilities/owners
+- [-] EXT-007 Persist evidence-linked objects
 - [ ] EXT-008 Build extraction review screen
 - [ ] EXT-009 Add rename/reject/merge/confirm actions
 - [ ] EXT-010 Add prompt-injection and malformed-output tests
