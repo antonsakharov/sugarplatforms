@@ -17,7 +17,7 @@ test("server performs transient content inspection and parsing without persistin
   assert.match(route, /inspectArtifactBytes/);
   assert.match(route, /checksumSha256/);
   assert.match(route, /maxTotalPages/);
-  assert.match(route, /storageMode: "transient-validation-and-parsing-only"/);
+  assert.match(route, /storageMode: "transient-validation-parsing-and-extraction-only"/);
   assert.doesNotMatch(route, /writeFile|putObject|storage\.from|upload\(/);
 });
 
@@ -40,4 +40,13 @@ test("processing status and evidence inventory are surfaced", () => {
   assert.match(route, /processingArtifacts/);
   assert.match(form, /Processing status/);
   assert.match(form, /Evidence inventory/);
+});
+
+test("evidence-linked extraction inventory is surfaced and retained locally", () => {
+  assert.match(route, /DeterministicExtractionProvider/);
+  assert.match(route, /validateExtractionEnvelope/);
+  assert.match(route, /extraction/);
+  assert.match(form, /Extracted architecture objects/);
+  assert.match(form, /sugar:extraction:/);
+  assert.match(form, /Direct evidence/);
 });
