@@ -42,7 +42,10 @@ Before upload, display:
 - evidence required;
 - direct/derived/inferred distinction;
 - human review before publication;
-- no external tool execution based on uploaded content.
+- no external tool execution based on uploaded content;
+- demo extraction remains local and deterministic;
+- activation of an external model requires explicit server-side configuration and production privacy controls;
+- external Responses requests disable provider-side storage where supported and require strict structured output.
 
 ### Logging and secrets
 
