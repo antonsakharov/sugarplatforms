@@ -1,37 +1,49 @@
 # Build Status
 
-## 2026-08-11
+## 2026-08-12
 
 ### Implemented in this increment
 
-- [-] PAR-003 deterministic CSV parser with quoted-field handling and row-range locators
-- [-] PAR-004 SQL DDL parser with CREATE statement segmentation and line provenance
-- [-] PAR-005 bounded direct-text PDF adapter with page locators and fail-closed unsupported cases
-- [-] PAR-007 per-artifact parsing status: parsed, failed, or withheld
-- [-] PAR-008 expandable artifact/evidence inventory with source locator and evidence preview
-- source-segment schema expanded for CSV, SQL DDL, PDF, row ranges, and PDF pages
-- stale upload contract corrected to the current transient validation-and-parsing mode
+- [-] EXT-001 AI extraction provider interface
+- [-] EXT-002 OpenAI Responses adapter boundary with structured output and `store: false`; not activated in demo mode
+- [-] EXT-003 extraction schema plus runtime evidence validation
+- [-] EXT-004 explicit `platform-extraction-v1` prompt version
+- [-] EXT-005 bounded extraction object count and OpenAI output-token ceiling; full cost accounting remains open
+- [-] EXT-006 deterministic extraction of directly supported systems, entities, identifiers, integrations, capabilities, and owners
+- [-] EXT-007 evidence-linked candidate objects returned to and retained by the local browser adapter; durable database persistence remains open
+- extraction inventory added to the upload experience with object kind, confidence, extraction method, and direct source evidence
 
-These remain in progress until dependency-backed TypeScript and Next.js production validation passes in GitHub Actions.
+These items remain in progress until durable persistence and the full human review/approval workflow are implemented.
 
 ### User flow now enabled
 
-`create assessment -> upload -> readiness validation -> parse supported artifacts -> see per-file processing status -> inspect every source-addressable evidence segment`
+`create assessment -> upload -> validate -> parse -> inspect evidence -> extract architecture candidates -> inspect direct evidence for each candidate`
 
-### Validation completed in this run
+### Validation completed locally
 
-- 23/23 Node behavioral and contract tests pass;
+- 28/28 Node behavioral and contract tests pass;
 - source-policy lint passes;
-- source-segment JSON schema parses successfully;
-- CSV quoted-field, SQL DDL provenance, direct-text PDF provenance, PDF fail-closed behavior, and prior upload/assessment cases are covered.
+- all JSON schemas parse successfully;
+- extraction tests cover direct evidence linkage, normalized duplicate reconciliation with evidence retention, SQL DDL extraction, fail-closed evidence validation, and object-count limits.
+
+Dependency-backed TypeScript and Next.js production validation is delegated to GitHub Actions for the published branch.
+
+### Security posture
+
+- uploaded bytes remain transient request-memory-only;
+- the demo route uses the deterministic local extraction adapter and sends no artifact content to an external provider;
+- the OpenAI adapter treats source text as untrusted data, requests JSON-schema structured output, sets `store: false`, and requires a server-only API key;
+- no extracted object can validate without direct source evidence;
+- no automatic publication or silent ambiguous merge occurs.
 
 ### Known limitations
 
-- this runtime cannot install dependencies from npm, so dependency-backed typecheck and Next.js production build are delegated to GitHub Actions;
-- PDF demo parsing covers only directly addressable text operators and intentionally rejects scanned/compressed/encrypted cases;
-- raw uploaded bytes remain transient demo-only request data and are not persisted;
-- authentication, tenant authorization, private object storage, malware scanning, deletion, audit controls, and tenant-isolation validation remain required before confidential enterprise use.
+- candidate objects are not yet durable database records;
+- rename/reject/merge/confirm and extraction approval are not yet implemented;
+- the deterministic adapter intentionally recognizes only explicit architecture facts and may return an empty candidate set;
+- OpenAI extraction is implemented but not enabled or credential-tested in the demo route;
+- confidential enterprise use still requires authentication, tenant authorization, private storage, malware scanning, deletion, audit controls, and tenant-isolation validation.
 
 ### Exact next feature
 
-Begin the AI extraction boundary: `EXT-001` provider interface, `EXT-002` OpenAI Responses adapter, `EXT-003` structured-output schema validation, then extract evidence-linked systems/entities/IDs/integrations/capabilities/owners (`EXT-006` and `EXT-007`) using a deterministic local/demo adapter when API credentials are unavailable.
+Build the extraction review vertical slice: `EXT-008` review screen and `EXT-009` rename/reject/merge/confirm actions, including explicit approval of the reviewed extraction set before diagnostics can run. Add malformed-output and prompt-injection tests (`EXT-010`) at that boundary.
