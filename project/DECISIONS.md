@@ -1,0 +1,69 @@
+# Architecture Decision Log
+
+## ADR-001 — Modular monolith
+**Status:** Accepted
+Use a modular monolith for the initial product.
+
+## ADR-002 — Evidence graph is the product core
+**Status:** Accepted
+Keep traceable links from source artifacts to extracted objects, findings, and recommendations.
+
+## ADR-003 — Limited upload diagnostic is the MVP
+**Status:** Accepted
+Build a real limited assessment from uploaded architecture metadata; keep the fictional sample secondary.
+
+## ADR-004 — Acme sample is secondary
+**Status:** Accepted
+Use the same product surfaces for sample and real assessments.
+
+## ADR-005 — Explicit MVP limits
+**Status:** Accepted
+One focused assessment, one primary entity, up to 10 files, 25 MB per file, and 150 pages where measurable.
+
+## ADR-006 — Architecture metadata scope
+**Status:** Accepted
+The MVP analyzes architecture documentation and metadata rather than live production systems.
+
+## ADR-007 — Upload before connectors
+**Status:** Accepted
+Read-only external connectors are future work.
+
+## ADR-008 — Human review before publication
+**Status:** Accepted
+Extraction and findings remain reviewable; user decisions govern downstream outputs.
+
+## ADR-009 — Deterministic rules before AI interpretation
+**Status:** Accepted
+Use repeatable rules first and AI-assisted interpretation second.
+
+## ADR-010 — Demo/local adapters permitted
+**Status:** Accepted
+Use working local adapters when production services are not configured, without changing domain boundaries.
+
+## ADR-011 — Metadata-only first upload increment
+**Status:** Superseded by ADR-012
+The earliest upload slice validated metadata before content inspection was introduced.
+
+## ADR-012 — Transient demo inspection
+**Status:** Accepted
+Demo uploads may be inspected in bounded request memory for validation and deterministic parsing; raw bytes are not persisted by the demo adapter.
+
+## ADR-013 — Conservative upload readiness
+**Status:** Accepted
+Blocking violations stop processing; uncertain conditions remain visibly reviewable rather than silently bypassed.
+
+## ADR-014 — Source-addressable evidence segments
+**Status:** Accepted
+Every parser emits stable source locators and hashes; unsupported formats fail visibly rather than fabricating evidence.
+
+## ADR-015 — PDF demo parser fails closed
+**Status:** Accepted
+Only directly addressable PDF text is accepted by the demo parser; unsupported PDF structures remain visible failures.
+
+## ADR-016 — Evidence-first extraction
+**Status:** Accepted
+Every extracted architecture object requires direct source evidence. Exact normalized duplicates may reconcile only while retaining all source references. Ambiguous records are not silently merged.
+
+## ADR-017 — Extraction approval gates diagnostics
+**Status:** Accepted
+Every extracted candidate must be explicitly confirmed, rejected, or merged before approval. Renaming preserves identity and evidence, merges are restricted to the same object kind, and any review change clears prior approval. Production persistence and authorization remain separate readiness work.

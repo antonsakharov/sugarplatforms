@@ -1,0 +1,49 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import type { AssessmentDraft } from "@/lib/assessment";
+
+type ArtifactSummary = { name: string; size: number; type: string; status: "validated" | "review_required" | "blocked" };
+type Readiness = { readyForAnalysis: boolean; totalPages: number; warningCount: number; unmeasurableFiles: number };
+type Extraction = { stats: { objectCount: number } };
+type Review = { approved: boolean; objects: Array<{ status: "pending" | "confirmed" | "rejected" | "merged" }> };
+
+export function AssessmentWorkspace({ id }: { id: string }) {
+  const [assessment, setAssessment] = useState<AssessmentDraft | null | undefined>(undefined);
+  const [artifacts, setArtifacts] = useState<ArtifactSummary[]>([]);
+  const [readiness, setReadiness] = useState<Readiness | null>(null);
+  const [extraction, setExtraction] = useState<Extraction | null>(null);
+  const [review, setReview] = useState<Review | null>(null);
+
+  useEffect(() => {
+    const raw = localStorage.getItem(`sugar:assessment:${id}`);
+    setAssessment(raw ? JSON.parse(raw) : null);
+    const artifactRaw = localStorage.getItem(`sugar:artifacts:${id}`);
+    const readinessRaw = localStorage.getItem(`sugar:readiness:${id}`);
+    const extractionRaw = localStorage.getItem(`sugar:extraction:${id}`);
+    const reviewRaw = localStorage.getItem(`sugar:extraction-review:${id}`);
+    setArtifacts(artifactRaw ? JSON.parse(artifactRaw) : []);
+    setReadiness(readinessRaw ? JSON.parse(readinessRaw) : null);
+    setExtraction(extractionRaw ? JSON.parse(extractionRaw) : null);
+    setReview(reviewRaw ? JSON.parse(reviewRaw) : null);
+  }, [id]);
+
+  if (assessment === undefined) return <p className="lede">Loading assessment…</p>;
+  if (!assessment) return <div className="panel"><h2>Assessment not found</h2><p>This local demo draft is not available in this browser.</p><a className="button" href="/assessment/new">Create assessment</a></div>;
+
+  const resolved = review?.objects.filter((item) => item.status !== "pending").length ?? 0;
+  const extractedCount = extraction?.stats.objectCount ?? 0;
+
+  return <>
+    <div className="eyebrow">Draft assessment</div>
+    <h1>{assessment.assessmentTitle}</h1>
+    <p className="lede">{assessment.companyName} · Primary entity: <strong>{assessment.primaryEntity}</strong></p>
+    <div className="workspace-grid">
+      <article className="card"><span className="card-number">01</span><h3>Scope confirmed</h3><p>{assessment.businessConcern}</p></article>
+      <article className="card"><span className="card-number">02</span><h3>Upload & parse</h3><p>{readiness?.readyForAnalysis ? `${artifacts.length} artifacts processed · ${readiness.totalPages} pages.` : artifacts.length > 0 ? "Artifact set requires review." : "Add and validate a focused architecture artifact set."}</p></article>
+      <article className={`card ${extraction && !review?.approved ? "current-step" : ""}`}><span className="card-number">03</span><h3>Extract & review</h3><p>{review?.approved ? `${extractedCount} candidates reviewed and approved.` : extraction ? `${resolved} of ${extractedCount} candidates resolved.` : "Systems, entities, identifiers, integrations, capabilities, and owners."}</p></article>
+      <article className="card"><span className="card-number">04</span><h3>Diagnose & report</h3><p>{review?.approved ? "Extraction approved; deterministic diagnostics are next." : "Evidence-backed findings, entity/ID map, recommendations, and executive report."}</p></article>
+    </div>
+    <div className="panel"><h2>{review?.approved ? "Extraction approved" : extraction ? "Architecture candidates ready for review" : readiness?.readyForAnalysis ? "Evidence ready for extraction" : artifacts.length > 0 ? "Artifact review required" : "Ready for artifacts"}</h2><p>{review?.approved ? "The reviewed extraction set is locked for the next diagnostic step." : extraction ? "Review every extracted object, inspect its direct evidence, and explicitly confirm, reject, merge, or rename it before analysis." : "Upload architecture metadata for validation, parsing, and evidence-linked extraction."}</p><a className="button" href={extraction ? `/assessment/${id}/review` : `/assessment/${id}/upload`}>{extraction ? "Review extraction" : artifacts.length > 0 ? "Review artifacts" : "Upload artifacts"}</a></div>
+  </>;
+}
