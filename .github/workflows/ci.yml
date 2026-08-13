@@ -12,10 +12,11 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
         with:
           node-version: 22
+          package-manager-cache: false
       - run: npm install --no-audit --no-fund
       - run: npm run validate
       - name: Package repository snapshot
@@ -25,7 +26,7 @@ jobs:
           zip -r sugar-platform-diagnostic-${{ github.run_id }}.zip . -x '*.DS_Store'
       - name: Upload repository snapshot
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: sugar-platform-diagnostic-${{ github.run_id }}
           path: sugar-platform-diagnostic-${{ github.run_id }}.zip
