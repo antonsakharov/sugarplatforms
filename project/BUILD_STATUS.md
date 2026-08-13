@@ -1,49 +1,40 @@
 # Build Status
 
-## 2026-08-12
+## 2026-08-13
 
 ### Implemented in this increment
 
-- [-] EXT-001 AI extraction provider interface
-- [-] EXT-002 OpenAI Responses adapter boundary with structured output and `store: false`; not activated in demo mode
-- [-] EXT-003 extraction schema plus runtime evidence validation
-- [-] EXT-004 explicit `platform-extraction-v1` prompt version
-- [-] EXT-005 bounded extraction object count and OpenAI output-token ceiling; full cost accounting remains open
-- [-] EXT-006 deterministic extraction of directly supported systems, entities, identifiers, integrations, capabilities, and owners
-- [-] EXT-007 evidence-linked candidate objects returned to and retained by the local browser adapter; durable database persistence remains open
-- extraction inventory added to the upload experience with object kind, confidence, extraction method, and direct source evidence
-
-These items remain in progress until durable persistence and the full human review/approval workflow are implemented.
+- [-] EXT-008 extraction review screen
+- [-] EXT-009 rename, reject, same-kind merge, confirm, evidence drill-down, and explicit extraction approval
+- [-] EXT-010 untrusted-instruction and malformed-output boundary tests
+- workspace progress now routes from extracted candidates into review and shows approval state
+- review decisions remain local/demo state and preserve the original evidence-linked extraction object IDs
 
 ### User flow now enabled
 
-`create assessment -> upload -> validate -> parse -> inspect evidence -> extract architecture candidates -> inspect direct evidence for each candidate`
+`create assessment -> upload -> validate -> parse -> inspect evidence -> extract architecture candidates -> review each candidate -> rename/reject/merge/confirm -> approve extraction for diagnostics`
 
-### Validation completed locally
+### Validation state
 
-- 28/28 Node behavioral and contract tests pass;
-- source-policy lint passes;
-- all JSON schemas parse successfully;
-- extraction tests cover direct evidence linkage, normalized duplicate reconciliation with evidence retention, SQL DDL extraction, fail-closed evidence validation, and object-count limits.
+Feature code and focused tests are committed. Dependency-backed TypeScript, lint, test, and optimized Next.js build validation must pass in GitHub Actions before these items are marked complete.
 
-Dependency-backed TypeScript and Next.js production validation is delegated to GitHub Actions for the published branch.
+### Security and evidence posture
 
-### Security posture
-
-- uploaded bytes remain transient request-memory-only;
-- the demo route uses the deterministic local extraction adapter and sends no artifact content to an external provider;
-- the OpenAI adapter treats source text as untrusted data, requests JSON-schema structured output, sets `store: false`, and requires a server-only API key;
-- no extracted object can validate without direct source evidence;
-- no automatic publication or silent ambiguous merge occurs.
+- extraction approval is blocked while any candidate remains pending;
+- merge is explicit and allowed only between objects of the same kind;
+- rejected and merged-away objects remain represented in review history;
+- renaming does not rewrite source evidence or extraction identity;
+- malformed extraction objects without evidence fail closed;
+- untrusted source instructions do not cause the deterministic adapter to emit unsupported architecture facts;
+- demo review state is browser-local and is not suitable for confidential multi-user use.
 
 ### Known limitations
 
-- candidate objects are not yet durable database records;
-- rename/reject/merge/confirm and extraction approval are not yet implemented;
-- the deterministic adapter intentionally recognizes only explicit architecture facts and may return an empty candidate set;
-- OpenAI extraction is implemented but not enabled or credential-tested in the demo route;
-- confidential enterprise use still requires authentication, tenant authorization, private storage, malware scanning, deletion, audit controls, and tenant-isolation validation.
+- review decisions are not yet durable tenant-scoped records;
+- authentication, RLS, private object storage, malware controls, audit/deletion, and tenant-isolation testing remain required for confidential enterprise use;
+- OpenAI extraction remains an inactive adapter boundary in demo mode;
+- diagnostics, findings review, entity/ID visualization, recommendations, and reporting are not yet implemented.
 
 ### Exact next feature
 
-Build the extraction review vertical slice: `EXT-008` review screen and `EXT-009` rename/reject/merge/confirm actions, including explicit approval of the reviewed extraction set before diagnostics can run. Add malformed-output and prompt-injection tests (`EXT-010`) at that boundary.
+After validation, begin `DIA-001` with a deterministic diagnostic rule framework consuming only an approved extraction review. The first evidence-backed rule should detect ownership gaps or fragmented identifiers without introducing unsupported inference.

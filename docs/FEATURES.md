@@ -4,25 +4,25 @@
 
 User can create a workspace, name an assessment, choose one focus area, specify one primary entity, describe the business concern, and accept assessment limits.
 
-Status: in progress — implemented; dependency-backed production build validation remains pending.
+Status: in progress — implemented in the local/demo adapter; durable authenticated persistence remains open.
 
 ## MVP priority 2 — Guided upload
 
 User can select up to 10 supported files, receive server-side type/size/duplicate/page validation, receive probable-secret and prohibited-data warnings, remove or replace files, and see whether the artifact set is ready for parsing.
 
-Status: in progress — the complete demo/local upload-readiness workflow is implemented. The server reads bytes only transiently to calculate SHA-256 checksums, estimate page counts, and perform best-effort content-risk scanning; uploaded bytes are not persisted. Real confidential uploads still require authentication, tenant authorization, private object storage, malware scanning, and production security validation.
+Status: in progress — complete demo/local upload-readiness workflow is implemented. Uploaded bytes are inspected transiently and are not persisted. Confidential uploads still require authentication, tenant authorization, private object storage, malware scanning, and production security validation.
 
 ## MVP priority 3 — Artifact parsing and evidence
 
 User can see processing status, inspect parsed content and source coordinates, see extracted-object provenance, and inspect parsing failures.
 
-Status: in progress — text/Markdown, JSON/YAML/OpenAPI, CSV, SQL DDL, and bounded direct-text PDF parsing produce source-addressable segments with stable locators and hashes. The upload screen shows per-file processing state and a complete evidence inventory. Production-grade PDF coverage, retry/quarantine, authenticated storage, and persistence remain open.
+Status: in progress — text/Markdown, JSON/YAML/OpenAPI, CSV, SQL DDL, and bounded direct-text PDF parsing produce source-addressable segments with stable locators and hashes. Production-grade PDF coverage, retry/quarantine, authenticated storage, and persistence remain open.
 
 ## MVP priority 4 — Extraction review
 
 User can review extracted systems, entities, identifiers, integrations, capabilities, and owners; rename/reject/merge/confirm objects; inspect evidence; and approve extraction for analysis.
 
-Status: in progress — the extraction provider interface, structured extraction contract, prompt version, deterministic local/demo adapter, OpenAI Responses adapter boundary, and evidence-linked candidate object inventory are implemented. OpenAI activation, durable persistence, rename/reject/merge/confirm actions, and extraction approval remain next.
+Status: implemented for the local/demo workflow — evidence-linked candidate inventory, explicit rename/reject/merge/confirm actions, same-kind merge guardrails, evidence drill-down, and approval gating are available. Approval is blocked until every candidate is resolved. OpenAI activation and durable tenant-scoped persistence remain open.
 
 ## MVP priority 5 — Entity and ID map
 
