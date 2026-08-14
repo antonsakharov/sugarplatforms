@@ -34,7 +34,7 @@ Status: planned
 
 User can run analysis; filter findings; inspect impact and evidence; and accept, edit, or reject findings.
 
-Status: planned
+Status: in progress — deterministic diagnostics can now run only after extraction approval. The local/demo engine executes versioned fragmented-identifier and ownership-gap rules, emits derived findings with business/technical impact, recommendations, validation questions, and direct evidence links, and exposes a diagnostics inspection screen. Additional deterministic rules, AI-assisted candidate findings, evidence-coverage validation, and accept/edit/reject finding review remain open.
 
 ## MVP priority 7 — Maturity and recommendations
 
