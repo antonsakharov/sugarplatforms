@@ -67,3 +67,7 @@ Every extracted architecture object requires direct source evidence. Exact norma
 ## ADR-017 — Extraction approval gates diagnostics
 **Status:** Accepted
 Every extracted candidate must be explicitly confirmed, rejected, or merged before approval. Renaming preserves identity and evidence, merges are restricted to the same object kind, and any review change clears prior approval. Production persistence and authorization remain separate readiness work.
+
+## ADR-018 — Approved extraction is the deterministic diagnostic boundary
+**Status:** Accepted
+Deterministic rules consume only confirmed objects from an explicitly approved extraction review. Rejected and merged-away candidates are excluded. Every finding is a versioned derived signal with direct source evidence, impact, recommendation, validation questions, and pending human review status. Absence-based rules must state their epistemic limitation rather than claiming undocumented facts are definitively absent.
