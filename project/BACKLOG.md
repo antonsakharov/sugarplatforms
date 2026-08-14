@@ -11,12 +11,12 @@ Statuses: `[ ] planned`, `[-] in progress`, `[x] complete`, `[!] blocked`.
 - [-] EXT-008 Extraction review screen
 - [-] EXT-009 Rename, reject, merge, confirm, and approve extraction
 - [-] EXT-010 Extraction boundary validation tests
-- [ ] DIA-001 Deterministic diagnostic rule framework
-- [ ] DIA-002 Fragmented identifier rule
+- [-] DIA-001 Deterministic diagnostic rule framework
+- [-] DIA-002 Fragmented identifier rule
 - [ ] DIA-003 Competing authority rule
 - [ ] DIA-004 Duplicate matching logic rule
 - [ ] DIA-005 Duplicate capability rule
-- [ ] DIA-006 Ownership-gap rule
+- [-] DIA-006 Ownership-gap rule
 - [ ] DIA-007 Direct database coupling rule
 - [ ] DIA-008 Long synchronous chain rule
 - [ ] DIA-009 AI-assisted candidate findings
