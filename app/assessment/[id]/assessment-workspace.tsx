@@ -7,6 +7,7 @@ type ArtifactSummary = { name: string; size: number; type: string; status: "vali
 type Readiness = { readyForAnalysis: boolean; totalPages: number; warningCount: number; unmeasurableFiles: number };
 type Extraction = { stats: { objectCount: number } };
 type Review = { approved: boolean; objects: Array<{ status: "pending" | "confirmed" | "rejected" | "merged" }> };
+type Diagnostics = { stats: { findingCount: number; ruleCount: number } };
 
 export function AssessmentWorkspace({ id }: { id: string }) {
   const [assessment, setAssessment] = useState<AssessmentDraft | null | undefined>(undefined);
@@ -14,6 +15,7 @@ export function AssessmentWorkspace({ id }: { id: string }) {
   const [readiness, setReadiness] = useState<Readiness | null>(null);
   const [extraction, setExtraction] = useState<Extraction | null>(null);
   const [review, setReview] = useState<Review | null>(null);
+  const [diagnostics, setDiagnostics] = useState<Diagnostics | null>(null);
 
   useEffect(() => {
     const raw = localStorage.getItem(`sugar:assessment:${id}`);
@@ -22,10 +24,12 @@ export function AssessmentWorkspace({ id }: { id: string }) {
     const readinessRaw = localStorage.getItem(`sugar:readiness:${id}`);
     const extractionRaw = localStorage.getItem(`sugar:extraction:${id}`);
     const reviewRaw = localStorage.getItem(`sugar:extraction-review:${id}`);
+    const diagnosticsRaw = localStorage.getItem(`sugar:diagnostics:${id}`);
     setArtifacts(artifactRaw ? JSON.parse(artifactRaw) : []);
     setReadiness(readinessRaw ? JSON.parse(readinessRaw) : null);
     setExtraction(extractionRaw ? JSON.parse(extractionRaw) : null);
     setReview(reviewRaw ? JSON.parse(reviewRaw) : null);
+    setDiagnostics(diagnosticsRaw ? JSON.parse(diagnosticsRaw) : null);
   }, [id]);
 
   if (assessment === undefined) return <p className="lede">Loading assessment…</p>;
@@ -42,8 +46,8 @@ export function AssessmentWorkspace({ id }: { id: string }) {
       <article className="card"><span className="card-number">01</span><h3>Scope confirmed</h3><p>{assessment.businessConcern}</p></article>
       <article className="card"><span className="card-number">02</span><h3>Upload & parse</h3><p>{readiness?.readyForAnalysis ? `${artifacts.length} artifacts processed · ${readiness.totalPages} pages.` : artifacts.length > 0 ? "Artifact set requires review." : "Add and validate a focused architecture artifact set."}</p></article>
       <article className={`card ${extraction && !review?.approved ? "current-step" : ""}`}><span className="card-number">03</span><h3>Extract & review</h3><p>{review?.approved ? `${extractedCount} candidates reviewed and approved.` : extraction ? `${resolved} of ${extractedCount} candidates resolved.` : "Systems, entities, identifiers, integrations, capabilities, and owners."}</p></article>
-      <article className="card"><span className="card-number">04</span><h3>Diagnose & report</h3><p>{review?.approved ? "Extraction approved; deterministic diagnostics are next." : "Evidence-backed findings, entity/ID map, recommendations, and executive report."}</p></article>
+      <article className={`card ${review?.approved && !diagnostics ? "current-step" : ""}`}><span className="card-number">04</span><h3>Diagnose & report</h3><p>{diagnostics ? `${diagnostics.stats.findingCount} evidence-backed finding${diagnostics.stats.findingCount === 1 ? "" : "s"} from ${diagnostics.stats.ruleCount} deterministic rules.` : review?.approved ? "Extraction approved; deterministic diagnostics are ready." : "Evidence-backed findings, entity/ID map, recommendations, and executive report."}</p></article>
     </div>
-    <div className="panel"><h2>{review?.approved ? "Extraction approved" : extraction ? "Architecture candidates ready for review" : readiness?.readyForAnalysis ? "Evidence ready for extraction" : artifacts.length > 0 ? "Artifact review required" : "Ready for artifacts"}</h2><p>{review?.approved ? "The reviewed extraction set is locked for the next diagnostic step." : extraction ? "Review every extracted object, inspect its direct evidence, and explicitly confirm, reject, merge, or rename it before analysis." : "Upload architecture metadata for validation, parsing, and evidence-linked extraction."}</p><a className="button" href={extraction ? `/assessment/${id}/review` : `/assessment/${id}/upload`}>{extraction ? "Review extraction" : artifacts.length > 0 ? "Review artifacts" : "Upload artifacts"}</a></div>
+    <div className="panel"><h2>{diagnostics ? "Deterministic findings available" : review?.approved ? "Extraction approved" : extraction ? "Architecture candidates ready for review" : readiness?.readyForAnalysis ? "Evidence ready for extraction" : artifacts.length > 0 ? "Artifact review required" : "Ready for artifacts"}</h2><p>{diagnostics ? "Inspect the evidence and impact behind each deterministic signal before the finding-review workflow is added." : review?.approved ? "The reviewed extraction set can now run evidence-backed deterministic diagnostics." : extraction ? "Review every extracted object, inspect its direct evidence, and explicitly confirm, reject, merge, or rename it before analysis." : "Upload architecture metadata for validation, parsing, and evidence-linked extraction."}</p><a className="button" href={diagnostics || review?.approved ? `/assessment/${id}/diagnostics` : extraction ? `/assessment/${id}/review` : `/assessment/${id}/upload`}>{diagnostics ? "Inspect diagnostics" : review?.approved ? "Run diagnostics" : extraction ? "Review extraction" : artifacts.length > 0 ? "Review artifacts" : "Upload artifacts"}</a></div>
   </>;
 }
