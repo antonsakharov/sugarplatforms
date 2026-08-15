@@ -14,7 +14,7 @@ npm run dev
 npm run validate
 ```
 
-`npm run validate` runs TypeScript checks, source-policy lint, Node tests, and a production Next.js build. The Node tests include behavioral tests for assessment limits, upload safety, deterministic parsing, evidence provenance, and extraction contracts.
+`npm run validate` runs TypeScript checks, source-policy lint, Node tests, and a production Next.js build. The Node tests include behavioral tests for assessment limits, upload safety, deterministic parsing, evidence provenance, extraction contracts, deterministic diagnostics, evidence-boundary validation, and finding review.
 
 ## Current routes
 
@@ -22,6 +22,8 @@ npm run validate
 - `/assessment/new` — guided assessment setup
 - `/assessment/[id]` — local/demo assessment workspace
 - `/assessment/[id]/upload` — upload, readiness, parsing, evidence, and candidate extraction workflow
+- `/assessment/[id]/review` — extraction review and approval
+- `/assessment/[id]/diagnostics` — deterministic diagnostics, evidence validation, and finding review
 - `/api/assessments` — assessment validation/creation API
 - `/api/assessments/[id]/artifacts` — transient validation, parsing, and local extraction API
 - `/sample` — Acme sample entry route
@@ -35,6 +37,10 @@ The repository also contains an OpenAI Responses extraction adapter behind the s
 
 Do not use the current demo path for confidential customer material. Authentication, tenant authorization, private object storage, malware scanning, durable persistence, deletion, audit controls, and tenant-isolation verification remain production prerequisites.
 
-## Deterministic diagnostics
+## Diagnostics and finding review
 
-After validating/parsing/extracting artifacts, resolve every extraction candidate and approve the extraction set. Open `/assessment/<id>/diagnostics` to run the local deterministic engine. Demo diagnostic state is stored in browser local storage under `sugar:diagnostics:<assessmentId>` and is not durable tenant-scoped production persistence.
+After validating/parsing/extracting artifacts, resolve every extraction candidate and approve the extraction set. Open `/assessment/<id>/diagnostics` to run the local deterministic engine. The diagnostics screen validates every finding's evidence and affected-object references against the exact approved extraction version before review begins.
+
+Reviewers can edit presentation fields and severity, add a reviewer note, and explicitly accept or reject each finding. Rule identity, confidence, affected objects, and source evidence are immutable. Editing returns the finding to `pending`; review cannot complete until every finding is accepted or rejected. Only accepted findings from a completed, non-stale review are eligible for downstream maturity, visualization, recommendations, and reports.
+
+Demo diagnostic state is stored in browser local storage under `sugar:diagnostics:<assessmentId>` and finding-review state under `sugar:finding-review:<assessmentId>`. Neither is durable tenant-scoped production persistence.
