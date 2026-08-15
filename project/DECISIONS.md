@@ -71,3 +71,7 @@ Every extracted candidate must be explicitly confirmed, rejected, or merged befo
 ## ADR-018 — Approved extraction is the deterministic diagnostic boundary
 **Status:** Accepted
 Deterministic rules consume only confirmed objects from an explicitly approved extraction review. Rejected and merged-away candidates are excluded. Every finding is a versioned derived signal with direct source evidence, impact, recommendation, validation questions, and pending human review status. Absence-based rules must state their epistemic limitation rather than claiming undocumented facts are definitively absent.
+
+## ADR-019 — Finding review cannot rewrite evidence provenance
+**Status:** Accepted
+Before finding review begins, diagnostic evidence and affected-object references must validate against the exact approved extraction version. Reviewers may edit title, severity, description, impact, recommendation, and notes, but may not mutate rule identity, confidence, affected objects, source evidence, or provenance. Editing returns a finding to pending status, every finding requires an explicit accept/reject decision, and only accepted findings from a completed non-stale review may feed maturity, visualization, recommendations, or reports.
