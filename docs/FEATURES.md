@@ -32,9 +32,9 @@ Status: planned
 
 ## MVP priority 6 — Diagnostic findings
 
-User can run analysis; filter findings; inspect impact and evidence; and accept, edit, or reject findings.
+User can run analysis; inspect impact and evidence; and accept, edit, or reject findings.
 
-Status: in progress — deterministic diagnostics can now run only after extraction approval. The local/demo engine executes versioned fragmented-identifier and ownership-gap rules, emits derived findings with business/technical impact, recommendations, validation questions, and direct evidence links, and exposes a diagnostics inspection screen. Additional deterministic rules, AI-assisted candidate findings, evidence-coverage validation, and accept/edit/reject finding review remain open.
+Status: implemented for the current local/demo rule set — deterministic diagnostics run only after extraction approval; fragmented-identifier and ownership-gap rules emit evidence-backed derived findings; evidence coverage is revalidated against the exact approved extraction boundary before review; users can edit presentation/impact language, accept or reject each finding, and complete review only when every finding has an explicit decision. Evidence and rule provenance remain immutable. Additional deterministic rules, AI-assisted candidate findings, filtering, and durable tenant-scoped finding persistence remain open.
 
 ## MVP priority 7 — Maturity and recommendations
 
