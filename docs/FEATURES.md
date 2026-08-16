@@ -26,9 +26,9 @@ Status: implemented for the local/demo workflow — evidence-linked candidate in
 
 ## MVP priority 5 — Entity and ID map
 
-User can see identifiers associated with the primary entity, creator/consumer systems, authority claims, mappings, and evidence.
+User can see the focused primary entity, confirmed entity/identifier/system nodes, direct system integration relationships when explicitly extracted, accepted-finding overlays, and evidence drill-down.
 
-Status: planned
+Status: implemented for the current local/demo workflow — the graph projection is gated on completed non-stale finding review, uses confirmed extraction objects, and decorates downstream output with accepted findings only. Identifier-to-focus relationships are visibly marked derived. Creator/consumer, authority claims, and mappings are intentionally not inferred when extraction evidence does not explicitly represent them; richer relationship extraction and static export remain open.
 
 ## MVP priority 6 — Diagnostic findings
 

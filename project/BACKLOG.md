@@ -23,8 +23,10 @@ Statuses: `[ ] planned`, `[-] in progress`, `[x] complete`, `[!] blocked`.
 - [-] DIA-010 Evidence coverage validation
 - [-] DIA-011 Finding review workflow
 - [ ] DIA-012 Focused maturity summary
-- [ ] VIS-001 Entity/ID graph projection
-- [ ] VIS-002 Entity/ID graph UI and evidence drill-down
+- [x] VIS-001 Entity/ID graph projection
+- [x] VIS-002 Entity/ID graph UI and evidence drill-down
+- [ ] VIS-003 Creator/consumer and authority relationships when directly extracted
+- [ ] VIS-004 Graph filters and static export
 - [ ] REP-001 Prioritized recommendations
 - [ ] REP-002 90-day action plan
 - [ ] REP-003 Executive report preview

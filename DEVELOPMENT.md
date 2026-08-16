@@ -14,7 +14,7 @@ npm run dev
 npm run validate
 ```
 
-`npm run validate` runs TypeScript checks, source-policy lint, Node tests, and a production Next.js build. The Node tests include behavioral tests for assessment limits, upload safety, deterministic parsing, evidence provenance, extraction contracts, deterministic diagnostics, evidence-boundary validation, and finding review.
+`npm run validate` runs TypeScript checks, source-policy lint, Node tests, and a production Next.js build. The Node tests include behavioral tests for assessment limits, upload safety, deterministic parsing, evidence provenance, extraction contracts, deterministic diagnostics, evidence-boundary validation, finding review, and entity/ID graph projection.
 
 ## Current routes
 
@@ -24,6 +24,7 @@ npm run validate
 - `/assessment/[id]/upload` — upload, readiness, parsing, evidence, and candidate extraction workflow
 - `/assessment/[id]/review` — extraction review and approval
 - `/assessment/[id]/diagnostics` — deterministic diagnostics, evidence validation, and finding review
+- `/assessment/[id]/map` — reviewed entity/ID projection and evidence drill-down
 - `/api/assessments` — assessment validation/creation API
 - `/api/assessments/[id]/artifacts` — transient validation, parsing, and local extraction API
 - `/sample` — Acme sample entry route
@@ -43,4 +44,10 @@ After validating/parsing/extracting artifacts, resolve every extraction candidat
 
 Reviewers can edit presentation fields and severity, add a reviewer note, and explicitly accept or reject each finding. Rule identity, confidence, affected objects, and source evidence are immutable. Editing returns the finding to `pending`; review cannot complete until every finding is accepted or rejected. Only accepted findings from a completed, non-stale review are eligible for downstream maturity, visualization, recommendations, and reports.
 
-Demo diagnostic state is stored in browser local storage under `sugar:diagnostics:<assessmentId>` and finding-review state under `sugar:finding-review:<assessmentId>`. Neither is durable tenant-scoped production persistence.
+## Entity/ID map
+
+After finding review is completed, open `/assessment/<id>/map`. The map is projected in-browser from the approved extraction plus accepted findings. It includes the assessment primary entity, confirmed entity/identifier/system objects, direct integration edges when extraction provides both endpoints, and accepted-finding overlays. Identifier-to-primary-entity edges are explicitly labeled `derived` because they represent the one-primary-entity assessment scope rather than a newly asserted source fact.
+
+The map deliberately does not infer creator/consumer systems, authority claims, or identifier mappings when those relationships were not extracted directly. Every direct graph edge keeps source evidence references and the UI exposes artifact/locator drill-down.
+
+Demo diagnostic/review/map state is browser-local. It is not durable tenant-scoped production persistence.

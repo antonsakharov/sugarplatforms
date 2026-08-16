@@ -75,3 +75,7 @@ Deterministic rules consume only confirmed objects from an explicitly approved e
 ## ADR-019 — Finding review cannot rewrite evidence provenance
 **Status:** Accepted
 Before finding review begins, diagnostic evidence and affected-object references must validate against the exact approved extraction version. Reviewers may edit title, severity, description, impact, recommendation, and notes, but may not mutate rule identity, confidence, affected objects, source evidence, or provenance. Editing returns a finding to pending status, every finding requires an explicit accept/reject decision, and only accepted findings from a completed non-stale review may feed maturity, visualization, recommendations, or reports.
+
+## ADR-020 — Visualization is a projection, not a new inference engine
+**Status:** Accepted
+The entity/ID map consumes confirmed extraction objects and accepted findings from a completed, non-stale finding review. Direct relationships must retain source evidence; scope-derived relationships must be labeled derived. The map must not invent creator/consumer, authority, or identifier-mapping semantics when those relationships are absent from extraction evidence.
