@@ -1,7 +1,7 @@
-import type { DiagnosticEnvelope } from "@/lib/diagnostics";
+import type { DiagnosticEnvelope, DiagnosticFinding } from "@/lib/diagnostics";
 import type { ExtractionEnvelope, EvidenceReference } from "@/lib/extraction";
 import type { ExtractionReview } from "@/lib/extraction-review";
-import { acceptedFindings, type FindingReview } from "@/lib/finding-review";
+import type { FindingReview } from "@/lib/finding-review";
 
 export type GraphNodeKind = "primary_entity" | "entity" | "identifier" | "system";
 export type GraphEdgeKind = "focused_identifier" | "integration" | "accepted_finding";
@@ -39,6 +39,16 @@ function uniqueEvidence(items: EvidenceReference[]) {
   for (const item of items) if (!bySegment.has(item.segmentId)) bySegment.set(item.segmentId, item);
   return [...bySegment.values()];
 }
+function acceptedReviewedFindings(diagnostics: DiagnosticEnvelope, review: FindingReview): DiagnosticFinding[] {
+  if (!review.reviewedAt) throw new Error("Finding review must be completed before downstream outputs are generated.");
+  if (review.diagnosticGeneratedAt !== diagnostics.generatedAt) throw new Error("Finding review is stale because diagnostics were re-run.");
+  const byId = new Map(review.findings.map((item) => [item.findingId, item]));
+  return diagnostics.findings.flatMap((finding) => {
+    const item = byId.get(finding.id);
+    if (!item || item.status !== "accepted") return [];
+    return [{ ...finding, ...item.edits, reviewStatus: "accepted" as const }];
+  });
+}
 
 export function projectEntityIdGraph(input: {
   assessmentId: string;
@@ -51,7 +61,7 @@ export function projectEntityIdGraph(input: {
   const primaryEntity = input.primaryEntity.trim().replace(/\s+/g, " ").slice(0, 120);
   if (!primaryEntity) throw new Error("Entity/ID map requires the assessment primary entity.");
   if (!input.extractionReview.approved || !input.extractionReview.approvedAt) throw new Error("Entity/ID map requires an approved extraction review.");
-  const accepted = acceptedFindings(input.diagnostics, input.findingReview);
+  const accepted = acceptedReviewedFindings(input.diagnostics, input.findingReview);
   const reviewById = new Map(input.extractionReview.objects.map((item) => [item.id, item]));
   const confirmed = input.extraction.objects.filter((item) => reviewById.get(item.id)?.status === "confirmed");
   const findingIdsByObject = new Map<string, string[]>();
