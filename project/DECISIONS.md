@@ -79,3 +79,7 @@ Before finding review begins, diagnostic evidence and affected-object references
 ## ADR-020 — Visualization is a projection, not a new inference engine
 **Status:** Accepted
 The entity/ID map consumes confirmed extraction objects and accepted findings from a completed, non-stale finding review. Direct relationships must retain source evidence; scope-derived relationships must be labeled derived. The map must not invent creator/consumer, authority, or identifier-mapping semantics when those relationships are absent from extraction evidence.
+
+## ADR-021 — Maturity and recommendations are reviewed-finding projections
+**Status:** Accepted
+Focused maturity and prioritized recommendations consume only accepted findings from a completed, non-stale finding review. The maturity result is a transparent 1–5 risk-adjusted signal, not an enterprise maturity certification. When no findings are accepted, the product returns not-scored rather than inferring perfect maturity. Recommendation ordering is deterministic and every recommendation retains finding, affected-object, and evidence traceability.
