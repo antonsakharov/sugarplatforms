@@ -14,7 +14,7 @@ npm run dev
 npm run validate
 ```
 
-`npm run validate` runs TypeScript checks, source-policy lint, Node tests, and a production Next.js build. The Node tests include behavioral tests for assessment limits, upload safety, deterministic parsing, evidence provenance, extraction contracts, deterministic diagnostics, evidence-boundary validation, finding review, and entity/ID graph projection.
+`npm run validate` runs TypeScript checks, source-policy lint, Node tests, and a production Next.js build. The Node tests include behavioral tests for assessment limits, upload safety, deterministic parsing, evidence provenance, extraction contracts, deterministic diagnostics, evidence-boundary validation, finding review, entity/ID graph projection, and reviewed maturity/recommendation projection.
 
 ## Current routes
 
@@ -25,6 +25,7 @@ npm run validate
 - `/assessment/[id]/review` — extraction review and approval
 - `/assessment/[id]/diagnostics` — deterministic diagnostics, evidence validation, and finding review
 - `/assessment/[id]/map` — reviewed entity/ID projection and evidence drill-down
+- `/assessment/[id]/maturity` — focused maturity signal, scoring rationale, prioritized recommendations, and traceability
 - `/api/assessments` — assessment validation/creation API
 - `/api/assessments/[id]/artifacts` — transient validation, parsing, and local extraction API
 - `/sample` — Acme sample entry route
@@ -50,4 +51,10 @@ After finding review is completed, open `/assessment/<id>/map`. The map is proje
 
 The map deliberately does not infer creator/consumer systems, authority claims, or identifier mappings when those relationships were not extracted directly. Every direct graph edge keeps source evidence references and the UI exposes artifact/locator drill-down.
 
-Demo diagnostic/review/map state is browser-local. It is not durable tenant-scoped production persistence.
+## Focused maturity and recommendations
+
+After finding review is completed, open `/assessment/<id>/maturity` directly or from the Entity/ID map. The page calculates a transparent 1–5 risk-adjusted signal from accepted findings only and displays the formula rationale and rule-coverage limitations. If no findings were accepted, the result is `not_scored`; the product does not infer perfect maturity from missing or rejected evidence.
+
+Recommendations are projected deterministically from accepted findings and ordered by severity, confidence, then title. Each recommendation preserves the source finding ID, affected object IDs, evidence segments, artifact names, and source locators. The current recommendation set is not yet the 90-day action plan and does not account for implementation cost, organizational dependencies, or portfolio sequencing.
+
+Demo diagnostic/review/map/maturity state is browser-local. It is not durable tenant-scoped production persistence.
