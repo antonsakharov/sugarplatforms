@@ -40,7 +40,7 @@ Status: implemented for the current local/demo rule set — deterministic diagno
 
 User can see a focused maturity summary, scoring rationale, prioritized recommendations, and finding traceability.
 
-Status: planned
+Status: implemented for the current local/demo reviewed-finding flow — completed non-stale finding review is required; only accepted findings contribute to the focused 1–5 risk-adjusted signal and prioritized recommendations. Zero accepted findings produce an explicit not-scored result rather than a perfect score. Recommendation priority is deterministic by severity, confidence, and title, and every recommendation preserves finding, affected-object, and direct evidence traceability. This signal is explicitly not an enterprise maturity certification. The 90-day plan remains next.
 
 ## MVP priority 8 — Executive report
 
