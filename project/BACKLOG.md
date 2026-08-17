@@ -22,12 +22,12 @@ Statuses: `[ ] planned`, `[-] in progress`, `[x] complete`, `[!] blocked`.
 - [ ] DIA-009 AI-assisted candidate findings
 - [-] DIA-010 Evidence coverage validation
 - [-] DIA-011 Finding review workflow
-- [ ] DIA-012 Focused maturity summary
+- [x] DIA-012 Focused maturity summary
 - [x] VIS-001 Entity/ID graph projection
 - [x] VIS-002 Entity/ID graph UI and evidence drill-down
 - [ ] VIS-003 Creator/consumer and authority relationships when directly extracted
 - [ ] VIS-004 Graph filters and static export
-- [ ] REP-001 Prioritized recommendations
+- [x] REP-001 Prioritized recommendations
 - [ ] REP-002 90-day action plan
 - [ ] REP-003 Executive report preview
 - [ ] REP-004 Accepted-findings-only report generation
