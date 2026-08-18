@@ -83,3 +83,7 @@ The entity/ID map consumes confirmed extraction objects and accepted findings fr
 ## ADR-021 — Maturity and recommendations are reviewed-finding projections
 **Status:** Accepted
 Focused maturity and prioritized recommendations consume only accepted findings from a completed, non-stale finding review. The maturity result is a transparent 1–5 risk-adjusted signal, not an enterprise maturity certification. When no findings are accepted, the product returns not-scored rather than inferring perfect maturity. Recommendation ordering is deterministic and every recommendation retains finding, affected-object, and evidence traceability.
+
+## ADR-022 — Reports are deterministic projections of reviewed outputs
+**Status:** Accepted
+The 90-day plan and executive report preview consume only a completed, non-stale finding review plus downstream maturity/recommendation projections from the same diagnostic version. Rejected or pending findings cannot enter report conclusions. The action plan sequences accepted recommendations deterministically by existing priority and must state that effort, budget, staffing, and dependency duration require human validation. Report artifact inventory is metadata-only; raw uploaded content is not reproduced. Browser print preview is allowed in demo mode, while durable versioning and formal PDF export remain separate production work.
