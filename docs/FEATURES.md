@@ -40,13 +40,13 @@ Status: implemented for the current local/demo rule set — deterministic diagno
 
 User can see a focused maturity summary, scoring rationale, prioritized recommendations, and finding traceability.
 
-Status: implemented for the current local/demo reviewed-finding flow — completed non-stale finding review is required; only accepted findings contribute to the focused 1–5 risk-adjusted signal and prioritized recommendations. Zero accepted findings produce an explicit not-scored result rather than a perfect score. Recommendation priority is deterministic by severity, confidence, and title, and every recommendation preserves finding, affected-object, and direct evidence traceability. This signal is explicitly not an enterprise maturity certification. The 90-day plan remains next.
+Status: implemented for the current local/demo reviewed-finding flow — completed non-stale finding review is required; only accepted findings contribute to the focused 1–5 risk-adjusted signal and prioritized recommendations. Zero accepted findings produce an explicit not-scored result rather than a perfect score. Recommendation priority is deterministic by severity, confidence, and title, and every recommendation preserves finding, affected-object, and direct evidence traceability. This signal is explicitly not an enterprise maturity certification.
 
 ## MVP priority 8 — Executive report
 
 User can generate a report from accepted findings, preview executive and technical sections, print/export, and see report version and scope.
 
-Status: planned
+Status: implemented for the current local/demo reviewed-finding flow — the report preview consumes the assessment scope, artifact metadata, focused maturity, prioritized recommendations, and only accepted findings from a completed non-stale review. It includes an executive summary, scope/artifact inventory, top accepted findings with evidence drill-down, deterministic 0–30/31–60/61–90 day sequencing, recommendations, limitations, and browser print preview. Durable report persistence, formal version history, styled PDF export, and production authorization remain open.
 
 ## Secondary demo feature — Acme HealthTech
 
