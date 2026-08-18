@@ -14,7 +14,7 @@ npm run dev
 npm run validate
 ```
 
-`npm run validate` runs TypeScript checks, source-policy lint, Node tests, and a production Next.js build. The Node tests include behavioral tests for assessment limits, upload safety, deterministic parsing, evidence provenance, extraction contracts, deterministic diagnostics, evidence-boundary validation, finding review, entity/ID graph projection, and reviewed maturity/recommendation projection.
+`npm run validate` runs TypeScript checks, source-policy lint, Node tests, and a production Next.js build. The Node tests include behavioral tests for assessment limits, upload safety, deterministic parsing, evidence provenance, extraction contracts, deterministic diagnostics, evidence-boundary validation, finding review, entity/ID graph projection, reviewed maturity/recommendation projection, and accepted-findings-only reporting.
 
 ## Current routes
 
@@ -26,6 +26,7 @@ npm run validate
 - `/assessment/[id]/diagnostics` — deterministic diagnostics, evidence validation, and finding review
 - `/assessment/[id]/map` — reviewed entity/ID projection and evidence drill-down
 - `/assessment/[id]/maturity` — focused maturity signal, scoring rationale, prioritized recommendations, and traceability
+- `/assessment/[id]/report` — accepted-findings-only executive preview and deterministic 90-day action plan
 - `/api/assessments` — assessment validation/creation API
 - `/api/assessments/[id]/artifacts` — transient validation, parsing, and local extraction API
 - `/sample` — Acme sample entry route
@@ -55,6 +56,10 @@ The map deliberately does not infer creator/consumer systems, authority claims, 
 
 After finding review is completed, open `/assessment/<id>/maturity` directly or from the Entity/ID map. The page calculates a transparent 1–5 risk-adjusted signal from accepted findings only and displays the formula rationale and rule-coverage limitations. If no findings were accepted, the result is `not_scored`; the product does not infer perfect maturity from missing or rejected evidence.
 
-Recommendations are projected deterministically from accepted findings and ordered by severity, confidence, then title. Each recommendation preserves the source finding ID, affected object IDs, evidence segments, artifact names, and source locators. The current recommendation set is not yet the 90-day action plan and does not account for implementation cost, organizational dependencies, or portfolio sequencing.
+Recommendations are projected deterministically from accepted findings and ordered by severity, confidence, then title. Each recommendation preserves the source finding ID, affected object IDs, evidence segments, artifact names, and source locators. The executive report deterministically sequences these recommendations into 0–30, 31–60, and 61–90 day phases. That sequencing does not estimate implementation cost, staffing, organizational dependencies, or delivery duration and must be reviewed by a human owner.
 
 Demo diagnostic/review/map/maturity state is browser-local. It is not durable tenant-scoped production persistence.
+
+## Executive report preview
+
+The local/demo report is available at `/assessment/<id>/report` after finding review and maturity/recommendations are complete. It reads only browser-local assessment state and produces a deterministic 90-day action plan plus an accepted-findings-only executive preview. The preview never reproduces raw artifact content; artifact inventory is metadata-only. Use the browser print action for demo review only. Durable report records, tenant authorization, version history, and formal PDF export are not yet production-ready.
