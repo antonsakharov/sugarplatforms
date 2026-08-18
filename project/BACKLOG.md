@@ -28,9 +28,9 @@ Statuses: `[ ] planned`, `[-] in progress`, `[x] complete`, `[!] blocked`.
 - [ ] VIS-003 Creator/consumer and authority relationships when directly extracted
 - [ ] VIS-004 Graph filters and static export
 - [x] REP-001 Prioritized recommendations
-- [ ] REP-002 90-day action plan
-- [ ] REP-003 Executive report preview
-- [ ] REP-004 Accepted-findings-only report generation
+- [x] REP-002 90-day action plan
+- [x] REP-003 Executive report preview
+- [x] REP-004 Accepted-findings-only report generation
 - [ ] REP-005 Report versioning and export
 
 ## Production-readiness work
