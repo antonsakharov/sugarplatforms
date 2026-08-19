@@ -14,7 +14,7 @@ npm run dev
 npm run validate
 ```
 
-`npm run validate` runs TypeScript checks, source-policy lint, Node tests, and a production Next.js build. The Node tests include behavioral tests for assessment limits, upload safety, deterministic parsing, evidence provenance, extraction contracts, deterministic diagnostics, evidence-boundary validation, finding review, entity/ID graph projection, reviewed maturity/recommendation projection, and accepted-findings-only reporting.
+`npm run validate` runs TypeScript checks, source-policy lint, Node tests, and a production Next.js build. The Node tests include behavioral tests for assessment limits, upload safety, deterministic parsing, evidence provenance, extraction contracts, deterministic diagnostics, evidence-boundary validation, finding review, entity/ID graph projection, reviewed maturity/recommendation projection, accepted-findings-only reporting, and report snapshot/version export behavior.
 
 ## Current routes
 
@@ -26,7 +26,7 @@ npm run validate
 - `/assessment/[id]/diagnostics` — deterministic diagnostics, evidence validation, and finding review
 - `/assessment/[id]/map` — reviewed entity/ID projection and evidence drill-down
 - `/assessment/[id]/maturity` — focused maturity signal, scoring rationale, prioritized recommendations, and traceability
-- `/assessment/[id]/report` — accepted-findings-only executive preview and deterministic 90-day action plan
+- `/assessment/[id]/report` — accepted-findings-only executive preview, deterministic 90-day action plan, browser-local version history, and JSON snapshot export
 - `/api/assessments` — assessment validation/creation API
 - `/api/assessments/[id]/artifacts` — transient validation, parsing, and local extraction API
 - `/sample` — Acme sample entry route
@@ -60,6 +60,10 @@ Recommendations are projected deterministically from accepted findings and order
 
 Demo diagnostic/review/map/maturity state is browser-local. It is not durable tenant-scoped production persistence.
 
-## Executive report preview
+## Executive report versions and export
 
-The local/demo report is available at `/assessment/<id>/report` after finding review and maturity/recommendations are complete. It reads only browser-local assessment state and produces a deterministic 90-day action plan plus an accepted-findings-only executive preview. The preview never reproduces raw artifact content; artifact inventory is metadata-only. Use the browser print action for demo review only. Durable report records, tenant authorization, version history, and formal PDF export are not yet production-ready.
+The local/demo report is available at `/assessment/<id>/report` after finding review and maturity/recommendations are complete. It reads only browser-local assessment state and produces a deterministic 90-day action plan plus an accepted-findings-only executive preview. The preview never reproduces raw artifact content; artifact inventory is metadata-only.
+
+Use **Save report version** to create an explicit browser-local immutable snapshot. Snapshot history is stored under `sugar:report-snapshots:<assessmentId>` and is validated as a single-assessment, monotonically increasing version sequence. Saving again creates `v2`, `v3`, and so on without rewriting earlier snapshots. Each version preserves the diagnostic-generation timestamp that produced its report.
+
+Use **Download JSON** on a saved version to export a `sugar-platform-diagnostic-report-json` envelope. The export contains the structured report and artifact metadata only; it does not add raw uploaded content. JSON export is suitable for demo handoff and machine-readable inspection, but is not a signed archive, durable tenant record, or formal PDF deliverable. Browser print remains available for preview. Server-backed history, authorization, styled print/PDF output, and formal PDF generation remain production work.
