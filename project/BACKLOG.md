@@ -31,7 +31,9 @@ Statuses: `[ ] planned`, `[-] in progress`, `[x] complete`, `[!] blocked`.
 - [x] REP-002 90-day action plan
 - [x] REP-003 Executive report preview
 - [x] REP-004 Accepted-findings-only report generation
-- [ ] REP-005 Report versioning and export
+- [x] REP-005 Browser-local report versioning and structured JSON export
+- [ ] REP-006 Print stylesheet and formal report styling
+- [ ] REP-007 Formal PDF export
 
 ## Production-readiness work
 
@@ -40,6 +42,7 @@ Statuses: `[ ] planned`, `[-] in progress`, `[x] complete`, `[!] blocked`.
 - [ ] Authentication and authorization
 - [ ] Row-level security and tenant-isolation tests
 - [ ] Private object storage
+- [ ] Server-backed report version history and authorization
 - [ ] Audit and deletion workflow
 - [ ] Operational job controls and runbook
 
