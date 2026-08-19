@@ -44,9 +44,9 @@ Status: implemented for the current local/demo reviewed-finding flow — complet
 
 ## MVP priority 8 — Executive report
 
-User can generate a report from accepted findings, preview executive and technical sections, print/export, and see report version and scope.
+User can generate a report from accepted findings, preview executive and technical sections, save explicit report versions, export a structured report snapshot, print, and see report version and scope.
 
-Status: implemented for the current local/demo reviewed-finding flow — the report preview consumes the assessment scope, artifact metadata, focused maturity, prioritized recommendations, and only accepted findings from a completed non-stale review. It includes an executive summary, scope/artifact inventory, top accepted findings with evidence drill-down, deterministic 0–30/31–60/61–90 day sequencing, recommendations, limitations, and browser print preview. Durable report persistence, formal version history, styled PDF export, and production authorization remain open.
+Status: implemented for the current local/demo reviewed-finding flow — the report preview consumes the assessment scope, artifact metadata, focused maturity, prioritized recommendations, and only accepted findings from a completed non-stale review. It includes an executive summary, scope/artifact inventory, top accepted findings with evidence drill-down, deterministic 0–30/31–60/61–90 day sequencing, recommendations, limitations, and browser print preview. Users can explicitly save immutable browser-local snapshots with monotonic v1/v2/... numbering and download a metadata-only JSON export that retains diagnostic provenance. Durable tenant-scoped report persistence, authorization, server-backed version history, and formal styled PDF export remain open.
 
 ## Secondary demo feature — Acme HealthTech
 
