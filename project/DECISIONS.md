@@ -87,3 +87,7 @@ Focused maturity and prioritized recommendations consume only accepted findings 
 ## ADR-022 — Reports are deterministic projections of reviewed outputs
 **Status:** Accepted
 The 90-day plan and executive report preview consume only a completed, non-stale finding review plus downstream maturity/recommendation projections from the same diagnostic version. Rejected or pending findings cannot enter report conclusions. The action plan sequences accepted recommendations deterministically by existing priority and must state that effort, budget, staffing, and dependency duration require human validation. Report artifact inventory is metadata-only; raw uploaded content is not reproduced. Browser print preview is allowed in demo mode, while durable versioning and formal PDF export remain separate production work.
+
+## ADR-023 — Local report versions are explicit immutable snapshots
+**Status:** Accepted
+Demo-mode report versioning occurs only when the user explicitly saves a snapshot. Snapshots receive monotonically increasing v1/v2/... identifiers, retain the diagnostic timestamp that produced the report, and are validated as single-assessment history before use. Structured JSON export wraps one immutable snapshot and may contain report output plus artifact metadata only; it must not add raw uploaded artifact content. Browser-local history is a working demo adapter, not durable tenant-scoped persistence or a formal signed report archive.
