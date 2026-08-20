@@ -114,6 +114,47 @@ export class FragmentedIdentifierRule implements DiagnosticRule {
   }
 }
 
+export class CompetingAuthorityRule implements DiagnosticRule {
+  readonly id = "competing-authority";
+  readonly version = "1.0.0";
+
+  evaluate(objects: DiagnosticObject[]): DiagnosticFinding[] {
+    const claimsByEntity = new Map<string, { entity: string; systems: Map<string, DiagnosticObject> }>();
+    for (const system of objects.filter((item) => item.kind === "system" && item.attributes.authorityFor)) {
+      const entity = system.attributes.authorityFor.trim();
+      if (!entity) continue;
+      const key = normalized(entity);
+      const group = claimsByEntity.get(key) ?? { entity, systems: new Map<string, DiagnosticObject>() };
+      group.systems.set(normalized(system.reviewedName), system);
+      claimsByEntity.set(key, group);
+    }
+
+    return [...claimsByEntity.values()].flatMap((group) => {
+      const candidates = [...group.systems.values()];
+      if (candidates.length < 2) return [];
+      const evidence = uniqueEvidence(candidates);
+      return [{
+        id: stableFindingId(this.id, candidates.map((item) => item.id)),
+        ruleId: this.id,
+        ruleVersion: this.version,
+        category: "entity_identity" as const,
+        severity: "high" as const,
+        confidence: 0.94,
+        factStatus: "derived" as const,
+        title: `Multiple systems claim authority for ${group.entity}`,
+        description: `The approved architecture evidence explicitly identifies ${candidates.map((item) => item.reviewedName).join(", ")} as authoritative systems for ${group.entity}. These directly supported claims conflict and should be reconciled before downstream systems treat either source as canonical.`,
+        businessImpact: "Competing authority claims can create inconsistent reporting, duplicate reconciliation work, disputed ownership, and conflicting customer or business-entity outcomes.",
+        technicalImpact: "Downstream integrations may consume different canonical values or implement source-specific conflict resolution, increasing coupling and data inconsistency risk.",
+        affectedObjectIds: candidates.map((item) => item.id),
+        evidence,
+        recommendation: `Choose and document one authoritative source for ${group.entity}, define transition or exception rules for other systems, and make consumers reference that governance decision explicitly.`,
+        validationQuestions: [`Which system is formally authoritative for ${group.entity}?`, "Are the competing claims scoped to different lifecycle stages or regions?", "Which consumers currently rely on each claimed authority?"],
+        reviewStatus: "pending" as const
+      }];
+    });
+  }
+}
+
 export class OwnershipGapRule implements DiagnosticRule {
   readonly id = "ownership-gap";
   readonly version = "1.0.0";
@@ -144,7 +185,7 @@ export class OwnershipGapRule implements DiagnosticRule {
   }
 }
 
-export const DETERMINISTIC_RULES: readonly DiagnosticRule[] = [new FragmentedIdentifierRule(), new OwnershipGapRule()];
+export const DETERMINISTIC_RULES: readonly DiagnosticRule[] = [new FragmentedIdentifierRule(), new CompetingAuthorityRule(), new OwnershipGapRule()];
 
 export function runDeterministicDiagnostics(context: DiagnosticContext, generatedAt = new Date().toISOString()): DiagnosticEnvelope {
   const objects = approvedDiagnosticObjects(context.extraction, context.review);
