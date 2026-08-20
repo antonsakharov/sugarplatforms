@@ -1,27 +1,27 @@
 # Validation status
 
-## 2026-08-19 report versioning and structured export increment
+## 2026-08-20 competing authority increment
 
 Expected validation for the published branch:
 
 - all prior behavioral and contract tests remain green;
-- report snapshot creation is an explicit user action and does not silently version on page load;
-- snapshot versions increase monotonically as `v1`, `v2`, and so on without rewriting prior snapshots;
-- snapshot history rejects duplicate versions/IDs and cross-assessment records;
-- each snapshot preserves the diagnostic-generation timestamp that produced its report;
-- JSON export wraps one validated snapshot and preserves report provenance;
-- exported artifact inventory remains metadata-only and raw uploaded artifact content is not introduced;
-- safe export filenames carry the report version;
-- `schemas/report-snapshot.schema.json` and all existing schemas parse successfully;
+- explicit `system of record`, `source of truth`, and `authoritative system` statements enrich system objects with direct-evidence `authorityFor` attributes;
+- authority extraction preserves source evidence and does not introduce an unsupported object kind;
+- the competing-authority rule emits only when two or more confirmed systems explicitly claim authority for the same normalized entity;
+- a single authority claim does not emit a competing-authority finding;
+- rejected extraction objects remain excluded from diagnostics;
+- every emitted authority finding has direct evidence, rule/version provenance, affected systems, impact, recommendation, and validation questions;
+- the rule does not infer authority from topology, naming, integration direction, identifiers, or ownership;
+- all schemas continue to parse successfully;
 - TypeScript, source-policy lint, full tests, and optimized Next.js production build must pass in GitHub Actions.
 
 ## Prior validation
 
-The 2026-08-18 90-day action-plan and executive-report increment passed GitHub Actions with the accepted-findings-only reporting boundary intact.
+The 2026-08-19 report-versioning and structured-export increment passed GitHub Actions with accepted-findings-only reporting and immutable browser-local snapshot boundaries intact.
 
 ## Local/demo boundary
 
-Report versions are browser-local demo snapshots, not durable tenant-scoped records. The JSON export is a structured handoff format, not a signed archive or formal PDF. Existing report generation still requires completed non-stale finding review and matching downstream maturity/recommendation/diagnostic versions.
+Authority extraction is deterministic and intentionally narrow. It recognizes explicit architecture-language claims and does not attempt semantic inference across arbitrary prose. Diagnostic and review state remains browser-local demo state, not durable tenant-scoped persistence.
 
 ## Remaining production validation
 
