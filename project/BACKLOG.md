@@ -13,7 +13,7 @@ Statuses: `[ ] planned`, `[-] in progress`, `[x] complete`, `[!] blocked`.
 - [-] EXT-010 Extraction boundary validation tests
 - [-] DIA-001 Deterministic diagnostic rule framework
 - [-] DIA-002 Fragmented identifier rule
-- [ ] DIA-003 Competing authority rule
+- [x] DIA-003 Competing authority rule
 - [ ] DIA-004 Duplicate matching logic rule
 - [ ] DIA-005 Duplicate capability rule
 - [-] DIA-006 Ownership-gap rule
