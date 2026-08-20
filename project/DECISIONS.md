@@ -91,3 +91,7 @@ The 90-day plan and executive report preview consume only a completed, non-stale
 ## ADR-023 — Local report versions are explicit immutable snapshots
 **Status:** Accepted
 Demo-mode report versioning occurs only when the user explicitly saves a snapshot. Snapshots receive monotonically increasing v1/v2/... identifiers, retain the diagnostic timestamp that produced the report, and are validated as single-assessment history before use. Structured JSON export wraps one immutable snapshot and may contain report output plus artifact metadata only; it must not add raw uploaded artifact content. Browser-local history is a working demo adapter, not durable tenant-scoped persistence or a formal signed report archive.
+
+## ADR-024 — Competing authority requires direct claims
+**Status:** Accepted
+A competing-authority finding may be generated only when two or more confirmed system objects contain directly extracted authority claims for the same normalized entity. The local extractor may preserve explicit `system of record`, `source of truth`, and `authoritative system` statements as `authorityFor` system attributes while retaining source evidence. The diagnostic engine must not infer authority from topology, naming, ownership, integration direction, or identifier presence.
