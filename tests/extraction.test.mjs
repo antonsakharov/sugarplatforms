@@ -25,6 +25,18 @@ test("deterministic extractor emits evidence-linked architecture objects only", 
   assert.ok(validated.objects.every((item) => item.evidence.length > 0 && item.evidence[0].segmentId === "artifact_demo:segment:0"));
 });
 
+test("explicit authority statements enrich system objects without inventing a new object kind", async () => {
+  const provider = new DeterministicExtractionProvider();
+  const output = validateExtractionEnvelope(await provider.extract({ assessmentId: "asm_demo", parsedArtifacts: [artifact("CRM is the system of record for Customer\nSource of truth for Customer: Billing Hub")] }));
+  const crm = output.objects.find((item) => item.kind === "system" && item.name === "CRM");
+  const billing = output.objects.find((item) => item.kind === "system" && item.name === "Billing Hub");
+  assert.equal(crm?.attributes.authorityFor, "Customer");
+  assert.equal(crm?.attributes.authorityClaim, "explicit");
+  assert.equal(billing?.attributes.authorityFor, "Customer");
+  assert.ok(crm?.evidence.length);
+  assert.ok(billing?.evidence.length);
+});
+
 test("duplicate direct claims reconcile by normalized kind/name while retaining evidence", async () => {
   const provider = new DeterministicExtractionProvider();
   const first = artifact("System: Customer API");
