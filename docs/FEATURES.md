@@ -22,19 +22,19 @@ Status: in progress — text/Markdown, JSON/YAML/OpenAPI, CSV, SQL DDL, and boun
 
 User can review extracted systems, entities, identifiers, integrations, capabilities, and owners; rename/reject/merge/confirm objects; inspect evidence; and approve extraction for analysis.
 
-Status: implemented for the local/demo workflow — evidence-linked candidate inventory, explicit rename/reject/merge/confirm actions, same-kind merge guardrails, evidence drill-down, and approval gating are available. Approval is blocked until every candidate is resolved. OpenAI activation and durable tenant-scoped persistence remain open.
+Status: implemented for the local/demo workflow — evidence-linked candidate inventory, explicit rename/reject/merge/confirm actions, same-kind merge guardrails, evidence drill-down, and approval gating are available. Explicit `system of record`, `source of truth`, and `authoritative system` statements are retained as evidence-backed `authorityFor` attributes on system objects for downstream diagnostics. Approval is blocked until every candidate is resolved. OpenAI activation and durable tenant-scoped persistence remain open.
 
 ## MVP priority 5 — Entity and ID map
 
 User can see the focused primary entity, confirmed entity/identifier/system nodes, direct system integration relationships when explicitly extracted, accepted-finding overlays, and evidence drill-down.
 
-Status: implemented for the current local/demo workflow — the graph projection is gated on completed non-stale finding review, uses confirmed extraction objects, and decorates downstream output with accepted findings only. Identifier-to-focus relationships are visibly marked derived. Creator/consumer, authority claims, and mappings are intentionally not inferred when extraction evidence does not explicitly represent them; richer relationship extraction and static export remain open.
+Status: implemented for the current local/demo workflow — the graph projection is gated on completed non-stale finding review, uses confirmed extraction objects, and decorates downstream output with accepted findings only. Identifier-to-focus relationships are visibly marked derived. Creator/consumer and authority relationship visualization is still planned; relationships are not inferred without explicit extraction evidence.
 
 ## MVP priority 6 — Diagnostic findings
 
 User can run analysis; inspect impact and evidence; and accept, edit, or reject findings.
 
-Status: implemented for the current local/demo rule set — deterministic diagnostics run only after extraction approval; fragmented-identifier and ownership-gap rules emit evidence-backed derived findings; evidence coverage is revalidated against the exact approved extraction boundary before review; users can edit presentation/impact language, accept or reject each finding, and complete review only when every finding has an explicit decision. Evidence and rule provenance remain immutable. Additional deterministic rules, AI-assisted candidate findings, filtering, and durable tenant-scoped finding persistence remain open.
+Status: implemented for the current local/demo rule set — deterministic diagnostics run only after extraction approval. Fragmented-identifier, competing-authority, and ownership-gap rules emit evidence-backed derived findings. The competing-authority rule fires only when two or more confirmed systems carry direct authority claims for the same entity; it does not infer authority from system names or topology. Evidence coverage is revalidated against the exact approved extraction boundary before review. Additional deterministic rules, AI-assisted candidate findings, filtering, and durable tenant-scoped finding persistence remain open.
 
 ## MVP priority 7 — Maturity and recommendations
 
