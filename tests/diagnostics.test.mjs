@@ -3,8 +3,8 @@ import assert from "node:assert/strict";
 import { runDeterministicDiagnostics } from "../lib/diagnostics.ts";
 import { approveExtraction, createExtractionReview, setReviewStatus } from "../lib/extraction-review.ts";
 
-function object(id, kind, name, segmentId = `seg_${id}`) {
-  return { id, kind, name, normalizedName: name.toLowerCase(), confidence: 0.95, extractionMethod: "test", evidence: [{ segmentId, artifactId: "art_1", artifactName: "architecture.md", locator: `lines ${segmentId.slice(-1)}-${segmentId.slice(-1)}`, evidenceType: "direct" }], attributes: {} };
+function object(id, kind, name, segmentId = `seg_${id}`, attributes = {}) {
+  return { id, kind, name, normalizedName: name.toLowerCase(), confidence: 0.95, extractionMethod: "test", evidence: [{ segmentId, artifactId: "art_1", artifactName: "architecture.md", locator: `lines ${segmentId.slice(-1)}-${segmentId.slice(-1)}`, evidenceType: "direct" }], attributes };
 }
 function envelope(objects) { return { schemaVersion: "1.0", provider: "test", promptVersion: "test-v1", status: "ready", objects, warnings: [], stats: { objectCount: objects.length, evidenceReferenceCount: objects.length } }; }
 function approvedReview(objects, rejectedIds = []) {
@@ -26,6 +26,28 @@ test("fragmented identifier rule emits one evidence-backed derived finding", () 
   assert.equal(finding.factStatus, "derived");
   assert.equal(finding.evidence.length, 2);
   assert.equal(finding.ruleVersion, "1.0.0");
+});
+
+test("competing authority rule emits only for explicit conflicting claims on the same entity", () => {
+  const objects = [
+    object("sys_crm", "system", "CRM", "seg_1", { authorityFor: "Customer", authorityClaim: "explicit" }),
+    object("sys_bill", "system", "Billing Hub", "seg_2", { authorityFor: "Customer", authorityClaim: "explicit" }),
+    object("sys_order", "system", "Order Platform", "seg_3", { authorityFor: "Order", authorityClaim: "explicit" }),
+    object("owner_a", "owner", "Data Platform", "seg_4")
+  ];
+  const result = runDeterministicDiagnostics({ assessmentId: "a1", extraction: envelope(objects), review: approvedReview(objects) });
+  const finding = result.findings.find((item) => item.ruleId === "competing-authority");
+  assert.ok(finding);
+  assert.equal(finding.severity, "high");
+  assert.equal(finding.evidence.length, 2);
+  assert.deepEqual(new Set(finding.affectedObjectIds), new Set(["sys_crm", "sys_bill"]));
+  assert.match(finding.title, /Customer/);
+});
+
+test("a single explicit authority claim does not produce a competing-authority finding", () => {
+  const objects = [object("sys_crm", "system", "CRM", "seg_1", { authorityFor: "Customer", authorityClaim: "explicit" }), object("owner_a", "owner", "Data Platform", "seg_2")];
+  const result = runDeterministicDiagnostics({ assessmentId: "a1", extraction: envelope(objects), review: approvedReview(objects) });
+  assert.equal(result.findings.some((item) => item.ruleId === "competing-authority"), false);
 });
 
 test("ownership gap rule is cautious and evidence backed when no owner is confirmed", () => {
