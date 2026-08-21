@@ -95,3 +95,7 @@ Demo-mode report versioning occurs only when the user explicitly saves a snapsho
 ## ADR-024 — Competing authority requires direct claims
 **Status:** Accepted
 A competing-authority finding may be generated only when two or more confirmed system objects contain directly extracted authority claims for the same normalized entity. The local extractor may preserve explicit `system of record`, `source of truth`, and `authoritative system` statements as `authorityFor` system attributes while retaining source evidence. The diagnostic engine must not infer authority from topology, naming, ownership, integration direction, or identifier presence.
+
+## ADR-025 — Duplicate matching logic requires explicit matching responsibility
+**Status:** Accepted
+A duplicate-matching-logic finding may be generated only when two or more confirmed system objects contain directly extracted matching or entity-resolution responsibility for the same normalized entity. The local extractor may preserve explicit statements such as `<system> matches <entity> using <method>` or `matching logic for <entity> in <system>: <method>` as `matchingFor`, `matchingClaim=explicit`, and optional `matchingMethod` attributes. The diagnostic engine must not infer matching responsibility from system names, identifier presence, API paths, integration topology, or generic capability labels.
