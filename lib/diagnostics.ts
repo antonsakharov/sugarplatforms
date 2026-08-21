@@ -155,6 +155,48 @@ export class CompetingAuthorityRule implements DiagnosticRule {
   }
 }
 
+export class DuplicateMatchingLogicRule implements DiagnosticRule {
+  readonly id = "duplicate-matching-logic";
+  readonly version = "1.0.0";
+
+  evaluate(objects: DiagnosticObject[]): DiagnosticFinding[] {
+    const claimsByEntity = new Map<string, { entity: string; systems: Map<string, DiagnosticObject> }>();
+    for (const system of objects.filter((item) => item.kind === "system" && item.attributes.matchingFor && item.attributes.matchingClaim === "explicit")) {
+      const entity = system.attributes.matchingFor.trim();
+      if (!entity) continue;
+      const key = normalized(entity);
+      const group = claimsByEntity.get(key) ?? { entity, systems: new Map<string, DiagnosticObject>() };
+      group.systems.set(normalized(system.reviewedName), system);
+      claimsByEntity.set(key, group);
+    }
+
+    return [...claimsByEntity.values()].flatMap((group) => {
+      const candidates = [...group.systems.values()];
+      if (candidates.length < 2) return [];
+      const methods = candidates.map((item) => item.attributes.matchingMethod).filter(Boolean);
+      const methodSummary = methods.length > 0 ? ` Documented methods include ${methods.join("; ")}.` : "";
+      return [{
+        id: stableFindingId(this.id, candidates.map((item) => item.id)),
+        ruleId: this.id,
+        ruleVersion: this.version,
+        category: "entity_identity" as const,
+        severity: "high" as const,
+        confidence: 0.92,
+        factStatus: "derived" as const,
+        title: `Matching logic for ${group.entity} is implemented in multiple systems`,
+        description: `The approved architecture evidence explicitly states that ${candidates.map((item) => item.reviewedName).join(", ")} perform matching or entity-resolution logic for ${group.entity}.${methodSummary} This indicates duplicated decision logic that should be compared before changing identifiers or integration behavior.`,
+        businessImpact: "Independent matching logic can produce inconsistent entity decisions, duplicate reconciliation work, and different customer or business outcomes across channels.",
+        technicalImpact: "Multiple implementations of entity resolution increase rule drift, testing surface area, integration coupling, and migration risk when matching criteria change.",
+        affectedObjectIds: candidates.map((item) => item.id),
+        evidence: uniqueEvidence(candidates),
+        recommendation: `Inventory and compare the matching rules for ${group.entity}, designate a governed matching capability or contract, and define how exceptions are handled before consolidating implementations.`,
+        validationQuestions: [`Do the ${group.entity} matching implementations use the same fields, precedence, and thresholds?`, "Which implementation is authoritative when results disagree?", "Can matching decisions be centralized or governed through one shared contract?"],
+        reviewStatus: "pending" as const
+      }];
+    });
+  }
+}
+
 export class OwnershipGapRule implements DiagnosticRule {
   readonly id = "ownership-gap";
   readonly version = "1.0.0";
@@ -185,7 +227,7 @@ export class OwnershipGapRule implements DiagnosticRule {
   }
 }
 
-export const DETERMINISTIC_RULES: readonly DiagnosticRule[] = [new FragmentedIdentifierRule(), new CompetingAuthorityRule(), new OwnershipGapRule()];
+export const DETERMINISTIC_RULES: readonly DiagnosticRule[] = [new FragmentedIdentifierRule(), new CompetingAuthorityRule(), new DuplicateMatchingLogicRule(), new OwnershipGapRule()];
 
 export function runDeterministicDiagnostics(context: DiagnosticContext, generatedAt = new Date().toISOString()): DiagnosticEnvelope {
   const objects = approvedDiagnosticObjects(context.extraction, context.review);
