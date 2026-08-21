@@ -95,3 +95,7 @@ Demo-mode report versioning occurs only when the user explicitly saves a snapsho
 ## ADR-024 — Competing authority requires direct claims
 **Status:** Accepted
 A competing-authority finding may be generated only when two or more confirmed system objects contain directly extracted authority claims for the same normalized entity. The local extractor may preserve explicit `system of record`, `source of truth`, and `authoritative system` statements as `authorityFor` system attributes while retaining source evidence. The diagnostic engine must not infer authority from topology, naming, ownership, integration direction, or identifier presence.
+
+## ADR-025 — Duplicate matching is an explicit-capability signal
+**Status:** Accepted
+The deterministic duplicate-matching rule may consider only confirmed capability objects whose reviewed names explicitly describe matching, deduplication, entity-resolution, or record-linkage behavior. When an explicit subject prefix is present, capabilities are compared only within that subject. Multiple matching capabilities are reported as a reviewable duplication signal, never as proof that implementations are equivalent. The rule must preserve source evidence and must not perform probabilistic record matching, inspect production records, or infer matching behavior from identifiers, integrations, or system names.
