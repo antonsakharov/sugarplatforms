@@ -67,7 +67,7 @@ const AUTHORITY_PATTERNS: Array<{ expression: RegExp; systemIndex: number; entit
   { expression: /\b(?:authoritative system|system of record|source of truth)\s+for\s+([A-Za-z][A-Za-z0-9 _./-]{1,80})\s*[:=-]\s*([A-Za-z][A-Za-z0-9 _./-]{1,80})/gi, systemIndex: 2, entityIndex: 1 }
 ];
 const MATCHING_PATTERNS: Array<{ expression: RegExp; systemIndex: number; entityIndex: number; methodIndex?: number }> = [
-  { expression: /\b([A-Za-z][A-Za-z0-9 _./-]{1,80})\s+(?:matches|resolves|deduplicates)\s+([A-Za-z][A-Za-z0-9 _./-]{1,80})(?:\s+using\s+([^\n.;]{2,120}))?/gi, systemIndex: 1, entityIndex: 2, methodIndex: 3 },
+  { expression: /\b([A-Za-z][A-Za-z0-9 _./-]{1,80})\s+(?:matches|resolves|deduplicates)\s+([A-Za-z][A-Za-z0-9 _./-]{1,80}?)(?=\s+using\s+|[.;\n]|$)(?:\s+using\s+([^\n.;]{2,120}))?/gi, systemIndex: 1, entityIndex: 2, methodIndex: 3 },
   { expression: /\b(?:matching|entity resolution|deduplication)\s+(?:logic\s+)?for\s+([A-Za-z][A-Za-z0-9 _./-]{1,80})\s+(?:in|by)\s+([A-Za-z][A-Za-z0-9 _./-]{1,80})(?:\s*[:=-]\s*([^\n.;]{2,120}))?/gi, systemIndex: 2, entityIndex: 1, methodIndex: 3 }
 ];
 const IDENTIFIER_TOKEN = /\b([A-Za-z][A-Za-z0-9]*_(?:id|key)|[A-Za-z][A-Za-z0-9]*(?:Id|ID))\b/g;
