@@ -1,27 +1,28 @@
 # Validation status
 
-## 2026-08-20 competing authority increment
+## 2026-08-21 duplicate matching logic increment
 
 Expected validation for the published branch:
 
 - all prior behavioral and contract tests remain green;
-- explicit `system of record`, `source of truth`, and `authoritative system` statements enrich system objects with direct-evidence `authorityFor` attributes;
-- authority extraction preserves source evidence and does not introduce an unsupported object kind;
-- the competing-authority rule emits only when two or more confirmed systems explicitly claim authority for the same normalized entity;
-- a single authority claim does not emit a competing-authority finding;
+- explicit matching/entity-resolution statements enrich system objects with direct-evidence `matchingFor`, `matchingClaim`, and optional `matchingMethod` attributes;
+- matching extraction preserves source evidence and does not introduce an unsupported object kind;
+- the duplicate-matching-logic rule emits only when two or more confirmed systems explicitly perform matching/entity-resolution for the same normalized entity;
+- a single matching implementation does not emit the finding;
+- matching hints without `matchingClaim=explicit` do not emit the finding;
 - rejected extraction objects remain excluded from diagnostics;
-- every emitted authority finding has direct evidence, rule/version provenance, affected systems, impact, recommendation, and validation questions;
-- the rule does not infer authority from topology, naming, integration direction, identifiers, or ownership;
+- every emitted matching finding has direct evidence, rule/version provenance, affected systems, impact, recommendation, and validation questions;
+- the rule does not infer matching responsibility from system names, identifiers, APIs, integration topology, or generic capability labels;
 - all schemas continue to parse successfully;
 - TypeScript, source-policy lint, full tests, and optimized Next.js production build must pass in GitHub Actions.
 
 ## Prior validation
 
-The 2026-08-19 report-versioning and structured-export increment passed GitHub Actions with accepted-findings-only reporting and immutable browser-local snapshot boundaries intact.
+The 2026-08-20 competing-authority increment passed GitHub Actions with direct-claim authority extraction and diagnostic evidence boundaries intact.
 
 ## Local/demo boundary
 
-Authority extraction is deterministic and intentionally narrow. It recognizes explicit architecture-language claims and does not attempt semantic inference across arbitrary prose. Diagnostic and review state remains browser-local demo state, not durable tenant-scoped persistence.
+Matching extraction is deterministic and intentionally narrow. It recognizes explicit architecture-language statements and does not attempt semantic inference across arbitrary prose. Diagnostic and review state remains browser-local demo state, not durable tenant-scoped persistence.
 
 ## Remaining production validation
 
