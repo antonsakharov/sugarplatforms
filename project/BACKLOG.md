@@ -14,7 +14,7 @@ Statuses: `[ ] planned`, `[-] in progress`, `[x] complete`, `[!] blocked`.
 - [-] DIA-001 Deterministic diagnostic rule framework
 - [-] DIA-002 Fragmented identifier rule
 - [x] DIA-003 Competing authority rule
-- [ ] DIA-004 Duplicate matching logic rule
+- [x] DIA-004 Duplicate matching logic rule
 - [ ] DIA-005 Duplicate capability rule
 - [-] DIA-006 Ownership-gap rule
 - [ ] DIA-007 Direct database coupling rule
