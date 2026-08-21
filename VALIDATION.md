@@ -1,27 +1,28 @@
 # Validation status
 
-## 2026-08-20 competing authority increment
+## 2026-08-21 duplicate matching logic increment
 
 Expected validation for the published branch:
 
 - all prior behavioral and contract tests remain green;
-- explicit `system of record`, `source of truth`, and `authoritative system` statements enrich system objects with direct-evidence `authorityFor` attributes;
-- authority extraction preserves source evidence and does not introduce an unsupported object kind;
-- the competing-authority rule emits only when two or more confirmed systems explicitly claim authority for the same normalized entity;
-- a single authority claim does not emit a competing-authority finding;
+- duplicate matching considers only confirmed capability objects whose reviewed names explicitly contain matching, deduplication, entity-resolution, or record-linkage language;
+- two distinct matching capabilities with the same explicit subject prefix produce one evidence-backed derived finding;
+- matching capabilities with different explicit subject prefixes are not collapsed into one duplicate signal;
+- non-matching capabilities do not trigger the rule;
+- the finding explicitly states that multiple capabilities are a signal, not proof of functionally identical implementations;
 - rejected extraction objects remain excluded from diagnostics;
-- every emitted authority finding has direct evidence, rule/version provenance, affected systems, impact, recommendation, and validation questions;
-- the rule does not infer authority from topology, naming, integration direction, identifiers, or ownership;
-- all schemas continue to parse successfully;
+- every emitted matching finding has direct evidence, rule/version provenance, affected capabilities, impact, recommendation, and validation questions;
+- no probabilistic record matching, production-record inspection, or matching inference from identifiers, integrations, or system names is introduced;
+- all existing schemas continue to parse successfully because DIA-004 uses the existing `entity_identity` finding category and diagnostic envelope contract;
 - TypeScript, source-policy lint, full tests, and optimized Next.js production build must pass in GitHub Actions.
 
 ## Prior validation
 
-The 2026-08-19 report-versioning and structured-export increment passed GitHub Actions with accepted-findings-only reporting and immutable browser-local snapshot boundaries intact.
+The 2026-08-20 competing-authority increment passed GitHub Actions with direct authority evidence and no topology-based authority inference.
 
 ## Local/demo boundary
 
-Authority extraction is deterministic and intentionally narrow. It recognizes explicit architecture-language claims and does not attempt semantic inference across arbitrary prose. Diagnostic and review state remains browser-local demo state, not durable tenant-scoped persistence.
+Duplicate matching is intentionally conservative and uses reviewed architecture capability names only. It does not compare customer records or attempt record linkage. Diagnostic and review state remains browser-local demo state, not durable tenant-scoped persistence.
 
 ## Remaining production validation
 
