@@ -34,7 +34,7 @@ Status: implemented for the current local/demo workflow — the graph projection
 
 User can run analysis; inspect impact and evidence; and accept, edit, or reject findings.
 
-Status: implemented for the current local/demo rule set — deterministic diagnostics run only after extraction approval. Fragmented-identifier, competing-authority, and ownership-gap rules emit evidence-backed derived findings. The competing-authority rule fires only when two or more confirmed systems carry direct authority claims for the same entity; it does not infer authority from system names or topology. Evidence coverage is revalidated against the exact approved extraction boundary before review. Additional deterministic rules, AI-assisted candidate findings, filtering, and durable tenant-scoped finding persistence remain open.
+Status: implemented for the current local/demo rule set — deterministic diagnostics run only after extraction approval. Fragmented-identifier, competing-authority, duplicate-matching-logic, and ownership-gap rules emit evidence-backed derived findings. Duplicate matching is intentionally conservative: it considers only confirmed capability objects whose reviewed names explicitly describe matching, deduplication, entity-resolution, or record-linkage behavior, groups them by the explicit subject prefix where present, and states that multiple capabilities are a signal rather than proof of functionally identical implementations. Evidence coverage is revalidated against the exact approved extraction boundary before review. Additional deterministic rules, AI-assisted candidate findings, filtering, and durable tenant-scoped finding persistence remain open.
 
 ## MVP priority 7 — Maturity and recommendations
 
