@@ -50,6 +50,37 @@ test("a single explicit authority claim does not produce a competing-authority f
   assert.equal(result.findings.some((item) => item.ruleId === "competing-authority"), false);
 });
 
+test("duplicate matching rule flags two explicit matching capabilities for the same subject", () => {
+  const objects = [
+    object("cap_a", "capability", "Customer matching by email", "seg_1"),
+    object("cap_b", "capability", "Customer matching by name and phone", "seg_2"),
+    object("owner_a", "owner", "Identity Platform", "seg_3")
+  ];
+  const result = runDeterministicDiagnostics({ assessmentId: "a1", extraction: envelope(objects), review: approvedReview(objects) });
+  const finding = result.findings.find((item) => item.ruleId === "duplicate-matching-logic");
+  assert.ok(finding);
+  assert.equal(finding.factStatus, "derived");
+  assert.equal(finding.evidence.length, 2);
+  assert.equal(finding.severity, "medium");
+  assert.match(finding.description, /not proof.*functionally identical/i);
+});
+
+test("matching capabilities for different explicit subjects are not collapsed into one finding", () => {
+  const objects = [
+    object("cap_customer", "capability", "Customer matching by email", "seg_1"),
+    object("cap_supplier", "capability", "Supplier matching by tax ID", "seg_2"),
+    object("owner_a", "owner", "Identity Platform", "seg_3")
+  ];
+  const result = runDeterministicDiagnostics({ assessmentId: "a1", extraction: envelope(objects), review: approvedReview(objects) });
+  assert.equal(result.findings.some((item) => item.ruleId === "duplicate-matching-logic"), false);
+});
+
+test("non-matching capabilities do not trigger duplicate matching logic", () => {
+  const objects = [object("cap_a", "capability", "Customer profile API", "seg_1"), object("cap_b", "capability", "Customer search", "seg_2"), object("owner_a", "owner", "Platform", "seg_3")];
+  const result = runDeterministicDiagnostics({ assessmentId: "a1", extraction: envelope(objects), review: approvedReview(objects) });
+  assert.equal(result.findings.some((item) => item.ruleId === "duplicate-matching-logic"), false);
+});
+
 test("ownership gap rule is cautious and evidence backed when no owner is confirmed", () => {
   const objects = [object("sys_a", "system", "Orders", "seg_1"), object("entity_a", "entity", "Customer", "seg_2")];
   const result = runDeterministicDiagnostics({ assessmentId: "a1", extraction: envelope(objects), review: approvedReview(objects) });
