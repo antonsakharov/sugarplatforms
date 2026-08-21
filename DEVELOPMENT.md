@@ -46,6 +46,8 @@ After validating/parsing/extracting artifacts, resolve every extraction candidat
 
 Reviewers can edit presentation fields and severity, add a reviewer note, and explicitly accept or reject each finding. Rule identity, confidence, affected objects, and source evidence are immutable. Editing returns the finding to `pending`; review cannot complete until every finding is accepted or rejected. Only accepted findings from a completed, non-stale review are eligible for downstream maturity, visualization, recommendations, and reports.
 
+The deterministic engine currently includes fragmented identifiers, competing authority, duplicate matching logic, and ownership gaps. Duplicate matching is deliberately narrow: the local extractor recognizes explicit statements such as `CRM matches Customer using email and phone` or `Matching logic for Customer in Billing Hub: email plus postal code`. Two confirmed systems must carry `matchingClaim=explicit` for the same entity before a finding is emitted. No additional environment variable or external service is required for this local/demo rule.
+
 ## Entity/ID map
 
 After finding review is completed, open `/assessment/<id>/map`. The map is projected in-browser from the approved extraction plus accepted findings. It includes the assessment primary entity, confirmed entity/identifier/system objects, direct integration edges when extraction provides both endpoints, and accepted-finding overlays. Identifier-to-primary-entity edges are explicitly labeled `derived` because they represent the one-primary-entity assessment scope rather than a newly asserted source fact.
