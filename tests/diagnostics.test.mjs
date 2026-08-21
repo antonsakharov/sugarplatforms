@@ -50,6 +50,33 @@ test("a single explicit authority claim does not produce a competing-authority f
   assert.equal(result.findings.some((item) => item.ruleId === "competing-authority"), false);
 });
 
+test("duplicate matching logic rule emits only for explicit matching responsibilities on the same entity", () => {
+  const objects = [
+    object("sys_crm", "system", "CRM", "seg_1", { matchingFor: "Customer", matchingClaim: "explicit", matchingMethod: "email and phone" }),
+    object("sys_bill", "system", "Billing Hub", "seg_2", { matchingFor: "Customer", matchingClaim: "explicit", matchingMethod: "email plus postal code" }),
+    object("sys_order", "system", "Order Platform", "seg_3", { matchingFor: "Order", matchingClaim: "explicit" }),
+    object("owner_a", "owner", "Data Platform", "seg_4")
+  ];
+  const result = runDeterministicDiagnostics({ assessmentId: "a1", extraction: envelope(objects), review: approvedReview(objects) });
+  const finding = result.findings.find((item) => item.ruleId === "duplicate-matching-logic");
+  assert.ok(finding);
+  assert.equal(finding.severity, "high");
+  assert.equal(finding.confidence, 0.92);
+  assert.deepEqual(new Set(finding.affectedObjectIds), new Set(["sys_crm", "sys_bill"]));
+  assert.equal(finding.evidence.length, 2);
+  assert.match(finding.description, /email and phone/);
+});
+
+test("matching hints without an explicit matching claim do not produce a duplicate-matching finding", () => {
+  const objects = [
+    object("sys_crm", "system", "Customer Matcher", "seg_1", { matchingFor: "Customer" }),
+    object("sys_bill", "system", "Billing Matcher", "seg_2", { matchingFor: "Customer" }),
+    object("owner_a", "owner", "Data Platform", "seg_3")
+  ];
+  const result = runDeterministicDiagnostics({ assessmentId: "a1", extraction: envelope(objects), review: approvedReview(objects) });
+  assert.equal(result.findings.some((item) => item.ruleId === "duplicate-matching-logic"), false);
+});
+
 test("ownership gap rule is cautious and evidence backed when no owner is confirmed", () => {
   const objects = [object("sys_a", "system", "Orders", "seg_1"), object("entity_a", "entity", "Customer", "seg_2")];
   const result = runDeterministicDiagnostics({ assessmentId: "a1", extraction: envelope(objects), review: approvedReview(objects) });
