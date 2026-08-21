@@ -37,6 +37,20 @@ test("explicit authority statements enrich system objects without inventing a ne
   assert.ok(billing?.evidence.length);
 });
 
+test("explicit matching statements enrich system objects with entity and method", async () => {
+  const provider = new DeterministicExtractionProvider();
+  const output = validateExtractionEnvelope(await provider.extract({ assessmentId: "asm_demo", parsedArtifacts: [artifact("CRM matches Customer using email and phone\nMatching logic for Customer in Billing Hub: email plus postal code")] }));
+  const crm = output.objects.find((item) => item.kind === "system" && item.name === "CRM");
+  const billing = output.objects.find((item) => item.kind === "system" && item.name === "Billing Hub");
+  assert.equal(crm?.attributes.matchingFor, "Customer");
+  assert.equal(crm?.attributes.matchingClaim, "explicit");
+  assert.equal(crm?.attributes.matchingMethod, "email and phone");
+  assert.equal(billing?.attributes.matchingFor, "Customer");
+  assert.equal(billing?.attributes.matchingMethod, "email plus postal code");
+  assert.ok(crm?.evidence.length);
+  assert.ok(billing?.evidence.length);
+});
+
 test("duplicate direct claims reconcile by normalized kind/name while retaining evidence", async () => {
   const provider = new DeterministicExtractionProvider();
   const first = artifact("System: Customer API");
