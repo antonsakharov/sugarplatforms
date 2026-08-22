@@ -77,6 +77,32 @@ test("matching hints without an explicit matching claim do not produce a duplica
   assert.equal(result.findings.some((item) => item.ruleId === "duplicate-matching-logic"), false);
 });
 
+test("duplicate capability rule emits only for explicit same-capability responsibilities across systems", () => {
+  const objects = [
+    object("sys_crm", "system", "CRM", "seg_1", { capabilityClaim: "explicit", "capability:customer notifications": "Customer Notifications", "capability:consent management": "Consent Management" }),
+    object("sys_eng", "system", "Engagement Hub", "seg_2", { capabilityClaim: "explicit", "capability:customer notifications": "Customer Notifications" }),
+    object("sys_identity", "system", "Identity Hub", "seg_3", { capabilityClaim: "explicit", "capability:consent management": "Consent Management" }),
+    object("owner_a", "owner", "Platform", "seg_4")
+  ];
+  const result = runDeterministicDiagnostics({ assessmentId: "a1", extraction: envelope(objects), review: approvedReview(objects) });
+  const findings = result.findings.filter((item) => item.ruleId === "duplicate-platform-capability");
+  assert.equal(findings.length, 2);
+  assert.ok(findings.every((item) => item.category === "platform_capability" && item.evidence.length === 2));
+  assert.ok(findings.some((item) => /Customer Notifications/.test(item.title)));
+  assert.ok(findings.some((item) => /Consent Management/.test(item.title)));
+});
+
+test("generic capability objects or non-explicit hints do not produce duplicate-capability findings", () => {
+  const objects = [
+    object("cap_a", "capability", "Customer Notifications", "seg_1"),
+    object("sys_crm", "system", "CRM", "seg_2", { "capability:customer notifications": "Customer Notifications" }),
+    object("sys_eng", "system", "Engagement Hub", "seg_3", { "capability:customer notifications": "Customer Notifications" }),
+    object("owner_a", "owner", "Platform", "seg_4")
+  ];
+  const result = runDeterministicDiagnostics({ assessmentId: "a1", extraction: envelope(objects), review: approvedReview(objects) });
+  assert.equal(result.findings.some((item) => item.ruleId === "duplicate-platform-capability"), false);
+});
+
 test("ownership gap rule is cautious and evidence backed when no owner is confirmed", () => {
   const objects = [object("sys_a", "system", "Orders", "seg_1"), object("entity_a", "entity", "Customer", "seg_2")];
   const result = runDeterministicDiagnostics({ assessmentId: "a1", extraction: envelope(objects), review: approvedReview(objects) });
