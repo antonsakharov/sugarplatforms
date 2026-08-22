@@ -46,7 +46,8 @@ export type RecommendationSet = {
 const SEVERITY_POINTS: Record<DiagnosticSeverity, number> = { low: 1, medium: 2, high: 3 };
 const CATEGORY_LABELS: Record<DiagnosticFinding["category"], string> = {
   entity_identity: "Entity and identifier governance",
-  ownership: "Ownership and governance"
+  ownership: "Ownership and governance",
+  platform_capability: "Platform capability duplication"
 };
 
 function round1(value: number) { return Math.round(value * 10) / 10; }
