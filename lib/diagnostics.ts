@@ -10,7 +10,7 @@ export type DiagnosticFinding = {
   id: string;
   ruleId: string;
   ruleVersion: string;
-  category: "entity_identity" | "ownership";
+  category: "entity_identity" | "ownership" | "platform_capability";
   severity: DiagnosticSeverity;
   confidence: number;
   factStatus: DiagnosticFactStatus;
@@ -197,6 +197,47 @@ export class DuplicateMatchingLogicRule implements DiagnosticRule {
   }
 }
 
+export class DuplicatePlatformCapabilityRule implements DiagnosticRule {
+  readonly id = "duplicate-platform-capability";
+  readonly version = "1.0.0";
+
+  evaluate(objects: DiagnosticObject[]): DiagnosticFinding[] {
+    const claimsByCapability = new Map<string, { capability: string; systems: Map<string, DiagnosticObject> }>();
+    for (const system of objects.filter((item) => item.kind === "system" && item.attributes.capabilityClaim === "explicit")) {
+      for (const [attributeKey, capability] of Object.entries(system.attributes)) {
+        if (!attributeKey.startsWith("capability:") || !capability.trim()) continue;
+        const key = normalized(capability);
+        const group = claimsByCapability.get(key) ?? { capability: capability.trim(), systems: new Map<string, DiagnosticObject>() };
+        group.systems.set(normalized(system.reviewedName), system);
+        claimsByCapability.set(key, group);
+      }
+    }
+
+    return [...claimsByCapability.values()].flatMap((group) => {
+      const candidates = [...group.systems.values()];
+      if (candidates.length < 2) return [];
+      return [{
+        id: stableFindingId(this.id, candidates.map((item) => item.id)),
+        ruleId: this.id,
+        ruleVersion: this.version,
+        category: "platform_capability" as const,
+        severity: "medium" as const,
+        confidence: 0.9,
+        factStatus: "derived" as const,
+        title: `${group.capability} capability is implemented in multiple systems`,
+        description: `The approved architecture evidence explicitly states that ${candidates.map((item) => item.reviewedName).join(", ")} provide or implement the ${group.capability} capability. This is a directly supported duplication signal, not a similarity inference, and should be reviewed for intentional specialization versus redundant platform logic.`,
+        businessImpact: "Duplicated platform capabilities can split investment, create inconsistent user outcomes, and increase the cost of policy or process changes across products.",
+        technicalImpact: "Parallel implementations increase maintenance, testing, integration, and migration surface area and can drift in behavior or contracts over time.",
+        affectedObjectIds: candidates.map((item) => item.id),
+        evidence: uniqueEvidence(candidates),
+        recommendation: `Compare the ${group.capability} implementations, document intentional differences, and consolidate or establish one governed shared capability where duplication is not required.`,
+        validationQuestions: [`Are the ${group.capability} implementations intentionally scoped to different use cases?`, "Do they expose compatible contracts and policies?", "Could one governed platform capability serve both systems without creating unacceptable coupling?"],
+        reviewStatus: "pending" as const
+      }];
+    });
+  }
+}
+
 export class OwnershipGapRule implements DiagnosticRule {
   readonly id = "ownership-gap";
   readonly version = "1.0.0";
@@ -227,7 +268,7 @@ export class OwnershipGapRule implements DiagnosticRule {
   }
 }
 
-export const DETERMINISTIC_RULES: readonly DiagnosticRule[] = [new FragmentedIdentifierRule(), new CompetingAuthorityRule(), new DuplicateMatchingLogicRule(), new OwnershipGapRule()];
+export const DETERMINISTIC_RULES: readonly DiagnosticRule[] = [new FragmentedIdentifierRule(), new CompetingAuthorityRule(), new DuplicateMatchingLogicRule(), new DuplicatePlatformCapabilityRule(), new OwnershipGapRule()];
 
 export function runDeterministicDiagnostics(context: DiagnosticContext, generatedAt = new Date().toISOString()): DiagnosticEnvelope {
   const objects = approvedDiagnosticObjects(context.extraction, context.review);
