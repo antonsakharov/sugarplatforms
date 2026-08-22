@@ -51,6 +51,19 @@ test("explicit matching statements enrich system objects with entity and method"
   assert.ok(billing?.evidence.length);
 });
 
+test("explicit capability responsibility enriches systems and preserves multiple capability claims", async () => {
+  const provider = new DeterministicExtractionProvider();
+  const output = validateExtractionEnvelope(await provider.extract({ assessmentId: "asm_demo", parsedArtifacts: [artifact("CRM provides capability Customer Notifications.\nCRM implements capability Consent Management.\nCapability Customer Notifications is provided by Engagement Hub.")] }));
+  const crm = output.objects.find((item) => item.kind === "system" && item.name === "CRM");
+  const engagement = output.objects.find((item) => item.kind === "system" && item.name === "Engagement Hub");
+  assert.equal(crm?.attributes.capabilityClaim, "explicit");
+  assert.equal(crm?.attributes["capability:customer notifications"], "Customer Notifications");
+  assert.equal(crm?.attributes["capability:consent management"], "Consent Management");
+  assert.equal(engagement?.attributes["capability:customer notifications"], "Customer Notifications");
+  assert.ok(output.objects.some((item) => item.kind === "capability" && item.name === "Customer Notifications"));
+  assert.ok(output.objects.some((item) => item.kind === "capability" && item.name === "Consent Management"));
+});
+
 test("duplicate direct claims reconcile by normalized kind/name while retaining evidence", async () => {
   const provider = new DeterministicExtractionProvider();
   const first = artifact("System: Customer API");
