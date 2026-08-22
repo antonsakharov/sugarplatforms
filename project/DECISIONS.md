@@ -99,3 +99,7 @@ A competing-authority finding may be generated only when two or more confirmed s
 ## ADR-025 — Duplicate matching logic requires explicit matching responsibility
 **Status:** Accepted
 A duplicate-matching-logic finding may be generated only when two or more confirmed system objects contain directly extracted matching or entity-resolution responsibility for the same normalized entity. The local extractor may preserve explicit statements such as `<system> matches <entity> using <method>` or `matching logic for <entity> in <system>: <method>` as `matchingFor`, `matchingClaim=explicit`, and optional `matchingMethod` attributes. The diagnostic engine must not infer matching responsibility from system names, identifier presence, API paths, integration topology, or generic capability labels.
+
+## ADR-026 — Duplicate capability requires explicit system responsibility
+**Status:** Accepted
+A duplicate-platform-capability finding may be generated only when two or more confirmed system objects contain directly extracted responsibility for the same normalized capability. The local extractor may preserve explicit statements such as `<system> provides capability <capability>` or `capability <capability> is provided by <system>` as `capabilityClaim=explicit` plus a `capability:<normalized name>` attribute on the system while retaining source evidence. Generic capability objects, name similarity, APIs, and topology are insufficient to infer duplication.
