@@ -22,7 +22,7 @@ Status: in progress — text/Markdown, JSON/YAML/OpenAPI, CSV, SQL DDL, and boun
 
 User can review extracted systems, entities, identifiers, integrations, capabilities, and owners; rename/reject/merge/confirm objects; inspect evidence; and approve extraction for analysis.
 
-Status: implemented for the local/demo workflow — evidence-linked candidate inventory, explicit rename/reject/merge/confirm actions, same-kind merge guardrails, evidence drill-down, and approval gating are available. Explicit `system of record`, `source of truth`, and `authoritative system` statements are retained as evidence-backed `authorityFor` attributes on system objects. Explicit matching/entity-resolution statements are retained as `matchingFor`, `matchingClaim`, and optional `matchingMethod` attributes for downstream diagnostics. Approval is blocked until every candidate is resolved. OpenAI activation and durable tenant-scoped persistence remain open.
+Status: implemented for the local/demo workflow — evidence-linked candidate inventory, explicit rename/reject/merge/confirm actions, same-kind merge guardrails, evidence drill-down, and approval gating are available. Explicit `system of record`, `source of truth`, and `authoritative system` statements are retained as evidence-backed `authorityFor` attributes on system objects. Explicit matching/entity-resolution statements are retained as `matchingFor`, `matchingClaim`, and optional `matchingMethod` attributes. Explicit statements that a named system provides, implements, offers, or hosts a named platform capability are retained as direct system capability claims for downstream diagnostics. Approval is blocked until every candidate is resolved. OpenAI activation and durable tenant-scoped persistence remain open.
 
 ## MVP priority 5 — Entity and ID map
 
@@ -34,7 +34,7 @@ Status: implemented for the current local/demo workflow — the graph projection
 
 User can run analysis; inspect impact and evidence; and accept, edit, or reject findings.
 
-Status: implemented for the current local/demo rule set — deterministic diagnostics run only after extraction approval. Fragmented-identifier, competing-authority, duplicate-matching-logic, and ownership-gap rules emit evidence-backed derived findings. Duplicate matching fires only when two or more confirmed systems have direct explicit matching/entity-resolution responsibility for the same normalized entity; it does not infer matching from names, identifiers, APIs, or topology. Evidence coverage is revalidated against the exact approved extraction boundary before review. Additional deterministic rules, AI-assisted candidate findings, filtering, and durable tenant-scoped finding persistence remain open.
+Status: implemented for the current local/demo rule set — deterministic diagnostics run only after extraction approval. Fragmented-identifier, competing-authority, duplicate-matching-logic, duplicate-platform-capability, and ownership-gap rules emit evidence-backed derived findings. Duplicate capability fires only when two or more confirmed systems have direct explicit responsibility for the same normalized capability; generic capability names, system-name similarity, APIs, or topology do not trigger it. Evidence coverage is revalidated against the exact approved extraction boundary before review. Additional deterministic rules, AI-assisted candidate findings, filtering, and durable tenant-scoped finding persistence remain open.
 
 ## MVP priority 7 — Maturity and recommendations
 
