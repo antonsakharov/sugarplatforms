@@ -1,28 +1,28 @@
 # Validation status
 
-## 2026-08-21 duplicate matching logic increment
+## 2026-08-22 duplicate platform capability increment
 
 Expected validation for the published branch:
 
 - all prior behavioral and contract tests remain green;
-- explicit matching/entity-resolution statements enrich system objects with direct-evidence `matchingFor`, `matchingClaim`, and optional `matchingMethod` attributes;
-- matching extraction preserves source evidence and does not introduce an unsupported object kind;
-- the duplicate-matching-logic rule emits only when two or more confirmed systems explicitly perform matching/entity-resolution for the same normalized entity;
-- a single matching implementation does not emit the finding;
-- matching hints without `matchingClaim=explicit` do not emit the finding;
+- explicit system-to-capability statements enrich named system objects with direct-evidence `capabilityClaim=explicit` and `capability:<normalized capability>` attributes;
+- multiple explicit capability claims on the same system remain independently addressable as attributes;
+- the duplicate-platform-capability rule emits only when two or more confirmed systems explicitly provide, implement, offer, or host the same normalized capability;
+- generic capability objects and non-explicit capability hints do not emit the finding;
 - rejected extraction objects remain excluded from diagnostics;
-- every emitted matching finding has direct evidence, rule/version provenance, affected systems, impact, recommendation, and validation questions;
-- the rule does not infer matching responsibility from system names, identifiers, APIs, integration topology, or generic capability labels;
+- every emitted duplicate-capability finding has direct evidence, rule/version provenance, affected systems, impact, recommendation, and validation questions;
+- the rule does not infer capability duplication from names, APIs, topology, or generic similarity;
+- the diagnostic schema accepts the `platform_capability` category;
 - all schemas continue to parse successfully;
 - TypeScript, source-policy lint, full tests, and optimized Next.js production build must pass in GitHub Actions.
 
 ## Prior validation
 
-The 2026-08-20 competing-authority increment passed GitHub Actions with direct-claim authority extraction and diagnostic evidence boundaries intact.
+The 2026-08-21 duplicate-matching increment passed GitHub Actions with explicit matching/entity-resolution extraction and diagnostic evidence boundaries intact. The 2026-08-20 competing-authority increment passed GitHub Actions with direct-claim authority extraction and diagnostic evidence boundaries intact.
 
 ## Local/demo boundary
 
-Matching extraction is deterministic and intentionally narrow. It recognizes explicit architecture-language statements and does not attempt semantic inference across arbitrary prose. Diagnostic and review state remains browser-local demo state, not durable tenant-scoped persistence.
+Capability extraction is deterministic and intentionally narrow. It recognizes explicit architecture-language responsibility statements and does not attempt semantic inference across arbitrary prose. Diagnostic and review state remains browser-local demo state, not durable tenant-scoped persistence.
 
 ## Remaining production validation
 
