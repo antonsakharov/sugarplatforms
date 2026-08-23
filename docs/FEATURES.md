@@ -34,7 +34,7 @@ Status: implemented for the current local/demo workflow — the graph projection
 
 User can run analysis; inspect impact and evidence; and accept, edit, or reject findings.
 
-Status: implemented for the current local/demo rule set — deterministic diagnostics run only after extraction approval. Fragmented-identifier, competing-authority, duplicate-matching-logic, duplicate-platform-capability, and ownership-gap rules emit evidence-backed derived findings. Duplicate capability fires only when two or more confirmed systems have direct explicit responsibility for the same normalized capability; generic capability names, system-name similarity, APIs, or topology do not trigger it. Evidence coverage is revalidated against the exact approved extraction boundary before review. Additional deterministic rules, AI-assisted candidate findings, filtering, and durable tenant-scoped finding persistence remain open.
+Status: implemented for the current local/demo rule set — deterministic diagnostics run only after extraction approval. Fragmented-identifier, competing-authority, duplicate-matching-logic, duplicate-platform-capability, ownership-gap, and direct-database-coupling rules emit evidence-backed derived findings. Direct database coupling fires only when an approved explicit integration edge targets something named as a database/DB or recognized database engine; SQL DDL by itself, service-to-service edges, and naming similarity do not trigger it. Evidence coverage is revalidated against the exact approved extraction boundary before review. Additional deterministic rules, AI-assisted candidate findings, filtering, and durable tenant-scoped finding persistence remain open.
 
 ## MVP priority 7 — Maturity and recommendations
 
