@@ -1,28 +1,26 @@
 # Validation status
 
-## 2026-08-22 duplicate platform capability increment
+## 2026-08-23 direct database coupling increment
 
-Expected validation for the published branch:
+Validation expectations and results for the published branch:
 
-- all prior behavioral and contract tests remain green;
-- explicit system-to-capability statements enrich named system objects with direct-evidence `capabilityClaim=explicit` and `capability:<normalized capability>` attributes;
-- multiple explicit capability claims on the same system remain independently addressable as attributes;
-- the duplicate-platform-capability rule emits only when two or more confirmed systems explicitly provide, implement, offer, or host the same normalized capability;
-- generic capability objects and non-explicit capability hints do not emit the finding;
-- rejected extraction objects remain excluded from diagnostics;
-- every emitted duplicate-capability finding has direct evidence, rule/version provenance, affected systems, impact, recommendation, and validation questions;
-- the rule does not infer capability duplication from names, APIs, topology, or generic similarity;
-- the diagnostic schema accepts the `platform_capability` category;
-- all schemas continue to parse successfully;
-- TypeScript, source-policy lint, full tests, and optimized Next.js production build must pass in GitHub Actions.
+- direct database coupling is evaluated only after extraction approval;
+- the rule consumes explicit integration objects and requires a database-like target name (`DB`, `database`, PostgreSQL, MySQL, Oracle, or SQL Server);
+- ordinary service-to-service integration edges do not emit the finding;
+- SQL DDL/entity extraction alone does not imply direct database coupling;
+- emitted findings use the `integration_risk` category and retain direct source evidence, rule/version provenance, impact, recommendation, and validation questions;
+- maturity/recommendation projection supports the new integration-risk category without changing accepted-findings-only gating;
+- the diagnostic JSON schema includes `integration_risk`;
+- GitHub Actions validation run 32648190793 passed on Node 22.23.2 with TypeScript, source-policy lint, 70/70 tests, and the optimized Next.js 15.4.10 production build green;
+- the repository snapshot packaged successfully in CI.
 
 ## Prior validation
 
-The 2026-08-21 duplicate-matching increment passed GitHub Actions with explicit matching/entity-resolution extraction and diagnostic evidence boundaries intact. The 2026-08-20 competing-authority increment passed GitHub Actions with direct-claim authority extraction and diagnostic evidence boundaries intact.
+The 2026-08-22 duplicate-platform-capability increment passed GitHub Actions with explicit system responsibility and direct-evidence capability boundaries intact. The 2026-08-21 duplicate-matching increment passed GitHub Actions with explicit matching/entity-resolution extraction and diagnostic evidence boundaries intact. The 2026-08-20 competing-authority increment passed GitHub Actions with direct-claim authority extraction and diagnostic evidence boundaries intact.
 
 ## Local/demo boundary
 
-Capability extraction is deterministic and intentionally narrow. It recognizes explicit architecture-language responsibility statements and does not attempt semantic inference across arbitrary prose. Diagnostic and review state remains browser-local demo state, not durable tenant-scoped persistence.
+Direct database coupling recognition is deterministic and intentionally conservative. The current rule treats an explicit integration edge to something named as a database/DB or recognized database engine as a reviewable coupling signal, but it does not claim that database credentials or drivers are definitely used until a reviewer validates that fact. Diagnostic and review state remains browser-local demo state, not durable tenant-scoped persistence.
 
 ## Remaining production validation
 
