@@ -47,7 +47,8 @@ const SEVERITY_POINTS: Record<DiagnosticSeverity, number> = { low: 1, medium: 2,
 const CATEGORY_LABELS: Record<DiagnosticFinding["category"], string> = {
   entity_identity: "Entity and identifier governance",
   ownership: "Ownership and governance",
-  platform_capability: "Platform capability duplication"
+  platform_capability: "Platform capability duplication",
+  integration_risk: "Integration and coupling risk"
 };
 
 function round1(value: number) { return Math.round(value * 10) / 10; }
@@ -73,11 +74,6 @@ function reviewedAcceptedFindings(diagnostics: DiagnosticEnvelope, review: Findi
   });
 }
 
-/**
- * Produces a deliberately narrow risk-adjusted signal from reviewed findings.
- * Formula: 5 - (average accepted severity points * 0.8) - additional finding concentration penalty,
- * bounded to 1..5. It is not an enterprise maturity certification.
- */
 export function calculateFocusedMaturity(diagnostics: DiagnosticEnvelope, review: FindingReview): FocusedMaturitySummary {
   const accepted = reviewedAcceptedFindings(diagnostics, review);
   const limitations = [
