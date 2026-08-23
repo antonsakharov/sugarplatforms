@@ -103,3 +103,7 @@ A duplicate-matching-logic finding may be generated only when two or more confir
 ## ADR-026 — Duplicate capability requires explicit system responsibility
 **Status:** Accepted
 A duplicate-platform-capability finding may be generated only when two or more confirmed system objects contain directly extracted responsibility for the same normalized capability. The local extractor may preserve explicit statements such as `<system> provides capability <capability>` or `capability <capability> is provided by <system>` as `capabilityClaim=explicit` plus a `capability:<normalized name>` attribute on the system while retaining source evidence. Generic capability objects, name similarity, APIs, and topology are insufficient to infer duplication.
+
+## ADR-027 — Direct database coupling requires an explicit database-target integration edge
+**Status:** Accepted
+A direct-database-coupling finding may be generated only from a confirmed integration object with direct source evidence whose target is explicitly named as a database/DB or recognized database engine. The current local/demo rule treats an explicit architecture edge such as `Order Service -> Customer DB` as a reviewable coupling signal. SQL DDL presence, entity/table extraction, service-to-service edges, naming similarity, or inferred physical connectivity are insufficient. The finding remains derived and asks the reviewer to validate whether database credentials/drivers are actually used before remediation is accepted.
