@@ -18,7 +18,7 @@ Statuses: `[ ] planned`, `[-] in progress`, `[x] complete`, `[!] blocked`.
 - [x] DIA-005 Duplicate capability rule
 - [-] DIA-006 Ownership-gap rule
 - [x] DIA-007 Direct database coupling rule
-- [ ] DIA-008 Long synchronous chain rule
+- [x] DIA-008 Long synchronous chain rule
 - [ ] DIA-009 AI-assisted candidate findings
 - [-] DIA-010 Evidence coverage validation
 - [-] DIA-011 Finding review workflow
