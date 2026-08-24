@@ -14,7 +14,7 @@ npm run dev
 npm run validate
 ```
 
-`npm run validate` runs TypeScript checks, source-policy lint, Node tests, and a production Next.js build. The Node tests include behavioral tests for assessment limits, upload safety, deterministic parsing, evidence provenance, extraction contracts, deterministic diagnostics, evidence-boundary validation, finding review, entity/ID graph projection, reviewed maturity/recommendation projection, accepted-findings-only reporting, and report snapshot/version export behavior.
+`npm run validate` runs TypeScript checks, source-policy lint, Node tests, and a production Next.js build. The Node tests include behavioral tests for assessment limits, upload safety, deterministic parsing, evidence provenance, extraction contracts, deterministic diagnostics, explicit synchronous-integration extraction and long-chain detection, evidence-boundary validation, finding review, entity/ID graph projection, reviewed maturity/recommendation projection, accepted-findings-only reporting, and report snapshot/version export behavior.
 
 ## Current routes
 
@@ -36,6 +36,8 @@ npm run validate
 
 The demo adapter does not persist file bytes. After metadata checks pass, the server reads each file transiently to compute SHA-256, estimate pages, perform best-effort probable-secret/prohibited-data scanning, and generate source-addressable parse segments. A deterministic local extraction provider then emits only architecture candidates directly supported by those segments; each candidate carries direct evidence references.
 
+The local extractor preserves explicitly documented synchronous integration mode on integration objects when source text uses supported direct forms such as `Gateway synchronously calls Profile API`, `Profile API calls Identity Service synchronously`, `Identity Service makes a synchronous call to Consent Service`, or an explicitly annotated `[sync]` edge. These objects receive `interactionMode=synchronous` and `syncClaim=explicit`. Ordinary integration arrows and asynchronous wording are not promoted to synchronous behavior.
+
 The repository also contains an OpenAI Responses extraction adapter behind the same provider interface, but the demo upload route does not activate it or send uploaded artifact content to an external provider. External model activation requires a server-only API key and production privacy/tenancy controls.
 
 Do not use the current demo path for confidential customer material. Authentication, tenant authorization, private object storage, malware scanning, durable persistence, deletion, audit controls, and tenant-isolation verification remain production prerequisites.
@@ -46,7 +48,9 @@ After validating/parsing/extracting artifacts, resolve every extraction candidat
 
 Reviewers can edit presentation fields and severity, add a reviewer note, and explicitly accept or reject each finding. Rule identity, confidence, affected objects, and source evidence are immutable. Editing returns the finding to `pending`; review cannot complete until every finding is accepted or rejected. Only accepted findings from a completed, non-stale review are eligible for downstream maturity, visualization, recommendations, and reports.
 
-The deterministic engine currently includes fragmented identifiers, competing authority, duplicate matching logic, duplicate platform capabilities, and ownership gaps. Duplicate matching is deliberately narrow: the local extractor recognizes explicit statements such as `CRM matches Customer using email and phone` or `Matching logic for Customer in Billing Hub: email plus postal code`. Duplicate capability detection is equally conservative: explicit statements such as `CRM provides capability Customer Notifications` or `Capability Customer Notifications is provided by Engagement Hub` attach direct capability responsibility to the named system. Two confirmed systems must explicitly claim the same normalized capability before a duplicate-capability finding is emitted. Generic capability objects, names, APIs, and topology do not trigger duplication. No additional environment variable or external service is required for these local/demo rules.
+The deterministic engine currently includes fragmented identifiers, competing authority, duplicate matching logic, duplicate platform capabilities, ownership gaps, direct database coupling, and long synchronous integration chains. Long synchronous chain detection requires at least three consecutive confirmed integration objects where every edge carries a direct explicit synchronous claim. A non-synchronous, asynchronous, missing, rejected, or merely inferred edge breaks the chain. The rule does not infer runtime behavior from ordinary topology and asks reviewers to validate the real production critical path before accepting remediation.
+
+No additional environment variable or external service is required for these local/demo deterministic rules.
 
 ## Entity/ID map
 
