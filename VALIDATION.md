@@ -1,5 +1,21 @@
 # Validation status
 
+## 2026-08-24 long synchronous chain increment
+
+Validation expectations for this branch:
+
+- synchronous mode is retained only from directly supported language such as `A synchronously calls B`, `A calls B synchronously`, `A makes a synchronous call to B`, or an explicitly annotated `[sync]` edge;
+- ordinary integration arrows and asynchronous wording are not labeled synchronous;
+- DIA-008 runs only after extraction approval and consumes confirmed integration objects;
+- a long-synchronous-chain finding requires at least three consecutive explicit synchronous hops;
+- a non-synchronous, missing, rejected, or inferred middle edge breaks the chain;
+- findings use the existing `integration_risk` category and retain direct evidence, rule/version provenance, affected integration IDs, impact, recommendation, and runtime-validation questions;
+- no schema shape change is required because integration attributes are already string-valued and the diagnostic schema already supports `integration_risk` plus versioned rule identifiers;
+- focused behavioral coverage is provided in `tests/synchronous-chain.test.mjs` in addition to the complete existing test suite;
+- GitHub Actions is the authoritative dependency-backed validation path for TypeScript, source-policy lint, tests, optimized Next.js production build, and repository packaging.
+
+Final GitHub Actions run details are recorded after the branch head passes the complete workflow.
+
 ## 2026-08-23 direct database coupling increment
 
 Validation expectations and results for the published branch:
@@ -20,7 +36,7 @@ The 2026-08-22 duplicate-platform-capability increment passed GitHub Actions wit
 
 ## Local/demo boundary
 
-Direct database coupling recognition is deterministic and intentionally conservative. The current rule treats an explicit integration edge to something named as a database/DB or recognized database engine as a reviewable coupling signal, but it does not claim that database credentials or drivers are definitely used until a reviewer validates that fact. Diagnostic and review state remains browser-local demo state, not durable tenant-scoped persistence.
+Long synchronous chain recognition is deterministic and intentionally conservative. It does not claim ordinary service topology is synchronous, and a generated finding remains a reviewable latency/availability-coupling signal until a human confirms the real runtime critical path, latency budgets, retry policies, and transactional requirements. Diagnostic and review state remains browser-local demo state, not durable tenant-scoped persistence.
 
 ## Remaining production validation
 
