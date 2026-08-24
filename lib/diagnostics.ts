@@ -223,13 +223,77 @@ export class DirectDatabaseCouplingRule implements DiagnosticRule {
   }
 }
 
+function explicitSynchronousIntegrations(objects: DiagnosticObject[]) {
+  const byPair = new Map<string, DiagnosticObject>();
+  for (const item of objects.filter((candidate) => candidate.kind === "integration" && candidate.attributes.source && candidate.attributes.target && candidate.attributes.interactionMode === "synchronous" && candidate.attributes.syncClaim === "explicit")) {
+    const key = `${normalized(item.attributes.source)}->${normalized(item.attributes.target)}`;
+    if (!byPair.has(key)) byPair.set(key, item);
+  }
+  return [...byPair.values()];
+}
+
+function maximalSynchronousPaths(edges: DiagnosticObject[], minimumHops = 3) {
+  const bySource = new Map<string, DiagnosticObject[]>();
+  const targetNodes = new Set<string>();
+  for (const edge of edges) {
+    const source = normalized(edge.attributes.source);
+    const target = normalized(edge.attributes.target);
+    targetNodes.add(target);
+    const outgoing = bySource.get(source) ?? [];
+    outgoing.push(edge);
+    bySource.set(source, outgoing);
+  }
+  const starts = edges.filter((edge) => !targetNodes.has(normalized(edge.attributes.source)));
+  const paths: DiagnosticObject[][] = [];
+  function walk(path: DiagnosticObject[], visitedNodes: Set<string>) {
+    const tail = path[path.length - 1];
+    const nextEdges = (bySource.get(normalized(tail.attributes.target)) ?? []).filter((edge) => !visitedNodes.has(normalized(edge.attributes.target)));
+    if (nextEdges.length === 0) {
+      if (path.length >= minimumHops) paths.push(path);
+      return;
+    }
+    for (const next of nextEdges) {
+      const nextVisited = new Set(visitedNodes);
+      nextVisited.add(normalized(next.attributes.target));
+      walk([...path, next], nextVisited);
+    }
+  }
+  for (const start of starts) {
+    walk([start], new Set([normalized(start.attributes.source), normalized(start.attributes.target)]));
+  }
+  return paths;
+}
+
+export class LongSynchronousChainRule implements DiagnosticRule {
+  readonly id = "long-synchronous-chain";
+  readonly version = "1.0.0";
+  evaluate(objects: DiagnosticObject[]): DiagnosticFinding[] {
+    const edges = explicitSynchronousIntegrations(objects);
+    return maximalSynchronousPaths(edges, 3).map((chain) => {
+      const systems = [chain[0].attributes.source, ...chain.map((edge) => edge.attributes.target)];
+      return {
+        id: stableFindingId(this.id, chain.map((edge) => edge.id)), ruleId: this.id, ruleVersion: this.version,
+        category: "integration_risk" as const, severity: "high" as const, confidence: 0.93, factStatus: "derived" as const,
+        title: `${chain.length}-hop synchronous integration chain crosses ${systems.length} systems`,
+        description: `The approved architecture evidence explicitly documents this synchronous call chain: ${systems.join(" → ")}. Because all ${chain.length} consecutive edges are directly identified as synchronous, the chain is a reviewable latency and availability-coupling signal rather than an inference from topology alone.`,
+        businessImpact: "Long synchronous request paths can increase user-facing latency, widen outage blast radius, and make service-level objectives dependent on multiple independently operated systems.",
+        technicalImpact: "Each synchronous hop adds timeout, retry, capacity, and failure-mode coupling. A downstream slowdown or outage can propagate upstream through the complete request path.",
+        affectedObjectIds: chain.map((edge) => edge.id), evidence: uniqueEvidence(chain),
+        recommendation: "Validate the runtime critical path and service-level requirements for every hop. Where business semantics allow, shorten the synchronous path or introduce asynchronous/event-driven boundaries, cached reads, or explicit resilience controls.",
+        validationQuestions: ["Is every documented hop synchronous in production or only in a specific flow?", "What are the end-to-end latency budget and per-hop timeout/retry policies?", "Which hops can be decoupled without violating transactional or user-experience requirements?"], reviewStatus: "pending" as const
+      };
+    });
+  }
+}
+
 export const DETERMINISTIC_RULES: readonly DiagnosticRule[] = [
   new FragmentedIdentifierRule(),
   new CompetingAuthorityRule(),
   new DuplicateMatchingLogicRule(),
   new DuplicatePlatformCapabilityRule(),
   new OwnershipGapRule(),
-  new DirectDatabaseCouplingRule()
+  new DirectDatabaseCouplingRule(),
+  new LongSynchronousChainRule()
 ];
 
 export function runDeterministicDiagnostics(context: DiagnosticContext, generatedAt = new Date().toISOString()): DiagnosticEnvelope {
