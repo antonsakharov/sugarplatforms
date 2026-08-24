@@ -2,7 +2,7 @@
 
 ## 2026-08-24 long synchronous chain increment
 
-Validation expectations for this branch:
+Validation expectations and results for this branch:
 
 - synchronous mode is retained only from directly supported language such as `A synchronously calls B`, `A calls B synchronously`, `A makes a synchronous call to B`, or an explicitly annotated `[sync]` edge;
 - ordinary integration arrows and asynchronous wording are not labeled synchronous;
@@ -12,9 +12,8 @@ Validation expectations for this branch:
 - findings use the existing `integration_risk` category and retain direct evidence, rule/version provenance, affected integration IDs, impact, recommendation, and runtime-validation questions;
 - no schema shape change is required because integration attributes are already string-valued and the diagnostic schema already supports `integration_risk` plus versioned rule identifiers;
 - focused behavioral coverage is provided in `tests/synchronous-chain.test.mjs` in addition to the complete existing test suite;
-- GitHub Actions is the authoritative dependency-backed validation path for TypeScript, source-policy lint, tests, optimized Next.js production build, and repository packaging.
-
-Final GitHub Actions run details are recorded after the branch head passes the complete workflow.
+- GitHub Actions validation run 32747601170 passed on Node 22.23.2 with TypeScript, source-policy lint, 76/76 tests, and the optimized Next.js 15.4.10 production build green;
+- the repository snapshot packaged successfully in CI.
 
 ## 2026-08-23 direct database coupling increment
 
