@@ -14,7 +14,7 @@ npm run dev
 npm run validate
 ```
 
-`npm run validate` runs TypeScript checks, source-policy lint, Node tests, and a production Next.js build. The Node tests include behavioral tests for assessment limits, upload safety, deterministic parsing, evidence provenance, extraction contracts, deterministic diagnostics, explicit synchronous-integration extraction and long-chain detection, evidence-boundary validation, finding review, entity/ID graph projection, reviewed maturity/recommendation projection, accepted-findings-only reporting, and report snapshot/version export behavior.
+`npm run validate` runs TypeScript checks, source-policy lint, Node tests, and a production Next.js build. The Node tests include behavioral tests for assessment limits, upload safety, deterministic parsing, evidence provenance, extraction contracts, deterministic diagnostics, explicit synchronous-integration extraction and long-chain detection, AI-assisted candidate provider boundaries, evidence-boundary validation, finding review, entity/ID graph projection, reviewed maturity/recommendation projection, accepted-findings-only reporting, and report snapshot/version export behavior.
 
 ## Current routes
 
@@ -24,6 +24,7 @@ npm run validate
 - `/assessment/[id]/upload` — upload, readiness, parsing, evidence, and candidate extraction workflow
 - `/assessment/[id]/review` — extraction review and approval
 - `/assessment/[id]/diagnostics` — deterministic diagnostics, evidence validation, and finding review
+- `/assessment/[id]/ai-findings` — isolated AI-assisted candidate findings over approved structured evidence
 - `/assessment/[id]/map` — reviewed entity/ID projection and evidence drill-down
 - `/assessment/[id]/maturity` — focused maturity signal, scoring rationale, prioritized recommendations, and traceability
 - `/assessment/[id]/report` — accepted-findings-only executive preview, deterministic 90-day action plan, browser-local version history, and JSON snapshot export
@@ -51,6 +52,14 @@ Reviewers can edit presentation fields and severity, add a reviewer note, and ex
 The deterministic engine currently includes fragmented identifiers, competing authority, duplicate matching logic, duplicate platform capabilities, ownership gaps, direct database coupling, and long synchronous integration chains. Long synchronous chain detection requires at least three consecutive confirmed integration objects where every edge carries a direct explicit synchronous claim. A non-synchronous, asynchronous, missing, rejected, or merely inferred edge breaks the chain. The rule does not infer runtime behavior from ordinary topology and asks reviewers to validate the real production critical path before accepting remediation.
 
 No additional environment variable or external service is required for these local/demo deterministic rules.
+
+## AI-assisted candidate findings
+
+After deterministic diagnostics exist, open `/assessment/<id>/ai-findings`. The current working path uses `LocalDemoAiFindingProvider`, which evaluates only confirmed structured architecture objects and produces bounded-confidence `derived` candidates with direct evidence references. This adapter intentionally does not call a model; it exercises the production provider contract and candidate-review UI when credentials and production privacy controls are unavailable.
+
+`OpenAIResponsesFindingProvider` implements the external-model boundary with strict JSON-schema output, `store: false`, prompt-version metadata, a maximum of 20 candidates, and instructions that treat every object name/attribute as untrusted data. Provider output is rejected if it references an object or evidence segment outside the approved extraction boundary, lacks provenance, exceeds confidence 0.8, or attempts to leave the candidate lifecycle state.
+
+The browser/demo path never embeds an OpenAI key and does not activate the external provider. AI candidates are deliberately stored separately under `sugar:ai-candidates:<assessmentId>` and cannot affect finding review, maturity, recommendations, maps, or reports automatically. Explicit candidate promotion is a separate backlog item so AI suggestions cannot silently become conclusions.
 
 ## Entity/ID map
 
