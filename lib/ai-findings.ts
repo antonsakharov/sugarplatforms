@@ -1,6 +1,6 @@
 import type { EvidenceReference } from "@/lib/extraction";
 import type { DiagnosticContext, DiagnosticFinding, DiagnosticObject } from "@/lib/diagnostics";
-import { approvedDiagnosticObjects } from "@/lib/diagnostics";
+import { approvedDiagnosticObjects } from "./diagnostics.ts";
 
 export type AiFindingCandidate = DiagnosticFinding & {
   origin: "ai-assisted";
