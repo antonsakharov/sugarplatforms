@@ -2,7 +2,7 @@
 
 ## 2026-08-25 AI-assisted candidate finding increment
 
-Validation expectations for this branch:
+Validation expectations and results for this branch:
 
 - AI-assisted interpretation runs only after extraction approval and after deterministic diagnostics exist;
 - the working demo uses a local deterministic provider and requires no external credentials;
@@ -15,7 +15,8 @@ Validation expectations for this branch:
 - AI candidates remain isolated from normal accepted findings and therefore cannot affect maturity, recommendations, maps, or reports automatically;
 - focused behavioral coverage is provided in `tests/ai-findings.test.mjs` in addition to the complete existing test suite;
 - `schemas/ai-finding-candidate.schema.json` validates the candidate envelope and lifecycle/provenance fields;
-- final GitHub Actions results are recorded after the branch validation run completes.
+- GitHub Actions run 32865166583 passed on Node 22.23.2 with TypeScript, source-policy lint, 82/82 tests, and the optimized Next.js 15.4.10 production build green, including `/assessment/[id]/ai-findings`;
+- the validated repository snapshot packaged successfully in CI with artifact SHA-256 `7e3279d74f30712d8cf197e8e97928ebadc63838ed8dba4e65d9bf938c6df39b`.
 
 ## 2026-08-24 long synchronous chain increment
 
