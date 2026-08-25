@@ -1,5 +1,22 @@
 # Validation status
 
+## 2026-08-25 AI-assisted candidate finding increment
+
+Validation expectations for this branch:
+
+- AI-assisted interpretation runs only after extraction approval and after deterministic diagnostics exist;
+- the working demo uses a local deterministic provider and requires no external credentials;
+- the provider receives only confirmed structured architecture objects plus deterministic finding summaries;
+- candidates are limited to 20, remain `derived`, stay `pending`/`candidate`, and are capped at confidence 0.8;
+- every affected object ID and evidence segment must resolve inside the exact approved extraction boundary;
+- rejected extraction objects cannot contribute to AI candidates;
+- instruction-like strings in uploaded object attributes are treated as data and cannot trigger tools or override the candidate contract;
+- the OpenAI Responses provider boundary uses strict structured output and `store: false`, but is not activated in the browser/demo path;
+- AI candidates remain isolated from normal accepted findings and therefore cannot affect maturity, recommendations, maps, or reports automatically;
+- focused behavioral coverage is provided in `tests/ai-findings.test.mjs` in addition to the complete existing test suite;
+- `schemas/ai-finding-candidate.schema.json` validates the candidate envelope and lifecycle/provenance fields;
+- final GitHub Actions results are recorded after the branch validation run completes.
+
 ## 2026-08-24 long synchronous chain increment
 
 Validation expectations and results for this branch:
@@ -35,8 +52,8 @@ The 2026-08-22 duplicate-platform-capability increment passed GitHub Actions wit
 
 ## Local/demo boundary
 
-Long synchronous chain recognition is deterministic and intentionally conservative. It does not claim ordinary service topology is synchronous, and a generated finding remains a reviewable latency/availability-coupling signal until a human confirms the real runtime critical path, latency budgets, retry policies, and transactional requirements. Diagnostic and review state remains browser-local demo state, not durable tenant-scoped persistence.
+AI-assisted candidate generation is intentionally separated from accepted findings. The local provider exists to exercise the provider, evidence, schema, and UI boundaries without external credentials; it must not be described as a production model result. External model activation remains server-side production work. Diagnostic, candidate, and review state remains browser-local demo state, not durable tenant-scoped persistence.
 
 ## Remaining production validation
 
-Authentication, organization authorization, row-level security, private object storage, malware scanning, durable graph/findings/review/maturity/recommendation/report persistence, server-backed report authorization/version history, deletion, audit events, log redaction, backup/restore, tenant-isolation tests, styled print output, and formal PDF export remain mandatory before confidential enterprise artifacts can be accepted or reports can be treated as production records.
+Authentication, organization authorization, row-level security, private object storage, malware scanning, durable graph/findings/review/maturity/recommendation/report persistence, server-backed report authorization/version history, deletion, audit events, log redaction, backup/restore, tenant-isolation tests, styled print output, formal PDF export, and server-side external-model privacy/retention controls remain mandatory before confidential enterprise artifacts can be accepted or reports can be treated as production records.
