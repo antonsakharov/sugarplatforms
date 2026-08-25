@@ -19,10 +19,11 @@ Statuses: `[ ] planned`, `[-] in progress`, `[x] complete`, `[!] blocked`.
 - [-] DIA-006 Ownership-gap rule
 - [x] DIA-007 Direct database coupling rule
 - [x] DIA-008 Long synchronous chain rule
-- [ ] DIA-009 AI-assisted candidate findings
+- [x] DIA-009 AI-assisted candidate findings
 - [-] DIA-010 Evidence coverage validation
 - [-] DIA-011 Finding review workflow
 - [x] DIA-012 Focused maturity summary
+- [ ] DIA-013 Explicit promotion of approved AI candidates into normal finding review
 - [x] VIS-001 Entity/ID graph projection
 - [x] VIS-002 Entity/ID graph UI and evidence drill-down
 - [ ] VIS-003 Creator/consumer and authority relationships when directly extracted
