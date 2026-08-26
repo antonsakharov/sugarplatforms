@@ -1,5 +1,20 @@
 # Validation status
 
+## 2026-08-26 AI candidate promotion increment
+
+Validation expectations and local results for this branch:
+
+- explicit promotion is the only path from an AI-assisted candidate into the normal finding set;
+- every candidate envelope is bound to the exact deterministic diagnostic `generatedAt` version that produced it;
+- promotion revalidates the current approved extraction boundary, confirmed object IDs, direct evidence segment IDs, provider provenance, and prompt provenance;
+- extraction re-approval or deterministic diagnostic rerun makes older candidate sets stale and non-promotable;
+- promotion creates a pending derived normal finding and initializes a fresh normal finding review; the promoted finding cannot affect maturity, recommendations, maps, or reports until it is explicitly accepted in a completed non-stale review;
+- browser-local promotion records preserve candidate, diagnostic, extraction-approval, provider, prompt, and promotion timestamps; durable tenant-scoped audit persistence remains production work;
+- `schemas/ai-finding-candidate.schema.json` now requires `diagnosticGeneratedAt` and `schemas/ai-candidate-promotion.schema.json` validates promotion provenance;
+- focused promotion tests cover successful promotion/provenance, stale diagnostic rejection, stale extraction rejection, and downstream normal-review gating;
+- local Node 22.16.0 validation passed source-policy lint, all JSON schemas parsed, and the full behavioral suite passed 86/86 tests;
+- dependency-backed TypeScript and optimized Next.js build validation is delegated to GitHub Actions because the downloaded CI source snapshot intentionally excludes `node_modules`; the authoritative CI result is recorded in the run handoff.
+
 ## 2026-08-25 AI-assisted candidate finding increment
 
 Validation expectations and results for this branch:
@@ -53,7 +68,7 @@ The 2026-08-22 duplicate-platform-capability increment passed GitHub Actions wit
 
 ## Local/demo boundary
 
-AI-assisted candidate generation is intentionally separated from accepted findings. The local provider exists to exercise the provider, evidence, schema, and UI boundaries without external credentials; it must not be described as a production model result. External model activation remains server-side production work. Diagnostic, candidate, and review state remains browser-local demo state, not durable tenant-scoped persistence.
+AI-assisted candidate generation and promotion remain human-gated. The local provider exists to exercise provider, evidence, schema, candidate, promotion, and review boundaries without external credentials; it must not be described as a production model result. External model activation remains server-side production work. Diagnostic, candidate, promotion, and review state remains browser-local demo state, not durable tenant-scoped persistence.
 
 ## Remaining production validation
 
