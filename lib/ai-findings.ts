@@ -1,5 +1,5 @@
 import type { EvidenceReference } from "@/lib/extraction";
-import type { DiagnosticContext, DiagnosticFinding, DiagnosticObject } from "@/lib/diagnostics";
+import type { DiagnosticContext, DiagnosticEnvelope, DiagnosticFinding, DiagnosticObject } from "@/lib/diagnostics";
 import { approvedDiagnosticObjects } from "./diagnostics.ts";
 
 export type AiFindingCandidate = DiagnosticFinding & {
@@ -14,6 +14,7 @@ export type AiFindingEnvelope = {
   assessmentId: string;
   generatedAt: string;
   extractionApprovedAt: string;
+  diagnosticGeneratedAt: string;
   provider: string;
   promptVersion: string;
   candidates: AiFindingCandidate[];
@@ -110,6 +111,7 @@ export class LocalDemoAiFindingProvider implements AiFindingProvider {
       assessmentId: input.assessmentId,
       generatedAt: new Date().toISOString(),
       extractionApprovedAt: "",
+      diagnosticGeneratedAt: "",
       provider: this.id,
       promptVersion: this.promptVersion,
       candidates,
@@ -211,7 +213,7 @@ type RawCandidate = Omit<AiFindingCandidate, "evidence" | "origin" | "provider" 
 
 function materializeProviderOutput(raw: unknown, provider: AiFindingProvider, input: AiFindingInput): AiFindingEnvelope {
   if (!raw || typeof raw !== "object") throw new Error("AI candidate output must be an object.");
-  const value = raw as { candidates?: unknown; warnings?: unknown; schemaVersion?: unknown; assessmentId?: unknown; generatedAt?: unknown; extractionApprovedAt?: unknown; provider?: unknown; promptVersion?: unknown; stats?: unknown };
+  const value = raw as { candidates?: unknown; warnings?: unknown; schemaVersion?: unknown; assessmentId?: unknown; generatedAt?: unknown; extractionApprovedAt?: unknown; diagnosticGeneratedAt?: unknown; provider?: unknown; promptVersion?: unknown; stats?: unknown };
   if (value.schemaVersion === "1.0" && Array.isArray(value.candidates) && value.candidates.every((item) => item && typeof item === "object" && "evidence" in item)) {
     return value as AiFindingEnvelope;
   }
@@ -235,6 +237,7 @@ function materializeProviderOutput(raw: unknown, provider: AiFindingProvider, in
     assessmentId: input.assessmentId,
     generatedAt: new Date().toISOString(),
     extractionApprovedAt: "",
+    diagnosticGeneratedAt: "",
     provider: provider.id,
     promptVersion: provider.promptVersion,
     candidates,
@@ -246,6 +249,7 @@ function materializeProviderOutput(raw: unknown, provider: AiFindingProvider, in
 export function validateAiFindingEnvelope(envelope: AiFindingEnvelope, input: AiFindingInput) {
   if (envelope.schemaVersion !== "1.0") throw new Error("Unsupported AI candidate schema version.");
   if (envelope.assessmentId !== input.assessmentId) throw new Error("AI candidates belong to a different assessment.");
+  if (!envelope.diagnosticGeneratedAt) throw new Error("AI candidates must be bound to a deterministic diagnostic version.");
   if (envelope.candidates.length > MAX_AI_CANDIDATES) throw new Error("AI candidate limit exceeded.");
   const objectIds = new Set(input.objects.map((item) => item.id));
   const evidenceSegments = new Set(input.objects.flatMap((item) => item.evidence.map((evidence) => evidence.segmentId)));
@@ -261,13 +265,16 @@ export function validateAiFindingEnvelope(envelope: AiFindingEnvelope, input: Ai
   return true;
 }
 
-export async function generateAiFindingCandidates(context: DiagnosticContext, deterministicFindings: DiagnosticFinding[], provider: AiFindingProvider = new LocalDemoAiFindingProvider(), generatedAt = new Date().toISOString()) {
+export async function generateAiFindingCandidates(context: DiagnosticContext, diagnostics: DiagnosticEnvelope, provider: AiFindingProvider = new LocalDemoAiFindingProvider(), generatedAt = new Date().toISOString()) {
   const objects = approvedDiagnosticObjects(context.extraction, context.review);
-  const input: AiFindingInput = { assessmentId: context.assessmentId, objects, deterministicFindings };
+  if (diagnostics.assessmentId !== context.assessmentId) throw new Error("Deterministic diagnostics belong to a different assessment.");
+  if (!context.review.approvedAt || diagnostics.extractionApprovedAt !== context.review.approvedAt) throw new Error("Re-run deterministic diagnostics for the current approved extraction before generating AI candidates.");
+  const input: AiFindingInput = { assessmentId: context.assessmentId, objects, deterministicFindings: diagnostics.findings };
   const raw = await provider.generate(input);
   const envelope = materializeProviderOutput(raw, provider, input);
   envelope.generatedAt = generatedAt;
-  envelope.extractionApprovedAt = context.review.approvedAt!;
+  envelope.extractionApprovedAt = context.review.approvedAt;
+  envelope.diagnosticGeneratedAt = diagnostics.generatedAt;
   envelope.provider = provider.id;
   envelope.promptVersion = provider.promptVersion;
   envelope.stats = { candidateCount: envelope.candidates.length, evidenceReferenceCount: envelope.candidates.reduce((total, item) => total + item.evidence.length, 0) };
