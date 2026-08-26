@@ -1,5 +1,11 @@
 # Development
 
+## 2026-08-26 AI candidate promotion
+
+The local/demo AI-candidate surface now supports explicit promotion into normal finding review. Candidate envelopes carry `diagnosticGeneratedAt` so promotion can fail closed when deterministic diagnostics were re-run. The promotion path revalidates the approved extraction/evidence boundary, creates a pending derived finding, preserves provider/prompt provenance in a promotion record, replaces the browser-local diagnostic review set, and initializes a fresh finding review. One candidate set is bound to one deterministic diagnostic version; after a promotion changes the review set, regenerate candidates before promoting another item. No external model credentials are required for the demo adapter.
+
+Relevant files: `lib/ai-finding-promotion.ts`, `app/assessment/[id]/ai-findings/page.tsx`, `tests/ai-finding-promotion.test.mjs`, `schemas/ai-candidate-promotion.schema.json`, and the updated AI-candidate schema.
+
 ## Local setup
 
 ```bash
@@ -14,7 +20,7 @@ npm run dev
 npm run validate
 ```
 
-`npm run validate` runs TypeScript checks, source-policy lint, Node tests, and a production Next.js build. The Node tests include behavioral tests for assessment limits, upload safety, deterministic parsing, evidence provenance, extraction contracts, deterministic diagnostics, explicit synchronous-integration extraction and long-chain detection, AI-assisted candidate provider boundaries, evidence-boundary validation, finding review, entity/ID graph projection, reviewed maturity/recommendation projection, accepted-findings-only reporting, and report snapshot/version export behavior.
+`npm run validate` runs TypeScript checks, source-policy lint, Node tests, and a production Next.js build. The Node tests include behavioral tests for assessment limits, upload safety, deterministic parsing, evidence provenance, extraction contracts, deterministic diagnostics, explicit synchronous-integration extraction and long-chain detection, AI-assisted candidate provider boundaries, AI candidate promotion/version gating, evidence-boundary validation, finding review, entity/ID graph projection, reviewed maturity/recommendation projection, accepted-findings-only reporting, and report snapshot/version export behavior.
 
 ## Current routes
 
@@ -24,7 +30,7 @@ npm run validate
 - `/assessment/[id]/upload` — upload, readiness, parsing, evidence, and candidate extraction workflow
 - `/assessment/[id]/review` — extraction review and approval
 - `/assessment/[id]/diagnostics` — deterministic diagnostics, evidence validation, and finding review
-- `/assessment/[id]/ai-findings` — isolated AI-assisted candidate findings over approved structured evidence
+- `/assessment/[id]/ai-findings` — isolated AI-assisted candidate findings over approved structured evidence, with explicit promotion into normal finding review
 - `/assessment/[id]/map` — reviewed entity/ID projection and evidence drill-down
 - `/assessment/[id]/maturity` — focused maturity signal, scoring rationale, prioritized recommendations, and traceability
 - `/assessment/[id]/report` — accepted-findings-only executive preview, deterministic 90-day action plan, browser-local version history, and JSON snapshot export
@@ -59,7 +65,7 @@ After deterministic diagnostics exist, open `/assessment/<id>/ai-findings`. The 
 
 `OpenAIResponsesFindingProvider` implements the external-model boundary with strict JSON-schema output, `store: false`, prompt-version metadata, a maximum of 20 candidates, and instructions that treat every object name/attribute as untrusted data. Provider output is rejected if it references an object or evidence segment outside the approved extraction boundary, lacks provenance, exceeds confidence 0.8, or attempts to leave the candidate lifecycle state.
 
-The browser/demo path never embeds an OpenAI key and does not activate the external provider. AI candidates are deliberately stored separately under `sugar:ai-candidates:<assessmentId>` and cannot affect finding review, maturity, recommendations, maps, or reports automatically. Explicit candidate promotion is a separate backlog item so AI suggestions cannot silently become conclusions.
+The browser/demo path never embeds an OpenAI key and does not activate the external provider. AI candidates are deliberately stored separately under `sugar:ai-candidates:<assessmentId>` and cannot affect finding review, maturity, recommendations, maps, or reports automatically. A candidate enters the normal finding set only through the explicit promotion action. Promotion revalidates the current extraction approval and exact deterministic diagnostic version, creates a pending normal finding, resets finding review, and still requires explicit accept/reject review before downstream use.
 
 ## Entity/ID map
 
