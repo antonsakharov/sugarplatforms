@@ -11,12 +11,12 @@ type RelationshipClaim = {
 };
 
 const SYSTEM_ENTITY_PATTERNS: Array<{ kind: RelationshipKind; expression: RegExp; systemIndex: number; entityIndex: number }> = [
-  { kind: "creates", expression: /\b([A-Za-z][A-Za-z0-9 _./-]{1,80})\s+(?:creates|originates|produces)\s+([A-Za-z][A-Za-z0-9 _./-]{1,80}?)\s+(?:records?|entities?)(?=[.;\n]|$)/gi, systemIndex: 1, entityIndex: 2 },
-  { kind: "creates", expression: /\b([A-Za-z][A-Za-z0-9 _./-]{1,80}?)\s+(?:records?|entities?)\s+(?:are\s+)?(?:created|originated|produced)\s+by\s+([A-Za-z][A-Za-z0-9 _./-]{1,80})(?=[.;\n]|$)/gi, systemIndex: 2, entityIndex: 1 },
-  { kind: "consumes", expression: /\b([A-Za-z][A-Za-z0-9 _./-]{1,80})\s+(?:consumes|reads|uses)\s+([A-Za-z][A-Za-z0-9 _./-]{1,80}?)\s+(?:records?|entities?)(?=[.;\n]|$)/gi, systemIndex: 1, entityIndex: 2 },
-  { kind: "consumes", expression: /\b([A-Za-z][A-Za-z0-9 _./-]{1,80}?)\s+(?:records?|entities?)\s+(?:are\s+)?(?:consumed|read|used)\s+by\s+([A-Za-z][A-Za-z0-9 _./-]{1,80})(?=[.;\n]|$)/gi, systemIndex: 2, entityIndex: 1 },
-  { kind: "authority", expression: /\b([A-Za-z][A-Za-z0-9 _./-]{1,80})\s+(?:is|acts as)\s+(?:the\s+)?(?:authoritative system|system of record|source of truth)\s+for\s+([A-Za-z][A-Za-z0-9 _./-]{1,80})(?=[.;\n]|$)/gi, systemIndex: 1, entityIndex: 2 },
-  { kind: "authority", expression: /\b(?:authoritative system|system of record|source of truth)\s+for\s+([A-Za-z][A-Za-z0-9 _./-]{1,80})\s*[:=-]\s*([A-Za-z][A-Za-z0-9 _./-]{1,80})(?=[.;\n]|$)/gi, systemIndex: 2, entityIndex: 1 }
+  { kind: "creates", expression: /\b([A-Za-z][A-Za-z0-9 _./-]{1,80})\s+(?:creates|originates|produces)\s+([A-Za-z][A-Za-z0-9 _./-]{1,80}?)\s+(?:records?|entities?)$/gi, systemIndex: 1, entityIndex: 2 },
+  { kind: "creates", expression: /\b([A-Za-z][A-Za-z0-9 _./-]{1,80}?)\s+(?:records?|entities?)\s+(?:are\s+)?(?:created|originated|produced)\s+by\s+([A-Za-z][A-Za-z0-9 _./-]{1,80})$/gi, systemIndex: 2, entityIndex: 1 },
+  { kind: "consumes", expression: /\b([A-Za-z][A-Za-z0-9 _./-]{1,80})\s+(?:consumes|reads|uses)\s+([A-Za-z][A-Za-z0-9 _./-]{1,80}?)\s+(?:records?|entities?)$/gi, systemIndex: 1, entityIndex: 2 },
+  { kind: "consumes", expression: /\b([A-Za-z][A-Za-z0-9 _./-]{1,80}?)\s+(?:records?|entities?)\s+(?:are\s+)?(?:consumed|read|used)\s+by\s+([A-Za-z][A-Za-z0-9 _./-]{1,80})$/gi, systemIndex: 2, entityIndex: 1 },
+  { kind: "authority", expression: /\b([A-Za-z][A-Za-z0-9 _./-]{1,80})\s+(?:is|acts as)\s+(?:the\s+)?(?:authoritative system|system of record|source of truth)\s+for\s+([A-Za-z][A-Za-z0-9 _./-]{1,80})$/gi, systemIndex: 1, entityIndex: 2 },
+  { kind: "authority", expression: /\b(?:authoritative system|system of record|source of truth)\s+for\s+([A-Za-z][A-Za-z0-9 _./-]{1,80})\s*[:=-]\s*([A-Za-z][A-Za-z0-9 _./-]{1,80})$/gi, systemIndex: 2, entityIndex: 1 }
 ];
 
 function normalize(value: string) { return value.trim().replace(/\s+/g, " ").toLowerCase(); }
@@ -30,15 +30,24 @@ function evidenceFor(segment: SourceSegment): EvidenceReference {
 function relationshipKey(kind: RelationshipKind, entity: string) { return `relationship:${kind}:${normalize(entity)}`; }
 function relationshipEvidenceKey(kind: RelationshipKind, entity: string) { return `relationshipEvidence:${kind}:${normalize(entity)}`; }
 
+function claimClauses(content: string) {
+  return content
+    .split(/[.;\n]+/)
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
+
 function claimsFromSegment(segment: SourceSegment): RelationshipClaim[] {
   const claims: RelationshipClaim[] = [];
-  for (const pattern of SYSTEM_ENTITY_PATTERNS) {
-    pattern.expression.lastIndex = 0;
-    for (const match of segment.content.matchAll(pattern.expression)) {
-      const system = bounded(match[pattern.systemIndex]);
-      const entity = bounded(match[pattern.entityIndex]);
-      if (system.length < 2 || entity.length < 2) continue;
-      claims.push({ kind: pattern.kind, system, entity, evidence: evidenceFor(segment) });
+  for (const clause of claimClauses(segment.content)) {
+    for (const pattern of SYSTEM_ENTITY_PATTERNS) {
+      pattern.expression.lastIndex = 0;
+      for (const match of clause.matchAll(pattern.expression)) {
+        const system = bounded(match[pattern.systemIndex]);
+        const entity = bounded(match[pattern.entityIndex]);
+        if (system.length < 2 || entity.length < 2) continue;
+        claims.push({ kind: pattern.kind, system, entity, evidence: evidenceFor(segment) });
+      }
     }
   }
   return claims;
