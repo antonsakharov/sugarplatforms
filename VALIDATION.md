@@ -1,5 +1,20 @@
 # Validation status
 
+## 2026-08-27 explicit entity relationship increment
+
+Validation expectations for VIS-003:
+
+- creator, consumer, and authority claims are extracted only from strict explicit source language;
+- sentence-bounded parsing prevents neighboring statements from being absorbed into system or entity names;
+- every relationship retains the exact direct source segment used to support it;
+- creator/consumer/authority graph edges are emitted only when both endpoint objects are confirmed in extraction review;
+- ordinary topology, identifiers, names, OpenAPI paths, accepted findings, or missing contrary evidence cannot establish entity roles;
+- the focused identifier relationship remains visibly derived rather than being presented as a source fact;
+- feature-specific coverage in `tests/entity-relationships.test.mjs` checks positive extraction, topology-only negative behavior, exact-evidence graph projection, and suppression of unconfirmed endpoints;
+- `schemas/entity-id-graph.schema.json` covers the new relationship edge kinds and `directRelationshipCount`;
+- the full `npm run validate` gate remains authoritative and includes TypeScript, source-policy lint, all behavioral tests, and the optimized Next.js production build;
+- tenant-isolation checks remain not applicable to this browser-local adapter because authenticated organization persistence/RLS has not yet been implemented.
+
 ## 2026-08-26 AI candidate promotion increment
 
 Validation expectations and local results for this branch:
