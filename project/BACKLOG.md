@@ -26,7 +26,7 @@ Statuses: `[ ] planned`, `[-] in progress`, `[x] complete`, `[!] blocked`.
 - [x] DIA-013 Explicit promotion of approved AI candidates into normal finding review
 - [x] VIS-001 Entity/ID graph projection
 - [x] VIS-002 Entity/ID graph UI and evidence drill-down
-- [ ] VIS-003 Creator/consumer and authority relationships when directly extracted
+- [x] VIS-003 Creator/consumer and authority relationships when directly extracted
 - [ ] VIS-004 Graph filters and static export
 - [x] REP-001 Prioritized recommendations
 - [x] REP-002 90-day action plan
