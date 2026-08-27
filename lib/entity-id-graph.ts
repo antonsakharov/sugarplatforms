@@ -1,10 +1,10 @@
 import type { DiagnosticEnvelope, DiagnosticFinding } from "@/lib/diagnostics";
-import type { ExtractionEnvelope, EvidenceReference } from "@/lib/extraction";
+import type { ExtractionEnvelope, EvidenceReference, ExtractedObject } from "@/lib/extraction";
 import type { ExtractionReview } from "@/lib/extraction-review";
 import type { FindingReview } from "@/lib/finding-review";
 
 export type GraphNodeKind = "primary_entity" | "entity" | "identifier" | "system";
-export type GraphEdgeKind = "focused_identifier" | "integration" | "accepted_finding";
+export type GraphEdgeKind = "focused_identifier" | "integration" | "creates_entity" | "consumes_entity" | "authority_for" | "accepted_finding";
 export type GraphNode = {
   id: string;
   kind: GraphNodeKind;
@@ -29,7 +29,7 @@ export type EntityIdGraph = {
   generatedFromDiagnosticAt: string;
   nodes: GraphNode[];
   edges: GraphEdge[];
-  stats: { nodeCount: number; edgeCount: number; evidenceReferenceCount: number; acceptedFindingCount: number };
+  stats: { nodeCount: number; edgeCount: number; evidenceReferenceCount: number; acceptedFindingCount: number; directRelationshipCount: number };
   warnings: string[];
 };
 
@@ -48,6 +48,11 @@ function acceptedReviewedFindings(diagnostics: DiagnosticEnvelope, review: Findi
     if (!item || item.status !== "accepted") return [];
     return [{ ...finding, ...item.edits, reviewStatus: "accepted" as const }];
   });
+}
+function relationshipEvidence(object: ExtractedObject, kind: "creates" | "consumes" | "authority", entityName: string) {
+  const segmentId = object.attributes[`relationshipEvidence:${kind}:${normalized(entityName)}`];
+  if (!segmentId) return [];
+  return uniqueEvidence(object.evidence.filter((item) => item.segmentId === segmentId));
 }
 
 export function projectEntityIdGraph(input: {
@@ -82,11 +87,27 @@ export function projectEntityIdGraph(input: {
   }
 
   const systemByName = new Map(confirmed.filter((item) => item.kind === "system").map((item) => [normalized(reviewById.get(item.id)!.displayName), item]));
+  const entityByName = new Map(confirmed.filter((item) => item.kind === "entity").map((item) => [normalized(reviewById.get(item.id)!.displayName), item]));
   for (const integration of confirmed.filter((item) => item.kind === "integration")) {
     const source = integration.attributes.source ? systemByName.get(normalized(integration.attributes.source)) : undefined;
     const target = integration.attributes.target ? systemByName.get(normalized(integration.attributes.target)) : undefined;
     if (!source || !target || !nodeIds.has(source.id) || !nodeIds.has(target.id)) continue;
     edges.push({ id: `edge_integration_${integration.id}`, kind: "integration", source: source.id, target: target.id, label: reviewById.get(integration.id)?.displayName ?? integration.name, evidence: uniqueEvidence(integration.evidence), factStatus: "direct" });
+  }
+
+  for (const system of confirmed.filter((item) => item.kind === "system" && nodeIds.has(item.id))) {
+    for (const [attributeKey, entityName] of Object.entries(system.attributes)) {
+      const match = /^relationship:(creates|consumes|authority):(.+)$/.exec(attributeKey);
+      if (!match) continue;
+      const kind = match[1] as "creates" | "consumes" | "authority";
+      const entity = entityByName.get(normalized(entityName));
+      if (!entity || !nodeIds.has(entity.id)) continue;
+      const evidence = relationshipEvidence(system, kind, entityName);
+      if (evidence.length === 0) continue;
+      const edgeKind: GraphEdgeKind = kind === "creates" ? "creates_entity" : kind === "consumes" ? "consumes_entity" : "authority_for";
+      const label = kind === "creates" ? "creates entity records" : kind === "consumes" ? "consumes entity records" : "authoritative system for entity";
+      edges.push({ id: `edge_${kind}_${system.id}_${entity.id}`, kind: edgeKind, source: system.id, target: entity.id, label, evidence, factStatus: "direct" });
+    }
   }
 
   for (const finding of accepted) {
@@ -97,10 +118,11 @@ export function projectEntityIdGraph(input: {
   const warnings: string[] = [];
   if (!nodes.some((item) => item.kind === "identifier")) warnings.push("No confirmed identifier objects are available for the focused entity.");
   if (!edges.some((item) => item.kind === "integration")) warnings.push("No direct system-to-system integration edges could be projected from confirmed extraction evidence.");
-  warnings.push("Creator/consumer and authority relationships are shown only when directly represented by future extraction fields; this projection does not infer them from missing evidence.");
+  if (!edges.some((item) => item.kind === "creates_entity" || item.kind === "consumes_entity" || item.kind === "authority_for")) warnings.push("No explicit creator, consumer, or authority relationships were confirmed. The map does not infer these semantics from topology, naming, or missing evidence.");
+  const directRelationshipCount = edges.filter((edge) => edge.kind === "creates_entity" || edge.kind === "consumes_entity" || edge.kind === "authority_for").length;
   return {
     schemaVersion: "1.0", assessmentId: input.assessmentId, primaryEntity, generatedFromDiagnosticAt: input.diagnostics.generatedAt,
     nodes, edges, warnings,
-    stats: { nodeCount: nodes.length, edgeCount: edges.length, evidenceReferenceCount: edges.reduce((total, edge) => total + edge.evidence.length, 0), acceptedFindingCount: accepted.length }
+    stats: { nodeCount: nodes.length, edgeCount: edges.length, evidenceReferenceCount: edges.reduce((total, edge) => total + edge.evidence.length, 0), acceptedFindingCount: accepted.length, directRelationshipCount }
   };
 }
