@@ -4,6 +4,7 @@ import { inspectArtifactBytes } from "@/lib/artifact-content-policy";
 import { parseArtifact, type ParsedArtifact } from "@/lib/artifact-parser";
 import { validateArtifactSet } from "@/lib/upload";
 import { DeterministicExtractionProvider, validateExtractionEnvelope, type ExtractionEnvelope } from "@/lib/extraction";
+import { augmentExtractionWithEntityRelationships } from "@/lib/entity-relationship-claims";
 
 export const runtime = "nodejs";
 
@@ -81,7 +82,8 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   if (parsing.parsedArtifacts.length > 0) {
     try {
       const provider = new DeterministicExtractionProvider();
-      extraction = validateExtractionEnvelope(await provider.extract({ assessmentId: id, parsedArtifacts: parsing.parsedArtifacts }));
+      const baseExtraction = validateExtractionEnvelope(await provider.extract({ assessmentId: id, parsedArtifacts: parsing.parsedArtifacts }));
+      extraction = validateExtractionEnvelope(augmentExtractionWithEntityRelationships(baseExtraction, parsing.parsedArtifacts));
       if (parsing.status === "partial") extraction = { ...extraction, status: "partial", warnings: [...extraction.warnings, "Extraction is partial because one or more artifacts failed parsing."] };
     } catch (error) {
       extraction = { ...extraction, status: "partial", warnings: [error instanceof Error ? error.message : "Architecture extraction failed."] };
