@@ -34,7 +34,7 @@
         "required": ["id", "kind", "source", "target", "label", "evidence", "factStatus"],
         "properties": {
           "id": { "type": "string" },
-          "kind": { "enum": ["focused_identifier", "integration", "accepted_finding"] },
+          "kind": { "enum": ["focused_identifier", "integration", "creates_entity", "consumes_entity", "authority_for", "accepted_finding"] },
           "source": { "type": "string" },
           "target": { "type": "string" },
           "label": { "type": "string" },
@@ -46,12 +46,13 @@
     "stats": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["nodeCount", "edgeCount", "evidenceReferenceCount", "acceptedFindingCount"],
+      "required": ["nodeCount", "edgeCount", "evidenceReferenceCount", "acceptedFindingCount", "directRelationshipCount"],
       "properties": {
         "nodeCount": { "type": "integer", "minimum": 1 },
         "edgeCount": { "type": "integer", "minimum": 0 },
         "evidenceReferenceCount": { "type": "integer", "minimum": 0 },
-        "acceptedFindingCount": { "type": "integer", "minimum": 0 }
+        "acceptedFindingCount": { "type": "integer", "minimum": 0 },
+        "directRelationshipCount": { "type": "integer", "minimum": 0 }
       }
     },
     "warnings": { "type": "array", "items": { "type": "string" } }
