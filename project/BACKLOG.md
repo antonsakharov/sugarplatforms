@@ -1,6 +1,6 @@
 # Ordered Build Backlog
 
-Statuses: `[ ] planned`, `[-] in progress`, `[x] complete`, `[!] blocked`.
+Statuses: `[ ] planned`, `[-] in progress`, `[x] complete`.
 
 ## Current journey
 
@@ -27,7 +27,7 @@ Statuses: `[ ] planned`, `[-] in progress`, `[x] complete`, `[!] blocked`.
 - [x] VIS-001 Entity/ID graph projection
 - [x] VIS-002 Entity/ID graph UI and evidence drill-down
 - [x] VIS-003 Creator/consumer and authority relationships when directly extracted
-- [ ] VIS-004 Graph filters and static export
+- [x] VIS-004 Graph filters and static export
 - [x] REP-001 Prioritized recommendations
 - [x] REP-002 90-day action plan
 - [x] REP-003 Executive report preview
