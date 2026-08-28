@@ -26,9 +26,9 @@ Status: implemented for the local/demo workflow — evidence-linked candidate in
 
 ## MVP priority 5 — Entity and ID map
 
-User can see the focused primary entity, confirmed entity/identifier/system nodes, direct system integration relationships, directly stated creator/consumer/authority relationships, accepted-finding overlays, and evidence drill-down.
+User can see the focused primary entity, confirmed entity/identifier/system nodes, direct system integration relationships, directly stated creator/consumer/authority relationships, accepted-finding overlays, evidence drill-down, graph filters, and static export.
 
-Status: implemented for the current local/demo workflow — the graph projection is gated on completed non-stale finding review, uses confirmed extraction objects, and decorates downstream output with accepted findings only. Identifier-to-focus relationships are visibly marked derived. Creator, consumer, and authority edges are now shown only when strict uploaded architecture language explicitly states the role, both endpoint objects are confirmed, and the exact supporting source segment is available. Topology, names, identifiers, and missing evidence are never used to infer entity responsibility. Graph filtering/static export remains planned.
+Status: implemented for the current local/demo workflow — the graph projection is gated on completed non-stale finding review, uses confirmed extraction objects, and decorates downstream output with accepted findings only. Identifier-to-focus relationships are visibly marked derived. Creator, consumer, and authority edges are shown only when strict uploaded architecture language explicitly states the role, both endpoint objects are confirmed, and exact supporting source evidence is available. Users can filter by search text, node type, relationship type, and direct/derived status; optionally hide isolated nodes; and download the currently visible projection as self-contained SVG or structured JSON. Filters and exports never create new facts, and exports do not add raw uploaded artifact content.
 
 ## MVP priority 6 — Diagnostic findings
 
