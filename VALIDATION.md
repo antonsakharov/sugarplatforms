@@ -1,5 +1,22 @@
 # Validation status
 
+## 2026-08-28 graph filters and static export increment
+
+Validation expectations for VIS-004:
+
+- filtering operates only on the already reviewed Entity/ID graph and cannot synthesize nodes, relationships, evidence, or accepted findings;
+- node-type filters remove any relationship whose endpoint is no longer visible;
+- relationship-type and direct/derived filters preserve the original fact status and source evidence;
+- text search is bounded to 120 characters and matches visible node labels, relationship labels/types, and accepted finding identifiers without changing source data;
+- optional hide-isolated behavior removes nodes only after relationship filtering;
+- the filtered graph recomputes visible counts from the visible projection rather than retaining misleading full-graph counts;
+- SVG export is self-contained, escapes untrusted labels before XML rendering, and visually distinguishes direct edges from derived edges;
+- JSON export contains only the filtered graph, active filter definition, export timestamp, and existing metadata/evidence references; it does not add raw uploaded artifact content;
+- `schemas/entity-id-graph-export.schema.json` defines the structured export envelope;
+- feature-specific coverage in `tests/entity-id-graph-view.test.mjs` checks direct/derived filtering, endpoint pruning, search/hide-isolated behavior, SVG escaping/styling, and empty-filter fail-closed behavior;
+- the full `npm run validate` GitHub Actions gate remains authoritative and includes TypeScript, source-policy lint, all behavioral tests, schema parsing, and the optimized Next.js production build;
+- tenant-isolation checks remain not applicable to this browser-local adapter because authenticated organization persistence/RLS has not yet been implemented.
+
 ## 2026-08-27 explicit entity relationship increment
 
 Validation expectations for VIS-003:
