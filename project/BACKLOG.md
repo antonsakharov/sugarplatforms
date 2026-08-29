@@ -33,7 +33,7 @@ Statuses: `[ ] planned`, `[-] in progress`, `[x] complete`.
 - [x] REP-003 Executive report preview
 - [x] REP-004 Accepted-findings-only report generation
 - [x] REP-005 Browser-local report versioning and structured JSON export
-- [ ] REP-006 Print stylesheet and formal report styling
+- [x] REP-006 Print stylesheet and formal report styling
 - [ ] REP-007 Formal PDF export
 
 ## Production-readiness work
