@@ -127,3 +127,7 @@ Creator, consumer, and authority relationships in the Entity/ID map may be proje
 ## ADR-032 — Graph filters and static exports are projection-only
 **Status:** Accepted
 Entity/ID map filters may hide nodes or relationships by search text, node kind, relationship kind, or direct/derived status, but filtering may not synthesize or alter graph facts. A visible relationship must already exist in the reviewed graph and both visible endpoints must remain in the filtered projection. Static SVG and JSON exports contain only the currently visible reviewed projection, preserve direct-versus-derived semantics and diagnostic provenance, and must not add raw uploaded artifact content. SVG export is a deterministic presentation artifact rather than a new evidence source or signed production record.
+
+## ADR-033 — Formal print styling is presentation-only
+**Status:** Accepted
+The executive report may use a route-scoped stylesheet to provide A4 page geometry, print-safe typography, page-break controls, hidden interactive application controls, and expanded evidence details. Print styling must not add, remove, reinterpret, or synthesize report facts, findings, recommendations, artifact content, or evidence provenance. Browser print/save-to-PDF remains a user-agent presentation capability; formal product-managed PDF generation, signed artifacts, and durable server-backed report storage remain separate work.
