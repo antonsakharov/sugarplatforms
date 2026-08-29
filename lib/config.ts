@@ -1,0 +1,21 @@
+import { z } from "zod";
+
+const envSchema = z.object({
+  NEXT_PUBLIC_DEMO_MODE: z.enum(["true", "false"]).default("true"),
+  MAX_ACTIVE_ASSESSMENTS_PER_WORKSPACE: z.coerce.number().int().positive().default(1),
+  MAX_UPLOAD_FILES: z.coerce.number().int().positive().max(10).default(10),
+  MAX_UPLOAD_BYTES: z.coerce.number().int().positive().default(26_214_400),
+  MAX_TOTAL_PAGES: z.coerce.number().int().positive().max(150).default(150),
+  MAX_PRIMARY_ENTITIES: z.coerce.number().int().positive().max(1).default(1)
+});
+
+export const env = envSchema.parse(process.env);
+
+export const PRODUCT_LIMITS = {
+  maxActiveAssessments: env.MAX_ACTIVE_ASSESSMENTS_PER_WORKSPACE,
+  maxFiles: env.MAX_UPLOAD_FILES,
+  maxFileBytes: env.MAX_UPLOAD_BYTES,
+  maxFileMegabytes: Math.round(env.MAX_UPLOAD_BYTES / 1024 / 1024),
+  maxTotalPages: env.MAX_TOTAL_PAGES,
+  maxPrimaryEntities: env.MAX_PRIMARY_ENTITIES
+} as const;
