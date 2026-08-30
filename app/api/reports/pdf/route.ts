@@ -17,7 +17,8 @@ export async function POST(request: Request) {
     }
     const snapshot = JSON.parse(text) as ReportSnapshot;
     const artifact = generateReportPdf(snapshot);
-    return new Response(artifact.bytes, {
+    const body = artifact.bytes.slice().buffer as ArrayBuffer;
+    return new Response(body, {
       status: 200,
       headers: {
         "Content-Type": artifact.mediaType,
