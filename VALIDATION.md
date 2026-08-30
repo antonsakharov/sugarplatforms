@@ -1,5 +1,21 @@
 # Validation status
 
+## 2026-08-30 formal PDF export increment
+
+Validation expectations for REP-007:
+
+- formal PDF export is available only for an explicitly saved immutable report snapshot; an unsaved live preview cannot enter the product-managed export path;
+- the server reuses report snapshot validation and fails closed on assessment or diagnostic-provenance mismatch;
+- `POST /api/reports/pdf` accepts at most 1 MB of structured snapshot JSON and does not accept uploaded artifact bytes or parsed source content;
+- the deterministic PDF contains reviewed report facts, artifact metadata, accepted finding evidence coordinates, recommendations, action-plan items, limitations, snapshot version, and diagnostic provenance without adding new conclusions;
+- repeated generation from the same snapshot produces identical PDF bytes and SHA-256;
+- responses use `application/pdf`, `Cache-Control: no-store`, and expose page-count, SHA-256, and diagnostic-generation headers;
+- `schemas/report-pdf-export.schema.json` defines the export-manifest metadata contract;
+- `tests/report-pdf.test.mjs` covers PDF signature/EOF, deterministic bytes/checksum, safe versioned filename, visible evidence coordinates, absence of a raw-content field, and fail-closed provenance mismatch;
+- the dependency-free PDF adapter intentionally uses built-in Type 1 fonts and printable fallback for unsupported non-ASCII glyphs; full Unicode embedding is deferred production polish;
+- the full `npm run validate` GitHub Actions gate remains authoritative and includes TypeScript, source-policy lint, all behavioral tests, schema parsing, and the optimized Next.js production build;
+- tenant-isolation checks remain not applicable to this browser-local report-history adapter because authenticated organization persistence/RLS has not yet been implemented.
+
 ## 2026-08-28 graph filters and static export increment
 
 Validation expectations for VIS-004:
@@ -100,8 +116,8 @@ The 2026-08-22 duplicate-platform-capability increment passed GitHub Actions wit
 
 ## Local/demo boundary
 
-AI-assisted candidate generation and promotion remain human-gated. The local provider exists to exercise provider, evidence, schema, candidate, promotion, and review boundaries without external credentials; it must not be described as a production model result. External model activation remains server-side production work. Diagnostic, candidate, promotion, and review state remains browser-local demo state, not durable tenant-scoped persistence.
+AI-assisted candidate generation and promotion remain human-gated. The local provider exists to exercise provider, evidence, schema, candidate, promotion, and review boundaries without external credentials; it must not be described as a production model result. External model activation remains server-side production work. Diagnostic, candidate, promotion, review, report-version, and PDF-export source state remains browser-local demo state, not durable tenant-scoped persistence.
 
 ## Remaining production validation
 
-Authentication, organization authorization, row-level security, private object storage, malware scanning, durable graph/findings/review/maturity/recommendation/report persistence, server-backed report authorization/version history, deletion, audit events, log redaction, backup/restore, tenant-isolation tests, styled print output, formal PDF export, and server-side external-model privacy/retention controls remain mandatory before confidential enterprise artifacts can be accepted or reports can be treated as production records.
+Authentication, organization authorization, row-level security, private object storage, malware scanning, durable graph/findings/review/maturity/recommendation/report persistence, server-backed report authorization/version history, deletion, audit events, log redaction, backup/restore, tenant-isolation tests, digitally signed/private report storage where required, and server-side external-model privacy/retention controls remain mandatory before confidential enterprise artifacts can be accepted or reports can be treated as production records.
