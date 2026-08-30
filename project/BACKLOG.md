@@ -34,7 +34,7 @@ Statuses: `[ ] planned`, `[-] in progress`, `[x] complete`.
 - [x] REP-004 Accepted-findings-only report generation
 - [x] REP-005 Browser-local report versioning and structured JSON export
 - [x] REP-006 Print stylesheet and formal report styling
-- [ ] REP-007 Formal PDF export
+- [x] REP-007 Formal PDF export
 
 ## Production-readiness work
 
