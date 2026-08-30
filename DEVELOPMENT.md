@@ -1,8 +1,16 @@
 # Development
 
+## 2026-08-30 formal PDF export
+
+REP-007 adds a product-managed PDF export for explicitly saved report snapshots. No package, credential, environment variable, browser automation service, or external PDF provider is required. `lib/report-pdf.ts` is a deterministic bounded PDF 1.4 writer, and `POST /api/reports/pdf` accepts only the structured saved snapshot, revalidates its assessment/diagnostic provenance, and returns an `application/pdf` attachment with `Cache-Control: no-store`, page-count, SHA-256, and diagnostic timestamp headers. The report page exposes **Download formal PDF** only beside saved immutable versions; an unsaved live preview cannot use the formal export path.
+
+Relevant files: `lib/report-pdf.ts`, `app/api/reports/pdf/route.ts`, `app/assessment/[id]/report/page.tsx`, `tests/report-pdf.test.mjs`, `schemas/report-pdf-export.schema.json`, and `docs/REPORT_PDF.md`.
+
+The current dependency-free PDF adapter uses PDF built-in Type 1 fonts and normalizes unsupported non-ASCII glyphs to a printable fallback. Full Unicode font embedding, digital signing, authenticated tenant authorization, private report storage, and durable server-backed version history remain production work.
+
 ## 2026-08-29 formal report print styling
 
-REP-006 adds a route-scoped presentation layout for `/assessment/[id]/report`. No additional package, environment variable, credential, or external service is required. The report keeps the same accepted-findings-only data model and provenance; the new CSS only changes presentation. Browser print uses A4 page geometry, print-safe typography, compact metrics, page-break controls, expanded evidence details, and hides site navigation plus interactive form actions. Browser save-to-PDF is available through the print dialog, but product-managed PDF generation remains REP-007.
+REP-006 adds a route-scoped presentation layout for `/assessment/[id]/report`. No additional package, environment variable, credential, or external service is required. The report keeps the same accepted-findings-only data model and provenance; the new CSS only changes presentation. Browser print uses A4 page geometry, print-safe typography, compact metrics, page-break controls, expanded evidence details, and hides site navigation plus interactive form actions. Browser save-to-PDF remains available through the print dialog as an alternate user-agent presentation path.
 
 Relevant files: `app/assessment/[id]/report/layout.tsx`, `app/assessment/[id]/report/report-print.css`, `tests/report-print.test.mjs`, and `docs/REPORT_PRINT.md`.
 
@@ -18,7 +26,7 @@ npm install
 npm run dev
 ```
 
-No print-specific setup is required. Open `/assessment/<id>/report` after completing finding review and maturity/recommendations, then use **Print preview** and the browser print dialog.
+No PDF-specific setup is required. Open `/assessment/<id>/report` after completing finding review and maturity/recommendations, save a report version, then choose **Download formal PDF**. The server endpoint runs in the Node.js runtime and does not call an external service.
 
 ## Validation
 
@@ -26,7 +34,7 @@ No print-specific setup is required. Open `/assessment/<id>/report` after comple
 npm run validate
 ```
 
-`npm run validate` runs TypeScript checks, source-policy lint, Node tests, and a production Next.js build. The Node tests cover assessment limits, upload safety, deterministic parsing, evidence provenance, extraction contracts, deterministic diagnostics, AI-assisted candidate boundaries and promotion, evidence-boundary validation, finding review, entity/ID graph projection/export, reviewed maturity/recommendation projection, accepted-findings-only reporting, report snapshot/version export behavior, and the formal print presentation contract.
+`npm run validate` runs TypeScript checks, source-policy lint, Node tests, and a production Next.js build. The Node tests cover assessment limits, upload safety, deterministic parsing, evidence provenance, extraction contracts, deterministic diagnostics, AI-assisted candidate boundaries and promotion, evidence-boundary validation, finding review, entity/ID graph projection/export, reviewed maturity/recommendation projection, accepted-findings-only reporting, report snapshot/version export behavior, formal print presentation, and deterministic PDF generation/provenance failure behavior.
 
 ## Current routes
 
@@ -39,9 +47,10 @@ npm run validate
 - `/assessment/[id]/ai-findings` — isolated AI-assisted candidate findings, with explicit promotion into normal finding review
 - `/assessment/[id]/map` — reviewed entity/ID projection, evidence drill-down, filters, and static export
 - `/assessment/[id]/maturity` — focused maturity signal, scoring rationale, prioritized recommendations, and traceability
-- `/assessment/[id]/report` — accepted-findings-only executive preview, deterministic 90-day action plan, browser-local version history, JSON snapshot export, and formal print presentation
+- `/assessment/[id]/report` — accepted-findings-only executive preview, deterministic 90-day action plan, browser-local version history, JSON snapshot export, formal print presentation, and saved-version PDF export
 - `/api/assessments` — assessment validation/creation API
 - `/api/assessments/[id]/artifacts` — transient validation, parsing, and local extraction API
+- `/api/reports/pdf` — bounded deterministic PDF export from one validated saved report snapshot
 - `/sample` — Acme sample entry route
 - `/api/health` — health endpoint
 
@@ -73,10 +82,10 @@ After finding review is completed, open `/assessment/<id>/map`. The map is proje
 
 After finding review is completed, open `/assessment/<id>/maturity`. The page calculates a transparent 1–5 risk-adjusted signal from accepted findings only. If no findings were accepted, the result is `not_scored`; the product does not infer perfect maturity from missing evidence. Recommendations retain finding, affected-object, and source-evidence traceability.
 
-## Executive report versions, export, and print
+## Executive report versions, JSON, print, and PDF export
 
 The local/demo report is available at `/assessment/<id>/report` after finding review and maturity/recommendations are complete. It produces a deterministic 90-day action plan plus an accepted-findings-only executive preview. Artifact inventory is metadata-only and raw uploaded content is not reproduced.
 
-Use **Save report version** to create a browser-local immutable snapshot and **Download JSON** for a structured report export. Use **Print preview** for the REP-006 formal presentation. The route-specific stylesheet applies A4 margins, print typography, compact summary metrics, page-break behavior, and expands closed evidence details so locators remain visible on paper. Site navigation, footer, buttons, and form actions are omitted from printed output.
+Use **Save report version** to create a browser-local immutable snapshot, **Download JSON** for structured export, **Print preview** for browser print/save-to-PDF, and **Download formal PDF** for the REP-007 product-managed server export. Formal PDF generation always consumes a saved snapshot and revalidates report provenance before rendering.
 
-Browser print/save-to-PDF is a demo handoff capability, not a signed archive or product-managed PDF. REP-007 remains responsible for formal PDF export. Server-backed history, report authorization, and durable tenant-scoped report persistence remain production work.
+The PDF result is deterministic for the same snapshot and includes visible report facts, accepted finding evidence coordinates, version, and diagnostic provenance. It is not a signed archive. Server-backed history, authenticated report authorization, private durable report storage, digital signing, and tenant-scoped audit/deletion remain production work.
