@@ -9,11 +9,18 @@ import type { FocusedMaturitySummary, RecommendationSet } from "@/lib/maturity-r
 import { createReportExport, createReportSnapshot, reportExportFilename, validateReportSnapshotHistory, type ReportSnapshot } from "@/lib/report-versioning";
 import { generateExecutiveReport, generateNinetyDayActionPlan, type ArtifactReportItem, type ExecutiveReport } from "@/lib/reporting";
 
+function filenameFromDisposition(value: string | null, fallback: string) {
+  if (!value) return fallback;
+  const match = /filename="([^"]+)"/.exec(value);
+  return match?.[1] ?? fallback;
+}
+
 export default function ExecutiveReportPage() {
   const params = useParams<{ id: string }>();
   const assessmentId = params.id;
   const [report, setReport] = useState<ExecutiveReport | null>(null);
   const [snapshots, setSnapshots] = useState<ReportSnapshot[]>([]);
+  const [pdfSnapshotId, setPdfSnapshotId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -70,6 +77,35 @@ export default function ExecutiveReportPage() {
     URL.revokeObjectURL(url);
   }
 
+  async function downloadPdf(snapshot: ReportSnapshot) {
+    setPdfSnapshotId(snapshot.id);
+    setError(null);
+    try {
+      const response = await fetch("/api/reports/pdf", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(snapshot)
+      });
+      if (!response.ok) {
+        const payload = await response.json().catch(() => null) as { error?: string } | null;
+        throw new Error(payload?.error ?? "Formal PDF export failed.");
+      }
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const anchor = document.createElement("a");
+      anchor.href = url;
+      anchor.download = filenameFromDisposition(response.headers.get("content-disposition"), `${snapshot.versionLabel}.pdf`);
+      document.body.appendChild(anchor);
+      anchor.click();
+      anchor.remove();
+      URL.revokeObjectURL(url);
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : "Formal PDF export failed.");
+    } finally {
+      setPdfSnapshotId(null);
+    }
+  }
+
   if (error && !report) return <><div className="eyebrow">Assessment · Executive report</div><h1>Report unavailable</h1><div className="panel"><p>{error}</p><a className="button" href={`/assessment/${assessmentId}/maturity`}>Open maturity & recommendations</a></div></>;
   if (!report) return <p className="lede">Generating accepted-findings-only executive report preview…</p>;
 
@@ -86,7 +122,7 @@ export default function ExecutiveReportPage() {
     <div className="panel"><h2>Top accepted findings</h2>{report.topFindings.length === 0 ? <p>No accepted findings are included. This is inconclusive under the current limited rule coverage.</p> : <div className="artifact-list">{report.topFindings.map((finding) => <article className="inspection-row" key={finding.id}><span className="status-pill">{finding.severity} · {finding.category.replace("_", " ")}</span><h3>{finding.title}</h3><p>{finding.description}</p><p><strong>Business impact:</strong> {finding.businessImpact}</p><p><strong>Recommendation:</strong> {finding.recommendation}</p><details><summary>Evidence</summary>{finding.evidence.map((evidence) => <div className="artifact-row" key={`${finding.id}:${evidence.segmentId}`}><div><strong>{evidence.artifactName}</strong><code>{evidence.locator}</code></div><small>{evidence.segmentId}</small></div>)}</details></article>)}</div>}</div>
     <div className="panel"><h2>90-day action plan</h2>{report.actionPlan.phases.map((phase) => <section key={phase.horizon}><h3>{phase.label}</h3><p>{phase.objective}</p>{phase.items.length === 0 ? <p>No accepted recommendation is assigned to this phase.</p> : <div className="artifact-list">{phase.items.map((item) => <article className="inspection-row" key={item.id}><span className="status-pill">Priority {item.priority} · {item.severity}</span><h3>{item.title}</h3><p>{item.action}</p><p><strong>Expected outcome:</strong> {item.expectedOutcome}</p></article>)}</div>}</section>)}</div>
     <div className="panel"><h2>Evidence appendix</h2>{report.evidenceAppendix.length === 0 ? <p>No accepted finding evidence is included.</p> : <div className="artifact-list">{report.evidenceAppendix.map((entry) => <article className="inspection-row" key={entry.findingId}><h3>{entry.findingTitle}</h3>{entry.evidence.map((evidence) => <div className="artifact-row" key={`${entry.findingId}:${evidence.segmentId}`}><div><strong>{evidence.artifactName}</strong><code>{evidence.locator}</code></div><small>{evidence.segmentId}</small></div>)}</article>)}</div>}</div>
-    <div className="panel"><h2>Report versions & export</h2><p>Save an explicit browser-local snapshot before sharing. Each snapshot receives a monotonic version number and preserves the diagnostic timestamp that produced it. JSON exports contain this structured report and artifact metadata only; raw uploaded artifact content is never added.</p><div className="form-actions"><button className="button" type="button" onClick={saveSnapshot}>Save report version</button></div>{snapshots.length === 0 ? <p>No saved report versions yet.</p> : <div className="artifact-list">{snapshots.map((snapshot) => <article className="inspection-row" key={snapshot.id}><span className="status-pill">{snapshot.versionLabel}</span><h3>{snapshot.report.title}</h3><p>Saved {new Date(snapshot.createdAt).toLocaleString()} · diagnostics {new Date(snapshot.generatedFromDiagnosticAt).toLocaleString()}</p><div className="form-actions"><button className="button button-secondary" type="button" onClick={() => downloadSnapshot(snapshot)}>Download JSON</button></div></article>)}</div>}</div>
+    <div className="panel"><h2>Report versions & export</h2><p>Save an explicit browser-local snapshot before sharing. Each snapshot receives a monotonic version number and preserves the diagnostic timestamp that produced it. JSON and PDF exports are generated only from that immutable reviewed snapshot; neither export adds raw uploaded artifact content.</p><div className="form-actions"><button className="button" type="button" onClick={saveSnapshot}>Save report version</button></div>{snapshots.length === 0 ? <p>No saved report versions yet.</p> : <div className="artifact-list">{snapshots.map((snapshot) => <article className="inspection-row" key={snapshot.id}><span className="status-pill">{snapshot.versionLabel}</span><h3>{snapshot.report.title}</h3><p>Saved {new Date(snapshot.createdAt).toLocaleString()} · diagnostics {new Date(snapshot.generatedFromDiagnosticAt).toLocaleString()}</p><div className="form-actions"><button className="button button-secondary" type="button" onClick={() => downloadSnapshot(snapshot)}>Download JSON</button><button className="button" type="button" disabled={pdfSnapshotId !== null} onClick={() => downloadPdf(snapshot)}>{pdfSnapshotId === snapshot.id ? "Generating PDF…" : "Download formal PDF"}</button></div></article>)}</div>}</div>
     <div className="panel"><h2>Report limitations</h2><ul>{report.limitations.map((item) => <li key={item}>{item}</li>)}</ul><div className="form-actions"><button className="button" type="button" onClick={() => window.print()}>Print preview</button><a className="button button-secondary" href={`/assessment/${assessmentId}/maturity`}>Back to maturity</a><a className="button button-secondary" href={`/assessment/${assessmentId}`}>Assessment workspace</a></div></div>
   </>;
 }
