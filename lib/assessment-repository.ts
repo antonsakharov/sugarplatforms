@@ -1,7 +1,7 @@
 import { mkdirSync } from "node:fs";
 import { dirname } from "node:path";
 import { DatabaseSync } from "node:sqlite";
-import { assessmentDraftSchema, type AssessmentDraft } from "./assessment";
+import { assessmentDraftSchema, type AssessmentDraft } from "./assessment.ts";
 
 export const LOCAL_DEMO_WORKSPACE_ID = "local-demo";
 
