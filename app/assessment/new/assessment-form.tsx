@@ -44,6 +44,7 @@ export function AssessmentForm() {
       const body = await response.json();
       if (!response.ok) throw new Error(body.error ?? "Could not create assessment.");
       const assessment = body.assessment as AssessmentDraft;
+      // Compatibility cache only; the server response is already durably persisted.
       localStorage.setItem(`sugar:assessment:${assessment.id}`, JSON.stringify(assessment));
       localStorage.setItem("sugar:active-assessment", assessment.id);
       router.push(`/assessment/${assessment.id}`);

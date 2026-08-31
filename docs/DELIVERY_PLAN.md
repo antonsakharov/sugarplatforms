@@ -63,3 +63,7 @@ Deliver maturity summary, prioritized recommendations, 90-day plan, executive re
 ## Release gates
 
 Do not mark a phase complete unless the user-visible workflow works end to end, build/type/lint/tests pass, limits are enforced server-side, evidence requirements are preserved, documentation is updated, and demo fixtures still work.
+
+## Production-readiness continuation
+
+After the local/demo end-to-end journey reached formal PDF export, production readiness proceeds incrementally behind stable domain interfaces. The first persistence slice stores validated assessment metadata server-side through an explicit repository boundary and retains a credential-free SQLite adapter for local/single-instance operation. Subsequent slices move organization/workspace identity and the reviewed evidence graph to PostgreSQL/RLS before confidential enterprise inputs are enabled.

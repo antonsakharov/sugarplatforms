@@ -38,7 +38,7 @@ Statuses: `[ ] planned`, `[-] in progress`, `[x] complete`.
 
 ## Production-readiness work
 
-- [ ] Durable database persistence
+- [-] Durable database persistence — assessment metadata is server-persisted via the SQLite local/single-instance adapter; artifact metadata, evidence, review state, findings, and reports remain to migrate
 - [ ] Organization and workspace tenancy
 - [ ] Authentication and authorization
 - [ ] Row-level security and tenant-isolation tests

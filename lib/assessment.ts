@@ -23,11 +23,13 @@ export const assessmentInputSchema = z.object({
 
 export type AssessmentInput = z.infer<typeof assessmentInputSchema>;
 
-export type AssessmentDraft = AssessmentInput & {
-  id: string;
-  status: "draft";
-  createdAt: string;
-};
+export const assessmentDraftSchema = assessmentInputSchema.extend({
+  id: z.string().uuid(),
+  status: z.literal("draft"),
+  createdAt: z.string().datetime()
+});
+
+export type AssessmentDraft = z.infer<typeof assessmentDraftSchema>;
 
 export function createAssessmentDraft(input: AssessmentInput): AssessmentDraft {
   return {

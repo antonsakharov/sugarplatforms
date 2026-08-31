@@ -18,8 +18,9 @@ test("server route validates assessment payload before creation", () => {
   assert.match(route, /status: 201/);
 });
 
-test("form persists only a validated server response in the local demo adapter", () => {
+test("form caches only a validated, server-persisted response for compatibility", () => {
   assert.match(form, /fetch\("\/api\/assessments"/);
+  assert.match(route, /getAssessmentRepository\(\)\.create/);
   assert.match(form, /localStorage\.setItem/);
   assert.match(form, /limitsAcknowledged/);
 });

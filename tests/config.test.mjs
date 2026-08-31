@@ -4,6 +4,7 @@ import fs from "node:fs";
 
 test("MVP limit defaults are present", () => {
   const source = fs.readFileSync(new URL("../lib/config.ts", import.meta.url), "utf8");
+  assert.match(source, /ASSESSMENT_DB_PATH/);
   assert.match(source, /MAX_UPLOAD_FILES/);
   assert.match(source, /max\(10\)/);
   assert.match(source, /MAX_TOTAL_PAGES/);

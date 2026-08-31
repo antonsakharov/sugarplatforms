@@ -4,7 +4,7 @@
 
 User can create a workspace, name an assessment, choose one focus area, specify one primary entity, describe the business concern, and accept assessment limits.
 
-Status: in progress — implemented in the local/demo adapter; durable authenticated persistence remains open.
+Status: in progress — assessment creation is now server-persisted through a repository boundary using the credential-free SQLite local/single-instance adapter, with browser localStorage retained only as a compatibility cache. Authenticated organization/workspace identity, PostgreSQL/RLS, and durable persistence of downstream reviewed state remain open.
 
 ## MVP priority 2 — Guided upload
 

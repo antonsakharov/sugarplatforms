@@ -22,8 +22,18 @@ export function AssessmentWorkspace({ id }: { id: string }) {
   const [findingReview, setFindingReview] = useState<FindingReview | null>(null);
 
   useEffect(() => {
-    const raw = localStorage.getItem(`sugar:assessment:${id}`);
-    setAssessment(raw ? JSON.parse(raw) : null);
+    let cancelled = false;
+    const cached = localStorage.getItem(`sugar:assessment:${id}`);
+    void fetch(`/api/assessments/${id}`, { cache: "no-store" })
+      .then(async (response) => {
+        if (!response.ok) throw new Error("Server assessment unavailable.");
+        const body = await response.json() as { assessment: AssessmentDraft };
+        localStorage.setItem(`sugar:assessment:${id}`, JSON.stringify(body.assessment));
+        if (!cancelled) setAssessment(body.assessment);
+      })
+      .catch(() => {
+        if (!cancelled) setAssessment(cached ? JSON.parse(cached) : null);
+      });
     const artifactRaw = localStorage.getItem(`sugar:artifacts:${id}`);
     const readinessRaw = localStorage.getItem(`sugar:readiness:${id}`);
     const extractionRaw = localStorage.getItem(`sugar:extraction:${id}`);
@@ -38,10 +48,11 @@ export function AssessmentWorkspace({ id }: { id: string }) {
     setDiagnostics(diagnosticsRaw ? JSON.parse(diagnosticsRaw) : null);
     setAiCandidates(aiCandidatesRaw ? JSON.parse(aiCandidatesRaw) : null);
     setFindingReview(findingReviewRaw ? JSON.parse(findingReviewRaw) : null);
+    return () => { cancelled = true; };
   }, [id]);
 
   if (assessment === undefined) return <p className="lede">Loading assessment…</p>;
-  if (!assessment) return <div className="panel"><h2>Assessment not found</h2><p>This local demo draft is not available in this browser.</p><a className="button" href="/assessment/new">Create assessment</a></div>;
+  if (!assessment) return <div className="panel"><h2>Assessment not found</h2><p>This assessment is not available from server persistence or the local compatibility cache.</p><a className="button" href="/assessment/new">Create assessment</a></div>;
 
   const resolved = review?.objects.filter((item) => item.status !== "pending").length ?? 0;
   const extractedCount = extraction?.stats.objectCount ?? 0;
