@@ -1,8 +1,14 @@
 import { z } from "zod";
 
+const tenantIdSchema = z.string().trim().min(2).max(80).regex(/^[a-z0-9][a-z0-9_-]*$/i);
+
 const envSchema = z.object({
   NEXT_PUBLIC_DEMO_MODE: z.enum(["true", "false"]).default("true"),
   ASSESSMENT_DB_PATH: z.string().trim().min(1).default(".data/sugar-platform-diagnostic.sqlite"),
+  LOCAL_ORGANIZATION_ID: tenantIdSchema.default("local-org"),
+  LOCAL_ORGANIZATION_NAME: z.string().trim().min(2).max(120).default("Local Organization"),
+  LOCAL_WORKSPACE_ID: tenantIdSchema.default("local-demo"),
+  LOCAL_WORKSPACE_NAME: z.string().trim().min(2).max(120).default("Local Diagnostic Workspace"),
   MAX_ACTIVE_ASSESSMENTS_PER_WORKSPACE: z.coerce.number().int().positive().default(1),
   MAX_UPLOAD_FILES: z.coerce.number().int().positive().max(10).default(10),
   MAX_UPLOAD_BYTES: z.coerce.number().int().positive().default(26_214_400),
@@ -14,6 +20,13 @@ export const env = envSchema.parse(process.env);
 
 export const PERSISTENCE_CONFIG = {
   assessmentDatabasePath: env.ASSESSMENT_DB_PATH
+} as const;
+
+export const LOCAL_TENANT_CONFIG = {
+  organizationId: env.LOCAL_ORGANIZATION_ID,
+  organizationName: env.LOCAL_ORGANIZATION_NAME,
+  workspaceId: env.LOCAL_WORKSPACE_ID,
+  workspaceName: env.LOCAL_WORKSPACE_NAME
 } as const;
 
 export const PRODUCT_LIMITS = {
