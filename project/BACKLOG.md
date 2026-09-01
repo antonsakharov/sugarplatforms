@@ -39,9 +39,9 @@ Statuses: `[ ] planned`, `[-] in progress`, `[x] complete`.
 ## Production-readiness work
 
 - [-] Durable database persistence — assessment metadata is server-persisted via the SQLite local/single-instance adapter; artifact metadata, evidence, review state, findings, and reports remain to migrate
-- [ ] Organization and workspace tenancy
+- [x] Organization and workspace tenancy — persisted organization/workspace identity, server-owned local tenant context, tenant-scoped assessment operations, and focused isolation tests are implemented; authentication/RLS remain separate
 - [ ] Authentication and authorization
-- [ ] Row-level security and tenant-isolation tests
+- [ ] Row-level security and database/storage tenant-isolation tests
 - [ ] Private object storage
 - [ ] Server-backed report version history and authorization
 - [ ] Audit and deletion workflow
