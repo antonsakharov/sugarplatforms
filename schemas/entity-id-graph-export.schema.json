@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sugarplatforms.local/schemas/entity-id-graph-export.schema.json",
+  "title": "Filtered Entity/ID Graph Export",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "exportedAt", "filter", "graph"],
+  "properties": {
+    "schemaVersion": { "const": "1.0" },
+    "exportedAt": { "type": "string", "minLength": 1 },
+    "filter": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["query", "nodeKinds", "edgeKinds", "factStatuses", "hideIsolated"],
+      "properties": {
+        "query": { "type": "string", "maxLength": 120 },
+        "nodeKinds": { "type": "array", "uniqueItems": true, "items": { "enum": ["primary_entity", "entity", "identifier", "system"] } },
+        "edgeKinds": { "type": "array", "uniqueItems": true, "items": { "enum": ["focused_identifier", "integration", "creates_entity", "consumes_entity", "authority_for", "accepted_finding"] } },
+        "factStatuses": { "type": "array", "uniqueItems": true, "items": { "enum": ["direct", "derived"] } },
+        "hideIsolated": { "type": "boolean" }
+      }
+    },
+    "graph": { "$ref": "entity-id-graph.schema.json" }
+  }
+}
