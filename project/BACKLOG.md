@@ -40,7 +40,7 @@ Statuses: `[ ] planned`, `[-] in progress`, `[x] complete`.
 
 - [-] Durable database persistence — assessment metadata is server-persisted via the SQLite local/single-instance adapter; artifact metadata, evidence, review state, findings, and reports remain to migrate
 - [x] Organization and workspace tenancy — persisted organization/workspace identity, server-owned local tenant context, tenant-scoped assessment operations, and focused isolation tests are implemented; authentication/RLS remain separate
-- [ ] Authentication and authorization
+- [x] Authentication and authorization foundation — server-resolved user/workspace membership, viewer/editor/admin permissions, 401/403 fail-closed API guards, and local-dev identity adapter are implemented; production IdP/session verification remains open
 - [ ] Row-level security and database/storage tenant-isolation tests
 - [ ] Private object storage
 - [ ] Server-backed report version history and authorization

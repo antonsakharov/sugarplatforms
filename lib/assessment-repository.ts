@@ -2,11 +2,14 @@ import { mkdirSync } from "node:fs";
 import { dirname } from "node:path";
 import { DatabaseSync } from "node:sqlite";
 import { assessmentDraftSchema, type AssessmentDraft } from "./assessment.ts";
+import { membershipSchema, userIdentitySchema, type Membership, type UserIdentity } from "./auth.ts";
 import { tenantContextSchema, type TenantContext, type TenantScope } from "./tenancy.ts";
 
 export type AssessmentRepository = {
   ensureTenant(tenant: TenantContext): TenantContext;
   getTenant(scope: TenantScope): TenantContext | null;
+  ensureMembership(scope: TenantScope, user: UserIdentity, membership: Membership): Membership;
+  getMembership(scope: TenantScope, userId: string): Membership | null;
   create(scope: TenantScope, assessment: AssessmentDraft): AssessmentDraft;
   findById(scope: TenantScope, assessmentId: string): AssessmentDraft | null;
   listActive(scope: TenantScope): AssessmentDraft[];
@@ -47,6 +50,21 @@ export class SqliteAssessmentRepository implements AssessmentRepository {
         created_at TEXT NOT NULL
       );
       CREATE INDEX IF NOT EXISTS workspaces_organization_idx ON workspaces (organization_id, created_at);
+      CREATE TABLE IF NOT EXISTS users (
+        id TEXT PRIMARY KEY,
+        email TEXT NOT NULL UNIQUE,
+        display_name TEXT NOT NULL,
+        created_at TEXT NOT NULL
+      );
+      CREATE TABLE IF NOT EXISTS memberships (
+        user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        organization_id TEXT NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
+        workspace_id TEXT NOT NULL REFERENCES workspaces(id) ON DELETE CASCADE,
+        role TEXT NOT NULL CHECK (role IN ('viewer', 'editor', 'admin')),
+        created_at TEXT NOT NULL,
+        PRIMARY KEY (user_id, workspace_id)
+      );
+      CREATE INDEX IF NOT EXISTS memberships_scope_idx ON memberships (organization_id, workspace_id, user_id);
       CREATE TABLE IF NOT EXISTS assessments (
         workspace_id TEXT NOT NULL,
         id TEXT NOT NULL,
@@ -83,6 +101,38 @@ export class SqliteAssessmentRepository implements AssessmentRepository {
     return tenantContextSchema.parse({
       organization: { id: row.organization_id, name: row.organization_name, createdAt: row.organization_created_at },
       workspace: { id: row.workspace_id, organizationId: row.organization_id, name: row.workspace_name, createdAt: row.workspace_created_at }
+    });
+  }
+
+  ensureMembership(scope: TenantScope, user: UserIdentity, membership: Membership): Membership {
+    this.assertTenant(scope);
+    const validatedUser = userIdentitySchema.parse(user);
+    const validatedMembership = membershipSchema.parse(membership);
+    if (validatedMembership.userId !== validatedUser.id || validatedMembership.organizationId !== scope.organizationId || validatedMembership.workspaceId !== scope.workspaceId) {
+      throw new TenantScopeError();
+    }
+    this.db.prepare("INSERT OR IGNORE INTO users (id, email, display_name, created_at) VALUES (?, ?, ?, ?)")
+      .run(validatedUser.id, validatedUser.email, validatedUser.displayName, validatedUser.createdAt);
+    const existing = this.db.prepare("SELECT email FROM users WHERE id = ?").get(validatedUser.id) as { email: string } | undefined;
+    if (!existing || existing.email !== validatedUser.email) throw new TenantScopeError();
+    this.db.prepare("INSERT OR IGNORE INTO memberships (user_id, organization_id, workspace_id, role, created_at) VALUES (?, ?, ?, ?, ?)")
+      .run(validatedMembership.userId, validatedMembership.organizationId, validatedMembership.workspaceId, validatedMembership.role, validatedMembership.createdAt);
+    const stored = this.getMembership(scope, validatedUser.id);
+    if (!stored || stored.role !== validatedMembership.role) throw new TenantScopeError();
+    return stored;
+  }
+
+  getMembership(scope: TenantScope, userId: string): Membership | null {
+    this.assertTenant(scope);
+    const row = this.db.prepare(`
+      SELECT user_id, organization_id, workspace_id, role, created_at
+      FROM memberships
+      WHERE user_id = ? AND organization_id = ? AND workspace_id = ?
+    `).get(userId, scope.organizationId, scope.workspaceId) as Record<string, string> | undefined;
+    if (!row) return null;
+    return membershipSchema.parse({
+      userId: row.user_id, organizationId: row.organization_id, workspaceId: row.workspace_id,
+      role: row.role, createdAt: row.created_at
     });
   }
 
