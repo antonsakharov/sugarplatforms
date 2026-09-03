@@ -41,7 +41,8 @@ Statuses: `[ ] planned`, `[-] in progress`, `[x] complete`.
 - [-] Durable database persistence — assessment metadata is server-persisted via the SQLite local/single-instance adapter; artifact metadata, evidence, review state, findings, and reports remain to migrate
 - [x] Organization and workspace tenancy — persisted organization/workspace identity, server-owned local tenant context, tenant-scoped assessment operations, and focused isolation tests are implemented; authentication/RLS remain separate
 - [x] Authentication and authorization foundation — server-resolved user/workspace membership, viewer/editor/admin permissions, 401/403 fail-closed API guards, and local-dev identity adapter are implemented; production IdP/session verification remains open
-- [ ] Row-level security and database/storage tenant-isolation tests
+- [x] PostgreSQL row-level security foundation — relational tenant keys, forced RLS policies, membership-gated reads, editor/admin assessment inserts, transaction-local tenant context, and database one-active-assessment enforcement are implemented
+- [ ] Live database/storage tenant-isolation integration tests against a real non-superuser/non-`BYPASSRLS` PostgreSQL role and private object storage
 - [ ] Private object storage
 - [ ] Server-backed report version history and authorization
 - [ ] Audit and deletion workflow
