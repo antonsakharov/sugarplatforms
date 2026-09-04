@@ -5,6 +5,7 @@ const tenantIdSchema = z.string().trim().min(2).max(80).regex(/^[a-z0-9][a-z0-9_
 const envSchema = z.object({
   NEXT_PUBLIC_DEMO_MODE: z.enum(["true", "false"]).default("true"),
   ASSESSMENT_DB_PATH: z.string().trim().min(1).default(".data/sugar-platform-diagnostic.sqlite"),
+  PRIVATE_ARTIFACT_ROOT: z.string().trim().min(1).default(".data/private-artifacts"),
   LOCAL_ORGANIZATION_ID: tenantIdSchema.default("local-org"),
   LOCAL_ORGANIZATION_NAME: z.string().trim().min(2).max(120).default("Local Organization"),
   LOCAL_WORKSPACE_ID: tenantIdSchema.default("local-demo"),
@@ -23,9 +24,8 @@ const envSchema = z.object({
 
 export const env = envSchema.parse(process.env);
 
-export const PERSISTENCE_CONFIG = {
-  assessmentDatabasePath: env.ASSESSMENT_DB_PATH
-} as const;
+export const PERSISTENCE_CONFIG = { assessmentDatabasePath: env.ASSESSMENT_DB_PATH } as const;
+export const STORAGE_CONFIG = { privateArtifactRoot: env.PRIVATE_ARTIFACT_ROOT } as const;
 
 export const LOCAL_TENANT_CONFIG = {
   organizationId: env.LOCAL_ORGANIZATION_ID,
