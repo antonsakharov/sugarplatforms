@@ -1,6 +1,6 @@
 import { createHash, randomUUID } from "node:crypto";
 import { mkdir, readFile, rm, writeFile } from "node:fs/promises";
-import { dirname, join, resolve, sep } from "node:path";
+import { dirname, resolve, sep } from "node:path";
 import { z } from "zod";
 import type { TenantScope } from "./tenancy";
 
@@ -33,14 +33,14 @@ export function tenantStoragePrefix(scope: TenantScope, assessmentId: string) {
 
 export function assertTenantStorageKey(scope: TenantScope, storageKey: string) {
   const expected = `${scope.organizationId}/${scope.workspaceId}/`;
-  if (!storageKey.startsWith(expected) || storageKey.includes("..") || storageKey.startsWith("/")) {
-    throw new Error("Artifact storage key is outside the active tenant scope.");
-  }
+  if (!storageKey.startsWith(expected) || storageKey.includes("..") || storageKey.startsWith("/")) throw new Error("Artifact storage key is outside the active tenant scope.");
   return storageKey;
 }
 
 export class LocalPrivateArtifactStorage implements ArtifactStorage {
-  constructor(private readonly root: string) {}
+  private readonly root: string;
+
+  constructor(root: string) { this.root = root; }
 
   private pathFor(scope: TenantScope, storageKey: string) {
     assertTenantStorageKey(scope, storageKey);
@@ -61,11 +61,6 @@ export class LocalPrivateArtifactStorage implements ArtifactStorage {
     return storedArtifactSchema.parse({ id, assessmentId, organizationId: scope.organizationId, workspaceId: scope.workspaceId, originalName: input.originalName, mediaType: input.mediaType || "application/octet-stream", size: input.bytes.byteLength, checksumSha256: computed, storageKey, createdAt: new Date().toISOString() });
   }
 
-  async get(scope: TenantScope, storageKey: string) {
-    return new Uint8Array(await readFile(this.pathFor(scope, storageKey)));
-  }
-
-  async delete(scope: TenantScope, storageKey: string) {
-    await rm(this.pathFor(scope, storageKey), { force: true });
-  }
+  async get(scope: TenantScope, storageKey: string) { return new Uint8Array(await readFile(this.pathFor(scope, storageKey))); }
+  async delete(scope: TenantScope, storageKey: string) { await rm(this.pathFor(scope, storageKey), { force: true }); }
 }
