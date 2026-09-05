@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sugarplatforms.local/schemas/maturity-recommendations.schema.json",
+  "title": "Sugar Focused Maturity and Recommendations",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["maturity", "recommendations"],
+  "properties": {
+    "maturity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schemaVersion", "assessmentId", "generatedFromDiagnosticAt", "status", "score", "band", "acceptedFindingCount", "totalFindingCount", "dimensions", "rationale", "limitations"],
+      "properties": {
+        "schemaVersion": { "const": "1.0" },
+        "assessmentId": { "type": "string", "minLength": 1 },
+        "generatedFromDiagnosticAt": { "type": "string", "minLength": 1 },
+        "status": { "enum": ["scored", "not_scored"] },
+        "score": { "type": ["number", "null"], "minimum": 1, "maximum": 5 },
+        "band": { "type": ["string", "null"], "enum": ["initial", "developing", "managed", "strong", null] },
+        "acceptedFindingCount": { "type": "integer", "minimum": 0 },
+        "totalFindingCount": { "type": "integer", "minimum": 0 },
+        "dimensions": { "type": "array", "items": { "type": "object", "additionalProperties": false, "required": ["category", "acceptedFindingCount", "riskPoints", "score"], "properties": { "category": { "enum": ["entity_identity", "ownership"] }, "acceptedFindingCount": { "type": "integer", "minimum": 1 }, "riskPoints": { "type": "number", "minimum": 0 }, "score": { "type": "number", "minimum": 1, "maximum": 5 } } } },
+        "rationale": { "type": "array", "items": { "type": "string" } },
+        "limitations": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "recommendations": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schemaVersion", "assessmentId", "generatedFromDiagnosticAt", "recommendations", "stats", "limitations"],
+      "properties": {
+        "schemaVersion": { "const": "1.0" },
+        "assessmentId": { "type": "string", "minLength": 1 },
+        "generatedFromDiagnosticAt": { "type": "string", "minLength": 1 },
+        "recommendations": { "type": "array", "items": { "type": "object", "additionalProperties": false, "required": ["id", "priority", "severity", "confidence", "title", "action", "whyNow", "findingIds", "affectedObjectIds", "evidence"], "properties": { "id": { "type": "string" }, "priority": { "type": "integer", "minimum": 1 }, "severity": { "enum": ["low", "medium", "high"] }, "confidence": { "type": "number", "minimum": 0, "maximum": 1 }, "title": { "type": "string" }, "action": { "type": "string" }, "whyNow": { "type": "string" }, "findingIds": { "type": "array", "minItems": 1, "items": { "type": "string" } }, "affectedObjectIds": { "type": "array", "items": { "type": "string" } }, "evidence": { "type": "array", "minItems": 1, "items": { "type": "object", "required": ["segmentId", "artifactId", "artifactName", "locator", "evidenceType"] } } } } },
+        "stats": { "type": "object", "additionalProperties": false, "required": ["acceptedFindingCount", "recommendationCount", "evidenceReferenceCount"], "properties": { "acceptedFindingCount": { "type": "integer", "minimum": 0 }, "recommendationCount": { "type": "integer", "minimum": 0 }, "evidenceReferenceCount": { "type": "integer", "minimum": 0 } } },
+        "limitations": { "type": "array", "items": { "type": "string" } }
+      }
+    }
+  }
+}
