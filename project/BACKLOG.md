@@ -38,14 +38,16 @@ Statuses: `[ ] planned`, `[-] in progress`, `[x] complete`.
 
 ## Production-readiness work
 
-- [-] Durable database persistence — assessment metadata is server-persisted via the SQLite local/single-instance adapter; artifact metadata, evidence, review state, findings, and reports remain to migrate
+- [-] Durable database persistence — assessment metadata plus validated artifact metadata, normalized source segments, parser provenance, and extraction snapshots are server-persisted via tenant-scoped SQLite local/single-instance adapters; review decisions, findings, and reports remain to migrate
 - [x] Organization and workspace tenancy — persisted organization/workspace identity, server-owned local tenant context, tenant-scoped assessment operations, and focused isolation tests are implemented
 - [x] Authentication and authorization foundation — server-resolved user/workspace membership, viewer/editor/admin permissions, 401/403 fail-closed API guards, and local-dev identity adapter are implemented; production IdP/session verification remains open
 - [x] PostgreSQL row-level security foundation — relational tenant keys, forced RLS policies, membership-gated reads, editor/admin assessment inserts, transaction-local tenant context, and database one-active-assessment enforcement are implemented
 - [x] Private object storage foundation — validated artifact bytes are persisted only after upload/content checks, under random tenant-scoped keys through a server-only storage interface; local mode uses a private filesystem adapter and does not expose storage paths
+- [x] Server-backed artifact metadata and source/evidence persistence — validated artifact metadata, source-addressable parser segments, parser warnings, and extraction snapshots are transactionally persisted and tenant-scoped; authenticated resumable reads are available
+- [ ] Server-backed extraction-review decisions and approved extraction persistence
+- [ ] Server-backed finding-review decisions and accepted findings persistence
 - [ ] Live database/storage tenant-isolation integration tests against a real non-superuser/non-`BYPASSRLS` PostgreSQL role and production private object storage
 - [ ] Production S3/Supabase storage adapter with short-lived signed download URLs
-- [ ] Server-backed artifact metadata/evidence/review persistence
 - [ ] Server-backed report version history and authorization
 - [ ] Audit and deletion workflow
 - [ ] Operational job controls and runbook
