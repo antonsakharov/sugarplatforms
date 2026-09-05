@@ -4,25 +4,25 @@
 
 User can create a workspace, name an assessment, choose one focus area, specify one primary entity, describe the business concern, and accept assessment limits.
 
-Status: in progress — assessment creation is server-persisted through a repository boundary using the credential-free SQLite local/single-instance adapter. Explicit organization and workspace identities are now persisted and every assessment repository operation is scoped by both IDs; browser localStorage remains only a compatibility cache. Authentication, PostgreSQL/RLS, and durable persistence of downstream reviewed state remain open.
+Status: in progress — assessment creation is server-persisted through a repository boundary using the credential-free SQLite local/single-instance adapter. Explicit organization and workspace identities are persisted and every assessment repository operation is scoped by both IDs; browser localStorage remains only a compatibility cache. Authentication and PostgreSQL/RLS foundations exist, while durable persistence of downstream reviewed state remains open.
 
 ## MVP priority 2 — Guided upload
 
 User can select up to 10 supported files, receive server-side type/size/duplicate/page validation, receive probable-secret and prohibited-data warnings, remove or replace files, and see whether the artifact set is ready for parsing.
 
-Status: in progress — complete demo/local upload-readiness workflow is implemented. Uploaded bytes are inspected transiently and are not persisted. Confidential uploads still require authentication, tenant authorization, private object storage, malware scanning, and production security validation.
+Status: in progress — the complete local upload-readiness workflow is implemented. Artifact bytes are persisted privately only after readiness checks pass, using server-derived tenant-scoped random storage keys. Durable tenant-scoped artifact metadata is now stored alongside processing provenance. Confidential enterprise uploads still require production identity, production private storage, malware scanning, deletion/audit controls, and live isolation validation.
 
 ## MVP priority 3 — Artifact parsing and evidence
 
 User can see processing status, inspect parsed content and source coordinates, see extracted-object provenance, and inspect parsing failures.
 
-Status: in progress — text/Markdown, JSON/YAML/OpenAPI, CSV, SQL DDL, and bounded direct-text PDF parsing produce source-addressable segments with stable locators and hashes. Production-grade PDF coverage, retry/quarantine, authenticated storage, and persistence remain open.
+Status: in progress — text/Markdown, JSON/YAML/OpenAPI, CSV, SQL DDL, and bounded direct-text PDF parsing produce source-addressable segments with stable locators and hashes. Validated artifact metadata, normalized source segments, parser warnings, and the current extraction snapshot are now transactionally persisted under organization/workspace/assessment scope and can be resumed through an authenticated no-store API. Production-grade PDF coverage, malware/quarantine, production PostgreSQL/RLS activation, and durable human review decisions remain open.
 
 ## MVP priority 4 — Extraction review
 
 User can review extracted systems, entities, identifiers, integrations, capabilities, and owners; rename/reject/merge/confirm objects; inspect evidence; and approve extraction for analysis.
 
-Status: implemented for the local/demo workflow — evidence-linked candidate inventory, explicit rename/reject/merge/confirm actions, same-kind merge guardrails, evidence drill-down, and approval gating are available. Explicit `system of record`, `source of truth`, and `authoritative system` statements are retained as evidence-backed authority claims. Explicit matching/entity-resolution statements, capability responsibility, synchronous calls, and strict creator/consumer entity-role statements are preserved with direct evidence. Approval is blocked until every candidate is resolved. OpenAI activation and durable tenant-scoped persistence remain open.
+Status: implemented for the local/demo workflow — evidence-linked candidate inventory, explicit rename/reject/merge/confirm actions, same-kind merge guardrails, evidence drill-down, and approval gating are available. Explicit `system of record`, `source of truth`, and `authoritative system` statements are retained as evidence-backed authority claims. Explicit matching/entity-resolution statements, capability responsibility, synchronous calls, and strict creator/consumer entity-role statements are preserved with direct evidence. Approval is blocked until every candidate is resolved. OpenAI activation and durable tenant-scoped review-decision persistence remain open.
 
 ## MVP priority 5 — Entity and ID map
 
