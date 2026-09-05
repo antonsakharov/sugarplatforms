@@ -9,6 +9,7 @@ import { AuthenticationRequiredError, AuthorizationDeniedError } from "@/lib/aut
 import { requireServerPermission } from "@/lib/server-auth";
 import { getAssessmentRepository } from "@/lib/server-assessment-store";
 import { getArtifactStorage } from "@/lib/server-artifact-storage";
+import { getProcessingRepository } from "@/lib/server-processing-store";
 import { scopeFromTenant } from "@/lib/tenancy";
 
 export const runtime = "nodejs";
@@ -95,7 +96,35 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
       } catch (error) { extraction = { ...extraction, status: "partial", warnings: [error instanceof Error ? error.message : "Architecture extraction failed."] }; }
     }
 
-    return NextResponse.json({ assessmentId: id, accepted: true, storageMode: readyForAnalysis ? "private-tenant-scoped-local-adapter" : "not-persisted-until-ready", persistedArtifacts, limits: { maxFiles: PRODUCT_LIMITS.maxFiles, maxFileBytes: PRODUCT_LIMITS.maxFileBytes, maxTotalPages: PRODUCT_LIMITS.maxTotalPages }, artifacts, readiness, parsing, extraction }, { headers: { "Cache-Control": "no-store" } });
+    let processingPersistence: { persisted: boolean; persistedAt?: string; artifactCount: number; segmentCount: number } = { persisted: false, artifactCount: 0, segmentCount: 0 };
+    if (readyForAnalysis) {
+      const metadata = parsing.parsedArtifacts.flatMap((parsed) => {
+        const stored = persistedArtifacts.find((item) => item.name === parsed.artifactName);
+        const inspected = artifacts.find((item) => item.name === parsed.artifactName);
+        if (!stored || !inspected) return [];
+        return [{
+          storageArtifactId: stored.id,
+          parserArtifactId: parsed.artifactId,
+          originalName: parsed.artifactName,
+          mediaType: inspected.type,
+          size: stored.size,
+          checksumSha256: stored.checksumSha256,
+          parser: parsed.parser,
+          warnings: parsed.warnings,
+          createdAt: stored.persistedAt
+        }];
+      });
+      const persisted = getProcessingRepository().replace(scope, {
+        assessmentId: id,
+        artifacts: metadata,
+        parsedArtifacts: parsing.parsedArtifacts,
+        extraction,
+        persistedAt: new Date().toISOString()
+      });
+      processingPersistence = { persisted: true, persistedAt: persisted.persistedAt, artifactCount: persisted.artifacts.length, segmentCount: persisted.parsedArtifacts.reduce((sum, artifact) => sum + artifact.sourceSegments.length, 0) };
+    }
+
+    return NextResponse.json({ assessmentId: id, accepted: true, storageMode: readyForAnalysis ? "private-tenant-scoped-local-adapter" : "not-persisted-until-ready", persistedArtifacts, processingPersistence, limits: { maxFiles: PRODUCT_LIMITS.maxFiles, maxFileBytes: PRODUCT_LIMITS.maxFileBytes, maxTotalPages: PRODUCT_LIMITS.maxTotalPages }, artifacts, readiness, parsing, extraction }, { headers: { "Cache-Control": "no-store" } });
   } catch (error) {
     if (error instanceof AuthenticationRequiredError) return NextResponse.json({ error: error.message }, { status: 401 });
     if (error instanceof AuthorizationDeniedError) return NextResponse.json({ error: error.message }, { status: 403 });
