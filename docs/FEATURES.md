@@ -16,13 +16,13 @@ Status: in progress — the complete local upload-readiness workflow is implemen
 
 User can see processing status, inspect parsed content and source coordinates, see extracted-object provenance, and inspect parsing failures.
 
-Status: in progress — text/Markdown, JSON/YAML/OpenAPI, CSV, SQL DDL, and bounded direct-text PDF parsing produce source-addressable segments with stable locators and hashes. Validated artifact metadata, normalized source segments, parser warnings, and the current extraction snapshot are now transactionally persisted under organization/workspace/assessment scope and can be resumed through an authenticated no-store API. Production-grade PDF coverage, malware/quarantine, production PostgreSQL/RLS activation, and durable human review decisions remain open.
+Status: in progress — text/Markdown, JSON/YAML/OpenAPI, CSV, SQL DDL, and bounded direct-text PDF parsing produce source-addressable segments with stable locators and hashes. Validated artifact metadata, normalized source segments, parser warnings, and the current extraction snapshot are transactionally persisted under organization/workspace/assessment scope and can be resumed through an authenticated no-store API. Production-grade PDF coverage, malware/quarantine, production PostgreSQL/RLS activation, and durable downstream finding/report state remain open.
 
 ## MVP priority 4 — Extraction review
 
 User can review extracted systems, entities, identifiers, integrations, capabilities, and owners; rename/reject/merge/confirm objects; inspect evidence; and approve extraction for analysis.
 
-Status: implemented for the local/demo workflow — evidence-linked candidate inventory, explicit rename/reject/merge/confirm actions, same-kind merge guardrails, evidence drill-down, and approval gating are available. Explicit `system of record`, `source of truth`, and `authoritative system` statements are retained as evidence-backed authority claims. Explicit matching/entity-resolution statements, capability responsibility, synchronous calls, and strict creator/consumer entity-role statements are preserved with direct evidence. Approval is blocked until every candidate is resolved. OpenAI activation and durable tenant-scoped review-decision persistence remain open.
+Status: implemented for the real local/single-instance workflow with durable review state — evidence-linked candidate inventory, explicit rename/reject/merge/confirm actions, same-kind merge guardrails, evidence drill-down, and approval gating are available. Review decisions and approval are now authenticated, tenant-scoped, server-persisted, and SHA-256-bound to the exact persisted extraction snapshot. Any processing change that alters extraction identity/evidence makes the prior review stale and forces a fresh review; client payloads cannot introduce unknown objects or preserve approval across extraction versions. Browser localStorage is only a compatibility cache after successful server reads/writes. OpenAI activation and production PostgreSQL/RLS-backed review persistence remain open.
 
 ## MVP priority 5 — Entity and ID map
 
