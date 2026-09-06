@@ -29,27 +29,8 @@ export class StaleExtractionReviewError extends Error {
   }
 }
 
-function stableExtractionProjection(extraction: ExtractionEnvelope) {
-  return {
-    schemaVersion: extraction.schemaVersion,
-    provider: extraction.provider,
-    promptVersion: extraction.promptVersion,
-    status: extraction.status,
-    objects: [...extraction.objects]
-      .map((object) => ({
-        id: object.id,
-        kind: object.kind,
-        name: object.name,
-        evidence: [...object.evidence]
-          .map((evidence) => ({ segmentId: evidence.segmentId, artifactId: evidence.artifactId, locator: evidence.locator }))
-          .sort((a, b) => a.segmentId.localeCompare(b.segmentId))
-      }))
-      .sort((a, b) => a.id.localeCompare(b.id))
-  };
-}
-
 export function extractionFingerprint(extraction: ExtractionEnvelope) {
-  return createHash("sha256").update(JSON.stringify(stableExtractionProjection(extraction))).digest("hex");
+  return createHash("sha256").update(JSON.stringify(extraction)).digest("hex");
 }
 
 export function validateReviewAgainstExtraction(review: ExtractionReview, extraction: ExtractionEnvelope) {
