@@ -6,7 +6,7 @@ import { extractionFingerprint, SqliteExtractionReviewRepository, StaleExtractio
 const scope = { organizationId: "org_a", workspaceId: "ws_a" };
 const otherScope = { organizationId: "org_b", workspaceId: "ws_b" };
 const candidate = { id: "obj_a", kind: "system", name: "Service A", normalizedName: "service a", confidence: 1, extractionMethod: "demo", evidence: [{ segmentId: "seg_a", artifactId: "art_a", artifactName: "architecture.md", locator: "lines 1-2", evidenceType: "direct" }], attributes: {} };
-const extraction = { schemaVersion: "1.0", provider: "local-deterministic", promptVersion: "local-extraction-v1", status: "complete", objects: [candidate] };
+const extraction = { schemaVersion: "1.0", provider: "local-deterministic", promptVersion: "local-extraction-v1", status: "ready", objects: [candidate], warnings: [], stats: { objectCount: 1, evidenceReferenceCount: 1 } };
 
 test("persists approved extraction review under tenant scope", () => {
   const repository = new SqliteExtractionReviewRepository(":memory:");
