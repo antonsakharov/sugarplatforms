@@ -8,7 +8,7 @@ Extraction review is now durable server-side state for the real assessment path.
 
 Every review read/write is scoped by server-resolved organization and workspace membership. `viewer` may read; `editor` and `admin` may write. Client payloads cannot select tenant scope.
 
-A review is bound to a SHA-256 fingerprint of the exact persisted extraction envelope. The fingerprint covers extraction schema/provider/prompt/status plus object identity, name, kind, and direct evidence references. If artifact processing changes the extraction, the prior persisted review becomes stale and cannot be reused as approval.
+A review is bound to a SHA-256 fingerprint of the exact serialized persisted extraction envelope, including provider/prompt/status, extracted objects, attributes, confidence, direct evidence references, warnings, and extraction statistics. If artifact processing changes that envelope, the prior persisted review becomes stale and cannot be reused as approval.
 
 The server validates that review records:
 
@@ -20,6 +20,8 @@ The server validates that review records:
 - cannot claim approval while any object remains pending;
 - cannot retain `approvedAt` when approval has been reset.
 
+Diagnostics now load the current extraction/review boundary through the authenticated server API before running, so a stale browser cache cannot independently authorize analysis.
+
 ## API
 
 `GET /api/assessments/:id/extraction-review`
@@ -30,9 +32,18 @@ Returns the current persisted extraction, its fingerprint, and either the curren
 
 Requires `extraction-review:write` and accepts only `{ extractionFingerprint, review }`. A stale fingerprint fails with HTTP 409. Review validation failures fail closed with HTTP 400.
 
-## Local adapter
+## Local setup
 
-The credential-free local/single-instance path stores extraction review snapshots in the same SQLite database configured by `SUGAR_ASSESSMENT_DB_PATH`. This adapter exercises the intended authorization/versioning boundary without requiring external credentials.
+No new credential or service is required for the local/single-instance adapter. Use the existing local authentication/tenancy configuration and set `SUGAR_ASSESSMENT_DB_PATH` when a custom SQLite location is desired. Review state is stored in the same private application database as assessment and processing metadata.
+
+Typical validation remains:
+
+```bash
+npm install
+npm run validate
+```
+
+The local development identity must have an `editor` or `admin` membership to modify review decisions; `viewer` remains read-only.
 
 ## Remaining production work
 
