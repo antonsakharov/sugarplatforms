@@ -10,6 +10,12 @@ import { canCompleteFindingReview, completeFindingReview, createFindingReview, e
 function diagnosticsKey(assessmentId: string) { return `sugar:diagnostics:${assessmentId}`; }
 function findingReviewKey(assessmentId: string) { return `sugar:finding-review:${assessmentId}`; }
 
+type PersistedReviewPayload = {
+  extraction: ExtractionEnvelope;
+  review: ExtractionReview;
+  stalePersistedReview: boolean;
+};
+
 function FindingEditor({ finding, onSave }: { finding: DiagnosticFinding; onSave: (finding: DiagnosticFinding, note: string) => void }) {
   const [draft, setDraft] = useState(finding);
   const [note, setNote] = useState("");
@@ -35,14 +41,28 @@ export default function DiagnosticsPage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const extractionRaw = localStorage.getItem(`sugar:extraction:${assessmentId}`);
-    const reviewRaw = localStorage.getItem(`sugar:extraction-review:${assessmentId}`);
+    let active = true;
     const diagnosticsRaw = localStorage.getItem(diagnosticsKey(assessmentId));
     const findingReviewRaw = localStorage.getItem(findingReviewKey(assessmentId));
-    setExtraction(extractionRaw ? JSON.parse(extractionRaw) : null);
-    setReview(reviewRaw ? JSON.parse(reviewRaw) : null);
     setDiagnostics(diagnosticsRaw ? JSON.parse(diagnosticsRaw) : null);
     setFindingReview(findingReviewRaw ? JSON.parse(findingReviewRaw) : null);
+    void fetch(`/api/assessments/${assessmentId}/extraction-review`, { cache: "no-store" })
+      .then(async (response) => {
+        const payload = await response.json() as PersistedReviewPayload | { error?: string };
+        if (!response.ok || !("review" in payload)) throw new Error(("error" in payload && payload.error) || "Unable to load approved extraction.");
+        if (!active) return;
+        setExtraction(payload.extraction);
+        setReview(payload.stalePersistedReview ? null : payload.review);
+        localStorage.setItem(`sugar:extraction:${assessmentId}`, JSON.stringify(payload.extraction));
+        localStorage.setItem(`sugar:extraction-review:${assessmentId}`, JSON.stringify(payload.review));
+      })
+      .catch((caught) => {
+        if (!active) return;
+        setExtraction(null);
+        setReview(null);
+        setError(caught instanceof Error ? caught.message : "Unable to load approved extraction.");
+      });
+    return () => { active = false; };
   }, [assessmentId]);
 
   const evidenceBySegment = useMemo(() => {
@@ -107,20 +127,20 @@ export default function DiagnosticsPage() {
   }
 
   if (extraction === undefined) return <p className="lede">Loading approved architecture…</p>;
-  if (!extraction || !review) return <div className="panel"><h1>Diagnostics</h1><p>Complete architecture extraction and review first.</p><a className="button" href={`/assessment/${assessmentId}/upload`}>Upload evidence</a></div>;
-  if (!review.approved) return <><div className="eyebrow">Assessment · Diagnostics</div><h1>Approve extraction before diagnostics</h1><p className="lede">Deterministic rules only run against a fully reviewed extraction set.</p><div className="panel"><p>Resolve all architecture candidates and approve the extraction boundary first.</p><a className="button" href={`/assessment/${assessmentId}/review`}>Review extraction</a></div></>;
+  if (!extraction || !review) return <div className="panel"><h1>Diagnostics</h1><p>{error ?? "Complete architecture extraction and review first."}</p><a className="button" href={`/assessment/${assessmentId}/review`}>Review extraction</a></div>;
+  if (!review.approved) return <><div className="eyebrow">Assessment · Diagnostics</div><h1>Approve extraction before diagnostics</h1><p className="lede">Deterministic rules only run against a fully reviewed, current persisted extraction set.</p><div className="panel"><p>Resolve all architecture candidates and approve the current extraction boundary first.</p><a className="button" href={`/assessment/${assessmentId}/review`}>Review extraction</a></div></>;
 
   return <>
     <div className="eyebrow">Assessment · Diagnostics and finding review</div>
     <h1>Inspect and decide evidence-backed findings</h1>
-    <p className="lede">Rules operate only on confirmed architecture objects. Before review starts, every finding is checked against the approved extraction evidence boundary. You can edit presentation and impact language, but evidence and rule provenance remain immutable.</p>
+    <p className="lede">Rules operate only on the current server-persisted approved extraction. Before review starts, every finding is checked against that evidence boundary. You can edit presentation and impact language, but evidence and rule provenance remain immutable.</p>
     <div className="panel diagnostic-panel">
       <div className="form-actions"><button className="button" type="button" onClick={run}>{diagnostics ? "Re-run diagnostics" : "Run diagnostics"}</button><a className="button button-secondary" href={`/assessment/${assessmentId}/review`}>Back to extraction review</a><a className="button button-secondary" href={`/assessment/${assessmentId}`}>Assessment workspace</a></div>
       {error && <div className="form-error">{error}</div>}
       {diagnostics && <>
         <div className="metrics diagnostic-metrics"><article><strong>{diagnostics.stats.findingCount}</strong><span>findings</span></article><article><strong>{diagnostics.stats.ruleCount}</strong><span>rules run</span></article><article><strong>{diagnostics.stats.activeObjectCount}</strong><span>approved objects</span></article><article><strong>{diagnostics.stats.evidenceReferenceCount}</strong><span>evidence links</span></article></div>
         {!findingReview && diagnostics.findings.length > 0 && <div className="readiness-review"><strong>Review not initialized</strong><span>Validate evidence coverage and create an explicit review set before decisions.</span><button className="button button-secondary" type="button" onClick={ensureReview}>Validate evidence & start review</button></div>}
-        {diagnostics.findings.length === 0 ? <div className="readiness-ready"><strong>No deterministic signals found</strong><span>The currently implemented rules found no fragmented-identifier or ownership-gap signal in the approved extraction set.</span></div> : <div className="artifact-list">{diagnostics.findings.map((sourceFinding) => {
+        {diagnostics.findings.length === 0 ? <div className="readiness-ready"><strong>No deterministic signals found</strong><span>The currently implemented rules found no supported diagnostic signal in the approved extraction set.</span></div> : <div className="artifact-list">{diagnostics.findings.map((sourceFinding) => {
           const reviewItem = reviewByFinding.get(sourceFinding.id);
           const finding = reviewItem ? materializeReviewedFinding(sourceFinding, reviewItem) : sourceFinding;
           return <article className="finding-card" key={finding.id}>
