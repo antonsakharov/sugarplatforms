@@ -46,6 +46,7 @@ Statuses: `[ ] planned`, `[-] in progress`, `[x] complete`.
 - [x] Server-backed artifact metadata and source/evidence persistence — validated artifact metadata, source-addressable parser segments, parser warnings, and extraction snapshots are transactionally persisted and tenant-scoped; authenticated resumable reads are available
 - [x] Server-backed extraction-review decisions and approved extraction persistence — review decisions are tenant-scoped, authenticated, server-persisted, and bound to the exact extraction fingerprint; stale extraction changes invalidate prior approval
 - [x] Server-backed finding-review decisions and accepted findings persistence — authenticated finding review is tenant-scoped, server-persisted, bound to canonical deterministic diagnostics, stale on extraction changes, and materializes accepted findings only after explicit completion
+- [ ] Server-backed accepted-findings consumption — maturity, entity/ID map, recommendations, AI promotion handoff, and report pages must hydrate current reviewed state from the authenticated finding-review API rather than browser compatibility cache
 - [ ] Live database/storage tenant-isolation integration tests against a real non-superuser/non-`BYPASSRLS` PostgreSQL role and production private object storage
 - [ ] Production S3/Supabase storage adapter with short-lived signed download URLs
 - [ ] Server-backed report version history and authorization
