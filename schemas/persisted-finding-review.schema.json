@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sugarplatforms.local/schemas/persisted-finding-review.schema.json",
+  "title": "Persisted Finding Review",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["assessmentId", "diagnosticFingerprint", "diagnostics", "review", "acceptedFindings", "updatedAt", "stale"],
+  "properties": {
+    "assessmentId": { "type": "string", "minLength": 1 },
+    "diagnosticFingerprint": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "diagnostics": { "$ref": "diagnostic.schema.json" },
+    "review": { "$ref": "finding-review.schema.json" },
+    "acceptedFindings": {
+      "type": "array",
+      "items": { "$ref": "diagnostic.schema.json#/$defs/finding" }
+    },
+    "updatedAt": { "type": "string", "format": "date-time" },
+    "stale": { "type": "boolean" }
+  }
+}
