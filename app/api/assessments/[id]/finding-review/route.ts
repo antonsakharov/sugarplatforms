@@ -30,8 +30,7 @@ function state(id: string, permission: "finding-review:read" | "finding-review:w
 }
 
 function sameDeterministicDiagnostics(submitted: DiagnosticEnvelope, current: DiagnosticEnvelope) {
-  const normalized = { ...current, generatedAt: submitted.generatedAt };
-  return JSON.stringify(normalized) === JSON.stringify(submitted);
+  return JSON.stringify({ ...current, generatedAt: submitted.generatedAt }) === JSON.stringify(submitted);
 }
 
 export async function GET(_request: Request, { params }: { params: Promise<{ id: string }> }) {
@@ -59,18 +58,16 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
   try {
     const current = state(id, "finding-review:write");
     if ("response" in current) return current.response;
-    const body = await request.json() as { diagnostics?: unknown; diagnosticFingerprint?: unknown; review?: unknown };
-    if (!body.diagnostics || typeof body.diagnostics !== "object" || typeof body.diagnosticFingerprint !== "string" || !body.review || typeof body.review !== "object") {
-      return NextResponse.json({ error: "diagnostics, diagnosticFingerprint, and review are required." }, { status: 400 });
-    }
+    const body = await request.json() as { diagnostics?: unknown; review?: unknown };
+    if (!body.diagnostics || typeof body.diagnostics !== "object" || !body.review || typeof body.review !== "object") return NextResponse.json({ error: "diagnostics and review are required." }, { status: 400 });
     const diagnostics = body.diagnostics as DiagnosticEnvelope;
     const review = body.review as FindingReview;
     if (diagnostics.assessmentId !== id) return NextResponse.json({ error: "Diagnostics assessment does not match route scope." }, { status: 400 });
     validateDiagnosticEvidence(diagnostics, current.processing.extraction, current.extractionReview.review);
     const canonical = runDeterministicDiagnostics({ assessmentId: id, extraction: current.processing.extraction, review: current.extractionReview.review });
-    if (!sameDeterministicDiagnostics(diagnostics, canonical)) return NextResponse.json({ error: "Submitted diagnostics do not match the deterministic engine output for the current approved extraction." }, { status: 409 });
-    if (body.diagnosticFingerprint !== diagnosticFingerprint(diagnostics)) throw new StaleFindingReviewError();
-    const saved = getFindingReviewRepository().save(current.scope, id, diagnostics, review, body.diagnosticFingerprint);
+    if (!sameDeterministicDiagnostics(diagnostics, canonical)) return NextResponse.json({ error: "Submitted diagnostics do not match deterministic engine output for the current approved extraction." }, { status: 409 });
+    const fingerprint = diagnosticFingerprint(diagnostics);
+    const saved = getFindingReviewRepository().save(current.scope, id, diagnostics, review, fingerprint);
     return NextResponse.json(saved, { headers: { "Cache-Control": "no-store" } });
   } catch (error) {
     const response = authError(error);
