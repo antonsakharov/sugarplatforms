@@ -12,7 +12,10 @@
     "review": { "$ref": "finding-review.schema.json" },
     "acceptedFindings": {
       "type": "array",
-      "items": { "$ref": "diagnostic.schema.json#/$defs/finding" }
+      "items": {
+        "type": "object",
+        "required": ["id", "ruleId", "ruleVersion", "category", "severity", "confidence", "factStatus", "title", "description", "businessImpact", "technicalImpact", "affectedObjectIds", "evidence", "recommendation", "validationQuestions", "reviewStatus"]
+      }
     },
     "updatedAt": { "type": "string", "format": "date-time" },
     "stale": { "type": "boolean" }
