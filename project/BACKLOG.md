@@ -38,14 +38,14 @@ Statuses: `[ ] planned`, `[-] in progress`, `[x] complete`.
 
 ## Production-readiness work
 
-- [-] Durable database persistence — assessment metadata, validated artifact metadata, normalized source segments, parser provenance, extraction snapshots, and extraction-review decisions/approval are server-persisted via tenant-scoped SQLite local/single-instance adapters; finding review and reports remain to migrate
+- [-] Durable database persistence — assessment metadata, validated artifact metadata, normalized source segments, parser provenance, extraction snapshots, extraction-review decisions/approval, finding-review decisions, and materialized accepted findings are server-persisted via tenant-scoped SQLite local/single-instance adapters; report history remains to migrate
 - [x] Organization and workspace tenancy — persisted organization/workspace identity, server-owned local tenant context, tenant-scoped assessment operations, and focused isolation tests are implemented
 - [x] Authentication and authorization foundation — server-resolved user/workspace membership, viewer/editor/admin permissions, 401/403 fail-closed API guards, and local-dev identity adapter are implemented; production IdP/session verification remains open
 - [x] PostgreSQL row-level security foundation — relational tenant keys, forced RLS policies, membership-gated reads, editor/admin assessment inserts, transaction-local tenant context, and database one-active-assessment enforcement are implemented
 - [x] Private object storage foundation — validated artifact bytes are persisted only after upload/content checks, under random tenant-scoped keys through a server-only storage interface; local mode uses a private filesystem adapter and does not expose storage paths
 - [x] Server-backed artifact metadata and source/evidence persistence — validated artifact metadata, source-addressable parser segments, parser warnings, and extraction snapshots are transactionally persisted and tenant-scoped; authenticated resumable reads are available
 - [x] Server-backed extraction-review decisions and approved extraction persistence — review decisions are tenant-scoped, authenticated, server-persisted, and bound to the exact extraction fingerprint; stale extraction changes invalidate prior approval
-- [ ] Server-backed finding-review decisions and accepted findings persistence
+- [x] Server-backed finding-review decisions and accepted findings persistence — authenticated finding review is tenant-scoped, server-persisted, bound to canonical deterministic diagnostics, stale on extraction changes, and materializes accepted findings only after explicit completion
 - [ ] Live database/storage tenant-isolation integration tests against a real non-superuser/non-`BYPASSRLS` PostgreSQL role and production private object storage
 - [ ] Production S3/Supabase storage adapter with short-lived signed download URLs
 - [ ] Server-backed report version history and authorization
