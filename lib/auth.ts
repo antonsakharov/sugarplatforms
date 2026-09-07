@@ -33,12 +33,12 @@ export const authenticatedContextSchema = z.object({
 export type UserIdentity = z.infer<typeof userIdentitySchema>;
 export type Membership = z.infer<typeof membershipSchema>;
 export type AuthenticatedContext = z.infer<typeof authenticatedContextSchema>;
-export type Permission = "assessment:read" | "assessment:create" | "tenant:read" | "artifact:create" | "artifact:read" | "artifact:delete" | "extraction-review:read" | "extraction-review:write";
+export type Permission = "assessment:read" | "assessment:create" | "tenant:read" | "artifact:create" | "artifact:read" | "artifact:delete" | "extraction-review:read" | "extraction-review:write" | "finding-review:read" | "finding-review:write";
 
 const ROLE_PERMISSIONS: Record<Role, ReadonlySet<Permission>> = {
-  viewer: new Set(["assessment:read", "tenant:read", "artifact:read", "extraction-review:read"]),
-  editor: new Set(["assessment:read", "assessment:create", "tenant:read", "artifact:create", "artifact:read", "artifact:delete", "extraction-review:read", "extraction-review:write"]),
-  admin: new Set(["assessment:read", "assessment:create", "tenant:read", "artifact:create", "artifact:read", "artifact:delete", "extraction-review:read", "extraction-review:write"])
+  viewer: new Set(["assessment:read", "tenant:read", "artifact:read", "extraction-review:read", "finding-review:read"]),
+  editor: new Set(["assessment:read", "assessment:create", "tenant:read", "artifact:create", "artifact:read", "artifact:delete", "extraction-review:read", "extraction-review:write", "finding-review:read", "finding-review:write"]),
+  admin: new Set(["assessment:read", "assessment:create", "tenant:read", "artifact:create", "artifact:read", "artifact:delete", "extraction-review:read", "extraction-review:write", "finding-review:read", "finding-review:write"])
 };
 
 export class AuthenticationRequiredError extends Error { constructor() { super("Authenticated access is required."); this.name = "AuthenticationRequiredError"; } }
