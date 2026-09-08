@@ -1,23 +1,5 @@
 # Development
 
-## 2026-08-30 formal PDF export
-
-REP-007 adds a product-managed PDF export for explicitly saved report snapshots. No package, credential, environment variable, browser automation service, or external PDF provider is required. `lib/report-pdf.ts` is a deterministic bounded PDF 1.4 writer, and `POST /api/reports/pdf` accepts only the structured saved snapshot, revalidates its assessment/diagnostic provenance, and returns an `application/pdf` attachment with `Cache-Control: no-store`, page-count, SHA-256, and diagnostic timestamp headers. The report page exposes **Download formal PDF** only beside saved immutable versions; an unsaved live preview cannot use the formal export path.
-
-Relevant files: `lib/report-pdf.ts`, `app/api/reports/pdf/route.ts`, `app/assessment/[id]/report/page.tsx`, `tests/report-pdf.test.mjs`, `schemas/report-pdf-export.schema.json`, and `docs/REPORT_PDF.md`.
-
-The current dependency-free PDF adapter uses PDF built-in Type 1 fonts and normalizes unsupported non-ASCII glyphs to a printable fallback. Full Unicode font embedding, digital signing, authenticated tenant authorization, private report storage, and durable server-backed version history remain production work.
-
-## 2026-08-29 formal report print styling
-
-REP-006 adds a route-scoped presentation layout for `/assessment/[id]/report`. No additional package, environment variable, credential, or external service is required. The report keeps the same accepted-findings-only data model and provenance; the new CSS only changes presentation. Browser print uses A4 page geometry, print-safe typography, compact metrics, page-break controls, expanded evidence details, and hides site navigation plus interactive form actions. Browser save-to-PDF remains available through the print dialog as an alternate user-agent presentation path.
-
-Relevant files: `app/assessment/[id]/report/layout.tsx`, `app/assessment/[id]/report/report-print.css`, `tests/report-print.test.mjs`, and `docs/REPORT_PRINT.md`.
-
-## 2026-08-26 AI candidate promotion
-
-The local/demo AI-candidate surface supports explicit promotion into normal finding review. Candidate envelopes carry `diagnosticGeneratedAt` so promotion can fail closed when deterministic diagnostics were re-run. The promotion path revalidates the approved extraction/evidence boundary, creates a pending derived finding, preserves provider/prompt provenance in a promotion record, replaces the browser-local diagnostic review set, and initializes a fresh finding review. One candidate set is bound to one deterministic diagnostic version; after a promotion changes the review set, regenerate candidates before promoting another item. No external model credentials are required for the demo adapter.
-
 ## Local setup
 
 ```bash
@@ -26,7 +8,9 @@ npm install
 npm run dev
 ```
 
-No PDF-specific setup is required. Open `/assessment/<id>/report` after completing finding review and maturity/recommendations, save a report version, then choose **Download formal PDF**. The server endpoint runs in the Node.js runtime and does not call an external service.
+The credential-free local/single-instance path uses the existing server-owned local tenant, local-dev authenticated membership, SQLite persistence adapters, and private filesystem artifact storage. No external identity provider, PostgreSQL service, object-storage account, AI provider, or PDF provider is required to exercise the current end-to-end workflow locally.
+
+Do not use the local adapter for confidential enterprise material. Production readiness still requires verified production identity, PostgreSQL/RLS activation with live non-bypass tenant-isolation tests, production private object storage, malware/quarantine controls, audit/deletion, backup/restore verification, and log/incident controls.
 
 ## Validation
 
@@ -34,58 +18,78 @@ No PDF-specific setup is required. Open `/assessment/<id>/report` after completi
 npm run validate
 ```
 
-`npm run validate` runs TypeScript checks, source-policy lint, Node tests, and a production Next.js build. The Node tests cover assessment limits, upload safety, deterministic parsing, evidence provenance, extraction contracts, deterministic diagnostics, AI-assisted candidate boundaries and promotion, evidence-boundary validation, finding review, entity/ID graph projection/export, reviewed maturity/recommendation projection, accepted-findings-only reporting, report snapshot/version export behavior, formal print presentation, and deterministic PDF generation/provenance failure behavior.
+`npm run validate` runs TypeScript checks, source-policy lint, all Node tests, and an optimized Next.js production build. GitHub Actions also packages the validated source tree as a repository-snapshot artifact after each run.
+
+Current tests cover assessment limits and persistence, authentication/authorization, organization/workspace isolation, PostgreSQL RLS policy boundaries, upload safety, private artifact storage, deterministic parsing, source-addressable evidence persistence, extraction/review persistence and staleness, deterministic diagnostics, finding-review persistence/materialized accepted findings, AI candidate boundaries and promotion, entity/ID graph projection/export, maturity/recommendation projection, accepted-findings-only reporting, report snapshot/version export, formal print presentation, and deterministic PDF generation/provenance behavior.
 
 ## Current routes
 
 - `/` — product entry page
 - `/assessment/new` — guided assessment setup
-- `/assessment/[id]` — local/demo assessment workspace
-- `/assessment/[id]/upload` — upload, readiness, parsing, evidence, and candidate extraction workflow
-- `/assessment/[id]/review` — extraction review and approval
-- `/assessment/[id]/diagnostics` — deterministic diagnostics, evidence validation, and finding review
-- `/assessment/[id]/ai-findings` — isolated AI-assisted candidate findings, with explicit promotion into normal finding review
-- `/assessment/[id]/map` — reviewed entity/ID projection, evidence drill-down, filters, and static export
-- `/assessment/[id]/maturity` — focused maturity signal, scoring rationale, prioritized recommendations, and traceability
-- `/assessment/[id]/report` — accepted-findings-only executive preview, deterministic 90-day action plan, browser-local version history, JSON snapshot export, formal print presentation, and saved-version PDF export
-- `/api/assessments` — assessment validation/creation API
-- `/api/assessments/[id]/artifacts` — transient validation, parsing, and local extraction API
+- `/assessment/[id]` — assessment workspace
+- `/assessment/[id]/upload` — upload, readiness, parsing, evidence, and extraction workflow
+- `/assessment/[id]/review` — server-backed extraction review and approval
+- `/assessment/[id]/diagnostics` — deterministic diagnostics and server-backed finding review
+- `/assessment/[id]/ai-findings` — isolated candidate findings and explicit server-authorized promotion into normal finding review
+- `/assessment/[id]/map` — server-reviewed entity/ID projection, evidence drill-down, filters, and static export
+- `/assessment/[id]/maturity` — server-reviewed maturity signal and prioritized recommendations
+- `/assessment/[id]/report` — server-reviewed executive preview plus browser-local immutable report snapshots, JSON export, print, and formal PDF export
+- `/api/assessments` — authenticated assessment validation/creation
+- `/api/assessments/[id]` — authenticated assessment read
+- `/api/assessments/[id]/artifacts` — authenticated validation, private storage, parsing, extraction, and processing persistence
+- `/api/assessments/[id]/processing` — authenticated no-store processing snapshot
+- `/api/assessments/[id]/extraction-review` — authenticated extraction-review read/write
+- `/api/assessments/[id]/finding-review` — authenticated finding-review read/write and accepted-finding materialization
+- `/api/assessments/[id]/ai-promotions` — authenticated explicit AI-candidate promotion into a pending server-persisted finding set
+- `/api/auth/session` — current server-resolved local authenticated context
+- `/api/tenancy` — current server-resolved tenant context
 - `/api/reports/pdf` — bounded deterministic PDF export from one validated saved report snapshot
-- `/sample` — Acme sample entry route
 - `/api/health` — health endpoint
 
-## Current upload and extraction behavior
+## Assessment and upload limits
 
-The demo adapter does not persist file bytes. After metadata checks pass, the server reads each file transiently to compute SHA-256, estimate pages, perform best-effort probable-secret/prohibited-data scanning, and generate source-addressable parse segments. A deterministic local extraction provider then emits only architecture candidates directly supported by those segments; each candidate carries direct evidence references.
+The MVP remains deliberately bounded:
 
-The repository also contains OpenAI Responses provider boundaries, but the demo upload route does not activate them or send uploaded artifact content to an external provider. External model activation requires server-only credentials and production privacy/tenancy controls.
+- one active focused assessment per workspace;
+- one primary business entity;
+- up to 10 files;
+- up to 25 MB per file;
+- up to 150 total measurable pages;
+- architecture metadata only;
+- no customer/patient/payment records;
+- no passwords, tokens, API keys, private keys, credentials, or other secrets;
+- no raw production database exports or live production-system access.
 
-Do not use the current demo path for confidential customer material. Authentication, tenant authorization, private object storage, malware scanning, durable persistence, deletion, audit controls, and tenant-isolation verification remain production prerequisites.
+Validated artifact bytes are persisted only after upload-readiness checks pass, under server-derived random tenant-scoped private storage keys. Validated artifact metadata, parser/source segments, extraction snapshots, extraction review, finding review, and materialized accepted findings are server-persisted in the current local/single-instance adapter.
+
+## Reviewed-state authority
+
+The browser is no longer authoritative for reviewed findings downstream. `lib/client-reviewed-state.ts` hydrates the current assessment, processing snapshot, extraction approval, diagnostic envelope, finding review, and materialized accepted findings through authenticated `Cache-Control: no-store` APIs. It verifies assessment scope, approved extraction, stale state, completed review, and accepted-finding materialization before maturity, map, recommendations, or report projections run.
+
+Only after successful server hydration does the client refresh the legacy `localStorage` keys used as compatibility caches. A stale, missing, unauthorized, or incomplete server review fails closed; downstream surfaces do not fall back to old browser findings.
 
 ## Diagnostics and finding review
 
-After validating/parsing/extracting artifacts, resolve every extraction candidate and approve the extraction set. Open `/assessment/<id>/diagnostics` to run the local deterministic engine. The diagnostics screen validates every finding's evidence and affected-object references against the exact approved extraction version before review begins.
+Resolve every extraction candidate and approve the current extraction set before diagnostics. The deterministic engine validates all finding evidence and affected-object references against that approved extraction boundary. Reviewers may edit presentation fields and severity, add reviewer notes, and explicitly accept/reject findings, but rule identity, confidence, affected objects, and source evidence remain immutable.
 
-Reviewers can edit presentation fields and severity, add a reviewer note, and explicitly accept or reject each finding. Rule identity, confidence, affected objects, and source evidence are immutable. Only accepted findings from a completed, non-stale review are eligible for downstream maturity, visualization, recommendations, and reports.
+Finding-review state is tenant-scoped and server-persisted. Accepted findings are materialized only after explicit review completion with no pending decisions. Those accepted findings are the sole finding authority for maturity, visualization, recommendations, and reports.
 
-The deterministic engine currently includes fragmented identifiers, competing authority, duplicate matching logic, duplicate platform capabilities, ownership gaps, direct database coupling, and long synchronous integration chains. No additional environment variable or external service is required for these local/demo rules.
+## AI-assisted candidate findings and promotion
 
-## AI-assisted candidate findings
+The current candidate generator is a deterministic local provider that exercises the AI-provider/evidence contract without external credentials. `/assessment/<id>/ai-findings` first hydrates the current server diagnostic and extraction-review state. Candidate envelopes are browser-local suggestions and are bound to that exact diagnostic timestamp and extraction approval.
 
-After deterministic diagnostics exist, open `/assessment/<id>/ai-findings`. The working demo uses a local deterministic provider to exercise the provider contract without external credentials. AI candidates are stored separately and cannot affect finding review, maturity, recommendations, maps, or reports automatically. Explicit promotion revalidates current extraction and diagnostic versions, creates a pending normal finding, resets finding review, and still requires explicit accept/reject review before downstream use.
+Promotion is no longer a browser-authoritative handoff. `POST /api/assessments/<id>/ai-promotions` revalidates the candidate envelope against the current approved extraction and exact server-persisted diagnostic set, converts the selected candidate into a pending normal finding, resets finding review, and persists the new diagnostic/review envelope. The old candidate set is discarded client-side because promotion changes the diagnostic version.
 
-## Entity/ID map
+Subsequent finding-review writes may use only either fresh deterministic engine output or the exact current server-persisted promoted diagnostic envelope. This prevents an arbitrary client-edited diagnostic set from entering reviewed state. Durable promotion audit history beyond the persisted finding envelope remains future audit work.
 
-After finding review is completed, open `/assessment/<id>/map`. The map is projected in-browser from the approved extraction plus accepted findings. It retains direct evidence for source-backed relationships, marks scope-derived relationships as derived, and supports projection-only filters plus static SVG/JSON export without adding raw uploaded artifact content.
+## Entity/ID map, maturity, recommendations, and report
 
-## Focused maturity and recommendations
+After finding review is explicitly completed, `/map`, `/maturity`, and `/report` hydrate server-reviewed state directly. The map remains a projection rather than an inference engine; source-backed relationships retain evidence and derived relationships remain labeled. Maturity remains a focused 1–5 risk-adjusted signal rather than an enterprise certification; zero accepted findings return `not_scored`. Recommendations preserve finding/object/evidence traceability.
 
-After finding review is completed, open `/assessment/<id>/maturity`. The page calculates a transparent 1–5 risk-adjusted signal from accepted findings only. If no findings were accepted, the result is `not_scored`; the product does not infer perfect maturity from missing evidence. Recommendations retain finding, affected-object, and source-evidence traceability.
+The executive report preview reloads server-reviewed state and persisted validated artifact metadata, then regenerates maturity, recommendations, and the 90-day plan from the same diagnostic version. Raw uploaded artifact content is not reproduced in the report.
 
-## Executive report versions, JSON, print, and PDF export
+## Report snapshots, JSON, print, and PDF
 
-The local/demo report is available at `/assessment/<id>/report` after finding review and maturity/recommendations are complete. It produces a deterministic 90-day action plan plus an accepted-findings-only executive preview. Artifact inventory is metadata-only and raw uploaded content is not reproduced.
+Explicit report-version history remains a browser-local adapter. Use **Save report version** to create an immutable versioned snapshot, **Download JSON** for structured export, **Print preview** for browser print/save-to-PDF, and **Download formal PDF** for the product-managed server PDF adapter. PDF generation is allowed only from a saved immutable snapshot that passes report/provenance validation.
 
-Use **Save report version** to create a browser-local immutable snapshot, **Download JSON** for structured export, **Print preview** for browser print/save-to-PDF, and **Download formal PDF** for the REP-007 product-managed server export. Formal PDF generation always consumes a saved snapshot and revalidates report provenance before rendering.
-
-The PDF result is deterministic for the same snapshot and includes visible report facts, accepted finding evidence coordinates, version, and diagnostic provenance. It is not a signed archive. Server-backed history, authenticated report authorization, private durable report storage, digital signing, and tenant-scoped audit/deletion remain production work.
+Durable tenant-scoped report history and authorization are the next unblocked persistence slice. Private durable report storage, optional signing, audit/deletion, and production isolation validation remain open.
