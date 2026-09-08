@@ -2,8 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-import type { DiagnosticEnvelope } from "@/lib/diagnostics";
-import type { FindingReview } from "@/lib/finding-review";
+import { loadServerAcceptedFindingState } from "@/lib/client-reviewed-state";
 import { calculateFocusedMaturity, generatePrioritizedRecommendations, type FocusedMaturitySummary, type RecommendationSet } from "@/lib/maturity-recommendations";
 
 export default function MaturityRecommendationsPage() {
@@ -14,29 +13,32 @@ export default function MaturityRecommendationsPage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    try {
-      const diagnosticsRaw = localStorage.getItem(`sugar:diagnostics:${assessmentId}`);
-      const reviewRaw = localStorage.getItem(`sugar:finding-review:${assessmentId}`);
-      if (!diagnosticsRaw || !reviewRaw) throw new Error("Complete diagnostics and finding review before generating maturity and recommendations.");
-      const diagnostics = JSON.parse(diagnosticsRaw) as DiagnosticEnvelope;
-      const review = JSON.parse(reviewRaw) as FindingReview;
-      const nextMaturity = calculateFocusedMaturity(diagnostics, review);
-      const nextRecommendations = generatePrioritizedRecommendations(diagnostics, review);
+    let active = true;
+    loadServerAcceptedFindingState(assessmentId).then((state) => {
+      if (!active) return;
+      const nextMaturity = calculateFocusedMaturity(state.diagnostics, state.findingReview);
+      const nextRecommendations = generatePrioritizedRecommendations(state.diagnostics, state.findingReview);
       setMaturity(nextMaturity);
       setRecommendations(nextRecommendations);
       localStorage.setItem(`sugar:maturity:${assessmentId}`, JSON.stringify(nextMaturity));
       localStorage.setItem(`sugar:recommendations:${assessmentId}`, JSON.stringify(nextRecommendations));
       setError(null);
-    } catch (caught) { setError(caught instanceof Error ? caught.message : "Maturity and recommendations could not be generated."); }
+    }).catch((caught) => {
+      if (!active) return;
+      setMaturity(null);
+      setRecommendations(null);
+      setError(caught instanceof Error ? caught.message : "Maturity and recommendations could not be generated.");
+    });
+    return () => { active = false; };
   }, [assessmentId]);
 
   if (error) return <><div className="eyebrow">Assessment · Maturity & recommendations</div><h1>Summary unavailable</h1><div className="panel"><p>{error}</p><a className="button" href={`/assessment/${assessmentId}/diagnostics`}>Review findings</a></div></>;
-  if (!maturity || !recommendations) return <p className="lede">Generating reviewed maturity signal and recommendations…</p>;
+  if (!maturity || !recommendations) return <p className="lede">Loading server-reviewed findings and generating maturity recommendations…</p>;
 
   return <>
     <div className="eyebrow">Assessment · Maturity & recommendations</div>
     <h1>Focused maturity summary</h1>
-    <p className="lede">This output is generated only from accepted findings in the completed review. It is intentionally narrower than an enterprise maturity assessment.</p>
+    <p className="lede">This output is generated only from accepted findings in the current authenticated, completed server review. Browser state is a compatibility cache, not an authority for the result.</p>
     <div className="metrics diagnostic-metrics">
       <article><strong>{maturity.score === null ? "—" : `${maturity.score}/5`}</strong><span>{maturity.band ? `${maturity.band} signal` : "not scored"}</span></article>
       <article><strong>{maturity.acceptedFindingCount}</strong><span>accepted findings</span></article>
