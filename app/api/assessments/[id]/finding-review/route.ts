@@ -33,6 +33,10 @@ function sameDeterministicDiagnostics(submitted: DiagnosticEnvelope, current: Di
   return JSON.stringify({ ...current, generatedAt: submitted.generatedAt }) === JSON.stringify(submitted);
 }
 
+function samePersistedDiagnostics(submitted: DiagnosticEnvelope, persisted: DiagnosticEnvelope) {
+  return JSON.stringify(submitted) === JSON.stringify(persisted);
+}
+
 export async function GET(_request: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   try {
@@ -65,7 +69,11 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
     if (diagnostics.assessmentId !== id) return NextResponse.json({ error: "Diagnostics assessment does not match route scope." }, { status: 400 });
     validateDiagnosticEvidence(diagnostics, current.processing.extraction, current.extractionReview.review);
     const canonical = runDeterministicDiagnostics({ assessmentId: id, extraction: current.processing.extraction, review: current.extractionReview.review });
-    if (!sameDeterministicDiagnostics(diagnostics, canonical)) return NextResponse.json({ error: "Submitted diagnostics do not match deterministic engine output for the current approved extraction." }, { status: 409 });
+    const existing = getFindingReviewRepository().find(current.scope, id);
+    const trustedPromotedEnvelope = Boolean(existing && !existing.stale && samePersistedDiagnostics(diagnostics, existing.diagnostics));
+    if (!sameDeterministicDiagnostics(diagnostics, canonical) && !trustedPromotedEnvelope) {
+      return NextResponse.json({ error: "Submitted diagnostics do not match deterministic engine output or the exact current server-persisted promoted finding set." }, { status: 409 });
+    }
     const fingerprint = diagnosticFingerprint(diagnostics);
     const saved = getFindingReviewRepository().save(current.scope, id, diagnostics, review, fingerprint);
     return NextResponse.json(saved, { headers: { "Cache-Control": "no-store" } });
