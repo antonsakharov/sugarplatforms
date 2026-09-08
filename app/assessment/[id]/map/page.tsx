@@ -2,11 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
-import type { AssessmentDraft } from "@/lib/assessment";
-import type { DiagnosticEnvelope } from "@/lib/diagnostics";
-import type { ExtractionEnvelope } from "@/lib/extraction";
-import type { ExtractionReview } from "@/lib/extraction-review";
-import type { FindingReview } from "@/lib/finding-review";
+import { loadServerAcceptedFindingState } from "@/lib/client-reviewed-state";
 import { projectEntityIdGraph, type EntityIdGraph, type GraphEdgeKind, type GraphNodeKind } from "@/lib/entity-id-graph";
 import { ALL_GRAPH_EDGE_KINDS, ALL_GRAPH_FACT_STATUSES, ALL_GRAPH_NODE_KINDS, createEntityIdGraphExport, DEFAULT_ENTITY_ID_GRAPH_FILTER, filterEntityIdGraph, renderEntityIdGraphSvg, type GraphFactStatus } from "@/lib/entity-id-graph-view";
 
@@ -38,25 +34,25 @@ export default function EntityIdMapPage() {
   const [hideIsolated, setHideIsolated] = useState(false);
 
   useEffect(() => {
-    try {
-      const assessmentRaw = localStorage.getItem(`sugar:assessment:${assessmentId}`);
-      const extractionRaw = localStorage.getItem(`sugar:extraction:${assessmentId}`);
-      const extractionReviewRaw = localStorage.getItem(`sugar:extraction-review:${assessmentId}`);
-      const diagnosticsRaw = localStorage.getItem(`sugar:diagnostics:${assessmentId}`);
-      const findingReviewRaw = localStorage.getItem(`sugar:finding-review:${assessmentId}`);
-      if (!assessmentRaw || !extractionRaw || !extractionReviewRaw || !diagnosticsRaw || !findingReviewRaw) throw new Error("Complete extraction, diagnostics, and finding review before opening the entity/ID map.");
-      const assessment = JSON.parse(assessmentRaw) as AssessmentDraft;
+    let active = true;
+    loadServerAcceptedFindingState(assessmentId).then((state) => {
+      if (!active) return;
       const next = projectEntityIdGraph({
         assessmentId,
-        primaryEntity: assessment.primaryEntity,
-        extraction: JSON.parse(extractionRaw) as ExtractionEnvelope,
-        extractionReview: JSON.parse(extractionReviewRaw) as ExtractionReview,
-        diagnostics: JSON.parse(diagnosticsRaw) as DiagnosticEnvelope,
-        findingReview: JSON.parse(findingReviewRaw) as FindingReview
+        primaryEntity: state.assessment.primaryEntity,
+        extraction: state.extraction,
+        extractionReview: state.extractionReview,
+        diagnostics: state.diagnostics,
+        findingReview: state.findingReview
       });
       setGraph(next);
       setError(null);
-    } catch (caught) { setError(caught instanceof Error ? caught.message : "Entity/ID map could not be generated."); }
+    }).catch((caught) => {
+      if (!active) return;
+      setGraph(null);
+      setError(caught instanceof Error ? caught.message : "Entity/ID map could not be generated.");
+    });
+    return () => { active = false; };
   }, [assessmentId]);
 
   const filtered = useMemo(() => graph ? filterEntityIdGraph(graph, { query, nodeKinds, edgeKinds, factStatuses, hideIsolated }) : null, [graph, query, nodeKinds, edgeKinds, factStatuses, hideIsolated]);
@@ -83,12 +79,12 @@ export default function EntityIdMapPage() {
   }
 
   if (error) return <><div className="eyebrow">Assessment · Entity/ID map</div><h1>Map unavailable</h1><div className="panel"><p>{error}</p><a className="button" href={`/assessment/${assessmentId}/diagnostics`}>Review findings</a></div></>;
-  if (!graph || !visibleGraph || !filtered) return <p className="lede">Building reviewed entity/ID map…</p>;
+  if (!graph || !visibleGraph || !filtered) return <p className="lede">Loading the server-reviewed entity/ID projection…</p>;
 
   return <>
     <div className="eyebrow">Assessment · Entity/ID map</div>
     <h1>{graph.primaryEntity} identity map</h1>
-    <p className="lede">This projection uses only confirmed extraction objects and accepted findings from a completed, non-stale review. Filters change only the visible projection. Static exports contain the currently visible graph and preserve direct-versus-derived relationship status.</p>
+    <p className="lede">This projection uses only confirmed extraction objects and accepted findings from the current authenticated, completed server review. Filters change only the visible projection. Static exports contain the currently visible graph and preserve direct-versus-derived relationship status.</p>
     <div className="metrics diagnostic-metrics"><article><strong>{filtered.stats.visibleNodeCount}</strong><span>visible nodes</span></article><article><strong>{filtered.stats.visibleEdgeCount}</strong><span>visible relationships</span></article><article><strong>{filtered.stats.hiddenNodeCount}</strong><span>hidden nodes</span></article><article><strong>{filtered.stats.hiddenEdgeCount}</strong><span>hidden relationships</span></article><article><strong>{visibleGraph.stats.evidenceReferenceCount}</strong><span>visible evidence links</span></article></div>
     {graph.warnings.map((warning) => <div className="upload-warning" key={warning}>{warning}</div>)}
     <div className="panel">
