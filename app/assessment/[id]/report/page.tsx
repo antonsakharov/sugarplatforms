@@ -2,12 +2,10 @@
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-import type { AssessmentDraft } from "@/lib/assessment";
-import type { DiagnosticEnvelope } from "@/lib/diagnostics";
-import type { FindingReview } from "@/lib/finding-review";
-import type { FocusedMaturitySummary, RecommendationSet } from "@/lib/maturity-recommendations";
+import { loadServerAcceptedFindingState } from "@/lib/client-reviewed-state";
+import { calculateFocusedMaturity, generatePrioritizedRecommendations } from "@/lib/maturity-recommendations";
 import { createReportExport, createReportSnapshot, reportExportFilename, validateReportSnapshotHistory, type ReportSnapshot } from "@/lib/report-versioning";
-import { generateExecutiveReport, generateNinetyDayActionPlan, type ArtifactReportItem, type ExecutiveReport } from "@/lib/reporting";
+import { generateExecutiveReport, generateNinetyDayActionPlan, type ExecutiveReport } from "@/lib/reporting";
 
 function filenameFromDisposition(value: string | null, fallback: string) {
   if (!value) return fallback;
@@ -24,31 +22,37 @@ export default function ExecutiveReportPage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    try {
-      const assessmentRaw = localStorage.getItem(`sugar:assessment:${assessmentId}`);
-      const artifactsRaw = localStorage.getItem(`sugar:artifacts:${assessmentId}`);
-      const diagnosticsRaw = localStorage.getItem(`sugar:diagnostics:${assessmentId}`);
-      const reviewRaw = localStorage.getItem(`sugar:finding-review:${assessmentId}`);
-      const maturityRaw = localStorage.getItem(`sugar:maturity:${assessmentId}`);
-      const recommendationsRaw = localStorage.getItem(`sugar:recommendations:${assessmentId}`);
-      const snapshotsRaw = localStorage.getItem(`sugar:report-snapshots:${assessmentId}`);
-      if (!assessmentRaw || !diagnosticsRaw || !reviewRaw || !maturityRaw || !recommendationsRaw) throw new Error("Complete finding review and maturity/recommendations before generating the executive report preview.");
-      const assessment = JSON.parse(assessmentRaw) as AssessmentDraft;
-      const artifacts = artifactsRaw ? JSON.parse(artifactsRaw) as ArtifactReportItem[] : [];
-      const diagnostics = JSON.parse(diagnosticsRaw) as DiagnosticEnvelope;
-      const review = JSON.parse(reviewRaw) as FindingReview;
-      const maturity = JSON.parse(maturityRaw) as FocusedMaturitySummary;
-      const recommendations = JSON.parse(recommendationsRaw) as RecommendationSet;
-      const history = snapshotsRaw ? JSON.parse(snapshotsRaw) as ReportSnapshot[] : [];
-      validateReportSnapshotHistory(history, assessmentId);
+    let active = true;
+    loadServerAcceptedFindingState(assessmentId).then((state) => {
+      if (!active) return;
+      const maturity = calculateFocusedMaturity(state.diagnostics, state.findingReview);
+      const recommendations = generatePrioritizedRecommendations(state.diagnostics, state.findingReview);
       const actionPlan = generateNinetyDayActionPlan(recommendations);
-      const next = generateExecutiveReport({ assessment, artifacts, diagnostics, review, maturity, recommendations, actionPlan });
+      const historyRaw = localStorage.getItem(`sugar:report-snapshots:${assessmentId}`);
+      const history = historyRaw ? JSON.parse(historyRaw) as ReportSnapshot[] : [];
+      validateReportSnapshotHistory(history, assessmentId);
+      const next = generateExecutiveReport({
+        assessment: state.assessment,
+        artifacts: state.artifacts,
+        diagnostics: state.diagnostics,
+        review: state.findingReview,
+        maturity,
+        recommendations,
+        actionPlan
+      });
       setReport(next);
       setSnapshots([...history].sort((a, b) => b.version - a.version));
+      localStorage.setItem(`sugar:maturity:${assessmentId}`, JSON.stringify(maturity));
+      localStorage.setItem(`sugar:recommendations:${assessmentId}`, JSON.stringify(recommendations));
       localStorage.setItem(`sugar:action-plan:${assessmentId}`, JSON.stringify(actionPlan));
       localStorage.setItem(`sugar:report:${assessmentId}`, JSON.stringify(next));
       setError(null);
-    } catch (caught) { setError(caught instanceof Error ? caught.message : "Executive report preview could not be generated."); }
+    }).catch((caught) => {
+      if (!active) return;
+      setReport(null);
+      setError(caught instanceof Error ? caught.message : "Executive report preview could not be generated.");
+    });
+    return () => { active = false; };
   }, [assessmentId]);
 
   function saveSnapshot() {
@@ -106,13 +110,14 @@ export default function ExecutiveReportPage() {
     }
   }
 
-  if (error && !report) return <><div className="eyebrow">Assessment · Executive report</div><h1>Report unavailable</h1><div className="panel"><p>{error}</p><a className="button" href={`/assessment/${assessmentId}/maturity`}>Open maturity & recommendations</a></div></>;
-  if (!report) return <p className="lede">Generating accepted-findings-only executive report preview…</p>;
+  if (error && !report) return <><div className="eyebrow">Assessment · Executive report</div><h1>Report unavailable</h1><div className="panel"><p>{error}</p><a className="button" href={`/assessment/${assessmentId}/diagnostics`}>Review findings</a></div></>;
+  if (!report) return <p className="lede">Loading authenticated accepted findings and generating the executive report preview…</p>;
 
   return <>
     <div className="eyebrow">Assessment · Executive report preview</div>
     <h1>{report.title}</h1>
     <p className="lede">Audience: {report.audience} · Report {report.reportVersion}</p>
+    <div className="readiness-ready"><strong>Server-reviewed source state</strong><span>This preview is regenerated from the current authenticated completed finding review. Browser storage is used only for compatibility caches and explicitly saved report-version history.</span></div>
     {error && <div className="form-error">{error}</div>}
     <div className="panel"><h2>Executive summary</h2><p>{report.executiveSummary}</p></div>
     <div className="panel"><h2>Scope</h2><p><strong>{report.scope.companyName}</strong> · {report.scope.industry}</p><p>Focus: {report.scope.focusArea.replaceAll("-", " ")} · Primary entity: <strong>{report.scope.primaryEntity}</strong></p><p>{report.scope.businessConcern}</p><h3>Artifact inventory</h3>{report.scope.artifacts.length === 0 ? <p>No artifact metadata is available.</p> : <ul>{report.scope.artifacts.map((artifact) => <li key={`${artifact.name}:${artifact.size}`}>{artifact.name} · {artifact.status} · {(artifact.size / 1024 / 1024).toFixed(2)} MB</li>)}</ul>}</div>
