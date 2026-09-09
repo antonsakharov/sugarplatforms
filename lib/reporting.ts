@@ -168,7 +168,7 @@ export function generateExecutiveReport(input: {
     actionPlan,
     evidenceAppendix: topFindings.map((finding) => ({ findingId: finding.id, findingTitle: finding.title, evidence: finding.evidence })),
     limitations: [
-      "The report preview is regenerated from the current authenticated server-persisted reviewed finding state; explicit report-version history is still browser-local until durable report persistence is implemented.",
+      "The report preview is regenerated from the current authenticated server-persisted reviewed finding state; saved report versions are immutable tenant-scoped server snapshots in the local/single-instance adapter.",
       "Only accepted findings are included. Rejected and pending findings are excluded from report conclusions and recommendations.",
       "Artifact inventory contains metadata only; raw uploaded content is not reproduced in the executive report preview.",
       "The current deterministic engine covers a limited rule set, so absence of a finding does not prove absence of architecture risk."
