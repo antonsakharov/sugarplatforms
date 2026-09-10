@@ -55,3 +55,12 @@ test("membership cannot be written with a mismatched tenant scope", () => {
     { userId: user.id, organizationId: "org-a", workspaceId: "workspace-b", role: "admin", createdAt }
   ), TenantScopeError);
 });
+
+test("full assessment deletion and audit access are admin-only", () => {
+  assert.equal(hasPermission(auth("viewer"), "assessment:delete"), false);
+  assert.equal(hasPermission(auth("editor"), "assessment:delete"), false);
+  assert.equal(hasPermission(auth("admin"), "assessment:delete"), true);
+  assert.equal(hasPermission(auth("viewer"), "audit:read"), false);
+  assert.equal(hasPermission(auth("editor"), "audit:read"), false);
+  assert.equal(hasPermission(auth("admin"), "audit:read"), true);
+});
