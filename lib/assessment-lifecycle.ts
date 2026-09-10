@@ -3,9 +3,9 @@ import { mkdirSync } from "node:fs";
 import { dirname } from "node:path";
 import { DatabaseSync } from "node:sqlite";
 import { z } from "zod";
-import type { ArtifactStorage } from "./artifact-storage";
-import { tenantStoragePrefix } from "./artifact-storage";
-import type { TenantScope } from "./tenancy";
+import type { ArtifactStorage } from "./artifact-storage.ts";
+import { tenantStoragePrefix } from "./artifact-storage.ts";
+import type { TenantScope } from "./tenancy.ts";
 
 const idSchema = z.string().min(2).max(100).regex(/^[a-z0-9_-]+$/i);
 
