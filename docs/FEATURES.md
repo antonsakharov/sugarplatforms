@@ -10,7 +10,7 @@ Status: in progress — assessment creation is server-persisted through a reposi
 
 User can select up to 10 supported files, receive server-side type/size/duplicate/page validation, receive probable-secret and prohibited-data warnings, remove or replace files, and see whether the artifact set is ready for parsing.
 
-Status: in progress — the complete local upload-readiness workflow is implemented. Artifact bytes are persisted privately only after readiness checks pass, using server-derived tenant-scoped random storage keys. Durable tenant-scoped artifact metadata is stored alongside processing provenance. Confidential enterprise uploads still require production identity, production private storage, malware scanning, deletion/audit controls, and live isolation validation.
+Status: in progress — the complete local upload-readiness workflow is implemented. Artifact bytes are persisted privately only after readiness checks pass, using server-derived tenant-scoped random storage keys. Durable tenant-scoped artifact metadata is stored alongside processing provenance. Confidential enterprise uploads still require production identity, production private storage, malware scanning, production deletion/retention guarantees, and live isolation validation.
 
 ## MVP priority 3 — Artifact parsing and evidence
 
@@ -48,7 +48,7 @@ Status: implemented with server-authoritative accepted findings — maturity and
 
 User can generate a report from accepted findings, preview executive and technical sections, save explicit report versions, export a structured report snapshot, produce a formally styled print view, and download a product-managed PDF from a saved immutable version.
 
-Status: implemented with authenticated server-backed report history for the local/single-instance workflow — report preview reloads the current authenticated reviewed state and deterministically regenerates maturity, recommendations, and the 90-day plan. Saving a version sends no client report body: the server regenerates the canonical report from current reviewed state and persists an immutable monotonically versioned snapshot under organization/workspace/assessment scope. Viewers may read history while editors/admins may create versions. Formal PDF export accepts only assessment/report IDs, re-authorizes the request, and resolves the persisted snapshot server-side. JSON export wraps an already persisted immutable snapshot. Production PostgreSQL/RLS-backed report persistence, private generated-report object storage, signing, audit/deletion, and signed download URLs remain open.
+Status: implemented with authenticated server-backed report history for the local/single-instance workflow — report preview reloads the current authenticated reviewed state and deterministically regenerates maturity, recommendations, and the 90-day plan. Saving a version sends no client report body: the server regenerates the canonical report from current reviewed state and persists an immutable monotonically versioned snapshot under organization/workspace/assessment scope. Viewers may read history while editors/admins may create versions. Formal PDF export accepts only assessment/report IDs, re-authorizes the request, and resolves the persisted snapshot server-side. JSON export wraps an already persisted immutable snapshot. Production PostgreSQL/RLS-backed report persistence, private generated-report object storage, signing, and signed download URLs remain open. Admin-authorized assessment deletion with durable local audit receipts is implemented; production distributed deletion/retention semantics remain open.
 
 ## Secondary demo feature — Acme HealthTech
 
@@ -59,3 +59,9 @@ Status: planned
 ## Future features
 
 GitHub/Jira/Confluence/service-catalog connectors, continuous drift detection, assessment comparison, collaboration, enterprise SSO, and customer-managed deployment.
+
+## Production-readiness feature — Audit and deletion
+
+Delete an assessment only through a server-authorized administrator action. The workflow deletes private artifact objects, transactionally removes processing/extraction/review/finding/report state plus the assessment row, and retains minimal tenant-scoped audit receipts for request/completion/failure.
+
+Status: implemented for the credential-free local/single-instance workflow. Cross-tenant deletion fails closed, audit reads are admin-only, and storage failure keeps relational assessment state intact rather than claiming completion. Production PostgreSQL/RLS audit persistence, distributed retry/reconciliation, backup/retention deletion guarantees, and live production-storage validation remain open.
