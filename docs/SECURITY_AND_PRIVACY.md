@@ -55,10 +55,16 @@ Before upload, display:
 - separate development/production credentials;
 - redaction of likely sensitive values.
 
-### Deletion
+### Deletion and audit
 
-Delete original objects, normalized text, source segments, extracted objects, evidence, findings, reports, and provider indexes where applicable.
+Full assessment deletion is a server-authorized administrator action. Tenant scope is resolved from the authenticated membership; callers cannot provide organization/workspace scope or arbitrary storage keys.
+
+The local/single-instance workflow records a minimal `assessment.deletion.requested` event, removes server-derived private artifact objects, then transactionally deletes normalized/source evidence, extraction state, extraction review, finding review/materialized findings, saved report snapshots, artifact metadata, and the assessment record. A successful or failed operation keeps a minimal tenant-scoped audit receipt containing identifiers, actor, timestamps, outcome, and bounded deletion counts/error text, but no artifact content, evidence, findings, or report bodies.
+
+If private object deletion fails, relational assessment state is retained and failure is recorded rather than reporting successful deletion. Because filesystem/object storage and SQLite/PostgreSQL cannot share a distributed transaction, production must use idempotent object deletion plus durable retry/reconciliation state.
+
+Provider indexes and any future derived object-storage outputs must also participate in the same lifecycle once introduced.
 
 ## Production readiness
 
-Before accepting confidential enterprise materials, tenant isolation, malware scanning, backup/restore, incident response, provider retention, deletion, data-processing terms, and log redaction must be verified.
+Before accepting confidential enterprise materials, tenant isolation, malware scanning, backup/restore, incident response, provider retention, PostgreSQL/RLS-backed audit/deletion, production object-storage deletion/reconciliation, data-processing terms, and log redaction must be verified.
