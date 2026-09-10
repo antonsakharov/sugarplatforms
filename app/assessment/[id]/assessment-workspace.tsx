@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import type { AssessmentDraft } from "@/lib/assessment";
+import { AssessmentDangerZone } from "./assessment-danger-zone";
 
 type ArtifactSummary = { name: string; size: number; type: string; status: "validated" | "review_required" | "blocked" };
 type Readiness = { readyForAnalysis: boolean; totalPages: number; warningCount: number; unmeasurableFiles: number };
@@ -73,5 +74,6 @@ export function AssessmentWorkspace({ id }: { id: string }) {
       <article className={`card ${findingsComplete ? "current-step" : ""}`}><span className="card-number">06</span><h3>Report</h3><p>{findingsComplete ? "Generate focused maturity, prioritized recommendations, a 90-day plan, and an accepted-findings-only executive preview." : "Complete finding review before downstream reporting."}</p></article>
     </div>
     <div className="panel"><h2>{findingsComplete ? "Entity/ID map ready" : diagnostics ? "Diagnostic findings available" : review?.approved ? "Extraction approved" : extraction ? "Architecture candidates ready for review" : readiness?.readyForAnalysis ? "Evidence ready for extraction" : artifacts.length > 0 ? "Artifact review required" : "Ready for artifacts"}</h2><p>{findingsComplete ? "The map consumes only confirmed extraction objects and accepted findings from the completed review." : diagnostics ? "Inspect deterministic findings and, optionally, the isolated AI-assisted candidate surface. AI candidates cannot enter downstream outputs automatically." : review?.approved ? "The reviewed extraction set can now run evidence-backed deterministic diagnostics before optional AI-assisted interpretation." : extraction ? "Review every extracted object and explicitly confirm, reject, merge, or rename it before analysis." : "Upload architecture metadata for validation, parsing, and evidence-linked extraction."}</p><div className="form-actions"><a className="button" href={findingsComplete ? `/assessment/${id}/map` : diagnostics || review?.approved ? `/assessment/${id}/diagnostics` : extraction ? `/assessment/${id}/review` : `/assessment/${id}/upload`}>{findingsComplete ? "Open entity/ID map" : diagnostics ? "Review findings" : review?.approved ? "Run diagnostics" : extraction ? "Review extraction" : artifacts.length > 0 ? "Review artifacts" : "Upload artifacts"}</a>{diagnostics && !findingsComplete && <a className="button button-secondary" href={`/assessment/${id}/ai-findings`}>Inspect AI candidates</a>}</div></div>
+    <AssessmentDangerZone id={id} title={assessment.assessmentTitle} />
   </>;
 }
