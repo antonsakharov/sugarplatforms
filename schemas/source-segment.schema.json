@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sugarplatforms.local/schemas/source-segment.schema.json",
+  "title": "Source Segment",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "artifactId", "artifactName", "ordinal", "kind", "locator", "content", "contentSha256"],
+  "properties": {
+    "id": { "type": "string", "minLength": 1 },
+    "artifactId": { "type": "string", "minLength": 1 },
+    "artifactName": { "type": "string", "minLength": 1 },
+    "ordinal": { "type": "integer", "minimum": 0 },
+    "kind": { "enum": ["text", "markdown", "json", "yaml", "openapi-json", "openapi-yaml", "csv", "sql-ddl", "pdf-text"] },
+    "locator": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "value"],
+      "properties": {
+        "type": { "enum": ["line-range", "json-pointer", "csv-row-range", "pdf-page"] },
+        "value": { "type": "string", "minLength": 1 },
+        "startLine": { "type": "integer", "minimum": 1 },
+        "endLine": { "type": "integer", "minimum": 1 },
+        "startRow": { "type": "integer", "minimum": 1 },
+        "endRow": { "type": "integer", "minimum": 1 },
+        "page": { "type": "integer", "minimum": 1 },
+        "fragment": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "content": { "type": "string" },
+    "contentSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "title": { "type": "string" }
+  }
+}
