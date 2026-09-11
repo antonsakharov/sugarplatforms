@@ -51,7 +51,7 @@ Statuses: `[ ] planned`, `[-] in progress`, `[x] complete`.
 - [ ] Live database/storage tenant-isolation integration tests against a real non-superuser/non-`BYPASSRLS` PostgreSQL role and production private object storage
 - [ ] Production S3/Supabase storage adapter with short-lived signed download URLs
 - [x] Audit and deletion workflow — admin-only full assessment deletion now purges tenant-scoped private artifacts and persisted assessment state while retaining minimal durable success/failure audit receipts
-- [ ] Operational job controls and runbook
+- [x] Operational deletion job controls and runbook — durable tenant-scoped jobs persist progress, bound retries/backoff, reclaim crashed attempts with leases, expose redacted admin status, and support bounded reconciliation; production scheduler/worker activation remains open
 
 ## Secondary sample
 
