@@ -61,10 +61,12 @@ Full assessment deletion is a server-authorized administrator action. Tenant sco
 
 The local/single-instance workflow records a minimal `assessment.deletion.requested` event, removes server-derived private artifact objects, then transactionally deletes normalized/source evidence, extraction state, extraction review, finding review/materialized findings, saved report snapshots, artifact metadata, and the assessment record. A successful or failed operation keeps a minimal tenant-scoped audit receipt containing identifiers, actor, timestamps, outcome, and bounded deletion counts/error text, but no artifact content, evidence, findings, or report bodies.
 
-If private object deletion fails, relational assessment state is retained and failure is recorded rather than reporting successful deletion. Because filesystem/object storage and SQLite/PostgreSQL cannot share a distributed transaction, production must use idempotent object deletion plus durable retry/reconciliation state.
+Deletion recovery is also durable. Each operation has a tenant-scoped job that stores only operational metadata: server-derived object keys, per-object completion checkpoints, attempt count/budget, retry timing, a short execution lease, bounded error text, and the terminal receipt. The default budget is three attempts with exponential backoff beginning at 30 seconds and capped at 15 minutes; running attempts have a five-minute lease so interrupted work becomes reclaimable. Administrator job status is redacted and never returns storage keys. Reconciliation is server-authorized, tenant-scoped, and bounded to at most 20 due jobs per invocation.
+
+If private object deletion fails, relational assessment state is retained and failure is recorded rather than reporting successful deletion. Object deletion is idempotent and completed object keys are checkpointed so retries skip successful work. If a process exits after the relational purge commits but before job completion is recorded, reconciliation repairs the job from the durable `assessment.deletion.completed` audit receipt instead of replaying the purge.
 
 Provider indexes and any future derived object-storage outputs must also participate in the same lifecycle once introduced.
 
 ## Production readiness
 
-Before accepting confidential enterprise materials, tenant isolation, malware scanning, backup/restore, incident response, provider retention, PostgreSQL/RLS-backed audit/deletion, production object-storage deletion/reconciliation, data-processing terms, and log redaction must be verified.
+Before accepting confidential enterprise materials, tenant isolation, malware scanning, backup/restore, incident response, provider retention, PostgreSQL/RLS-backed audit/deletion-job persistence, an authenticated scheduler/worker, production object-storage deletion/reconciliation, data-processing terms, and log redaction must be verified.
