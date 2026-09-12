@@ -62,9 +62,10 @@ export function AssessmentWorkspace({ id }: { id: string }) {
   const aiCandidateCount = aiCandidates?.stats.candidateCount ?? 0;
 
   return <>
-    <div className="eyebrow">Draft assessment</div>
+    <div className="eyebrow">{assessment.companyName === "Acme HealthTech" ? "Guided sample assessment" : "Draft assessment"}</div>
     <h1>{assessment.assessmentTitle}</h1>
     <p className="lede">{assessment.companyName} · Primary entity: <strong>{assessment.primaryEntity}</strong></p>
+    {assessment.companyName === "Acme HealthTech" && <div className="panel"><h2>Acme HealthTech walkthrough</h2><p>This preloaded fixture uses the same persisted review and reporting boundaries as a real assessment. Jump between surfaces without changing the reviewed sample state.</p><div className="form-actions"><a className="button button-secondary" href={`/assessment/${id}/review`}>Extraction</a><a className="button button-secondary" href={`/assessment/${id}/diagnostics`}>Findings</a><a className="button button-secondary" href={`/assessment/${id}/map`}>Map</a><a className="button button-secondary" href={`/assessment/${id}/maturity`}>Maturity</a><a className="button button-secondary" href={`/assessment/${id}/report`}>Report</a></div></div>}
     <div className="workspace-grid">
       <article className="card"><span className="card-number">01</span><h3>Scope confirmed</h3><p>{assessment.businessConcern}</p></article>
       <article className="card"><span className="card-number">02</span><h3>Upload & parse</h3><p>{readiness?.readyForAnalysis ? `${artifacts.length} artifacts processed · ${readiness.totalPages} pages.` : artifacts.length > 0 ? "Artifact set requires review." : "Add and validate a focused architecture artifact set."}</p></article>
