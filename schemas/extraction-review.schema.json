@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sugar.local/schemas/extraction-review.schema.json",
+  "title": "Extraction Review",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "approved", "objects"],
+  "properties": {
+    "schemaVersion": { "const": "1.0" },
+    "approved": { "type": "boolean" },
+    "approvedAt": { "type": "string", "format": "date-time" },
+    "objects": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "kind", "originalName", "displayName", "status"],
+        "properties": {
+          "id": { "type": "string", "minLength": 1, "maxLength": 160 },
+          "kind": { "enum": ["system", "entity", "identifier", "integration", "capability", "owner"] },
+          "originalName": { "type": "string", "minLength": 1, "maxLength": 120 },
+          "displayName": { "type": "string", "minLength": 1, "maxLength": 120 },
+          "status": { "enum": ["pending", "confirmed", "rejected", "merged"] },
+          "mergedInto": { "type": "string", "minLength": 1, "maxLength": 160 }
+        }
+      }
+    }
+  }
+}
