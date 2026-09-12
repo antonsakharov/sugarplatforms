@@ -54,7 +54,7 @@ Status: implemented with authenticated server-backed report history for the loca
 
 User can open a preloaded assessment and navigate the same output surfaces used by real assessments.
 
-Status: planned
+Status: implemented for the local/single-instance demo workflow — `/sample` initializes a deterministic Acme HealthTech Patient-identity assessment using four architecture-metadata-only fixtures. The initializer persists the assessment and processing snapshot, explicitly approves the real extraction review, runs the existing deterministic diagnostics, completes finding review from those generated findings, and saves an immutable report version. The guided sample links into the same extraction, findings, map, maturity, recommendations, report, and export surfaces as uploaded assessments. It never injects arbitrary findings or deletes a conflicting active assessment.
 
 ## Future features
 
