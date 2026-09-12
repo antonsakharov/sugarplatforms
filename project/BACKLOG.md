@@ -55,7 +55,7 @@ Statuses: `[ ] planned`, `[-] in progress`, `[x] complete`.
 
 ## Secondary sample
 
-- [ ] Acme HealthTech fixtures, sample workspace, graph, report, and guided walkthrough
+- [x] Acme HealthTech fixtures, sample workspace, graph, report, and guided walkthrough
 
 ## Future
 
