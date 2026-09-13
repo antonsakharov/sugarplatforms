@@ -7,7 +7,7 @@ import {
   type ArtifactStorage,
   type SignedArtifactAccess,
   type StoredArtifact
-} from "./artifact-storage";
+} from "./artifact-storage.ts";
 import type { TenantScope } from "./tenancy";
 
 const configSchema = z.object({
