@@ -49,7 +49,7 @@ Statuses: `[ ] planned`, `[-] in progress`, `[x] complete`.
 - [x] Server-backed accepted-findings consumption — maturity, entity/ID map, recommendations, AI-candidate promotion handoff, and executive report hydrate authenticated no-store reviewed state from the server; browser state is compatibility cache only
 - [x] Server-backed report version history and authorization — report versions are generated server-side from current reviewed state, immutable, tenant-scoped, role-authorized, and formal PDF export resolves persisted snapshots by ID
 - [ ] Live database/storage tenant-isolation integration tests against a real non-superuser/non-`BYPASSRLS` PostgreSQL role and production private object storage
-- [ ] Production S3/Supabase storage adapter with short-lived signed download URLs
+- [x] Production Supabase private-storage adapter with bounded short-lived signed read URLs — server-only provider selection, checksum verification, tenant-scoped random keys, authenticated reads, provider API deletion, and mocked cross-tenant/provider-contract tests are implemented; live bucket isolation remains credential-dependent
 - [x] Audit and deletion workflow — admin-only full assessment deletion now purges tenant-scoped private artifacts and persisted assessment state while retaining minimal durable success/failure audit receipts
 - [x] Operational deletion job controls and runbook — durable tenant-scoped jobs persist progress, bound retries/backoff, reclaim crashed attempts with leases, expose redacted admin status, and support bounded reconciliation; production scheduler/worker activation remains open
 
