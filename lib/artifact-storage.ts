@@ -20,10 +20,16 @@ export const storedArtifactSchema = z.object({
 });
 export type StoredArtifact = z.infer<typeof storedArtifactSchema>;
 
+export type SignedArtifactAccess = {
+  url: string;
+  expiresAt: string;
+};
+
 export type ArtifactStorage = {
   put(scope: TenantScope, assessmentId: string, input: { originalName: string; mediaType: string; bytes: Uint8Array; checksumSha256: string }): Promise<StoredArtifact>;
   get(scope: TenantScope, storageKey: string): Promise<Uint8Array>;
   delete(scope: TenantScope, storageKey: string): Promise<void>;
+  createSignedReadUrl(scope: TenantScope, storageKey: string): Promise<SignedArtifactAccess | null>;
 };
 
 export function tenantStoragePrefix(scope: TenantScope, assessmentId: string) {
@@ -63,4 +69,5 @@ export class LocalPrivateArtifactStorage implements ArtifactStorage {
 
   async get(scope: TenantScope, storageKey: string) { return new Uint8Array(await readFile(this.pathFor(scope, storageKey))); }
   async delete(scope: TenantScope, storageKey: string) { await rm(this.pathFor(scope, storageKey), { force: true }); }
+  async createSignedReadUrl(scope: TenantScope, storageKey: string) { this.pathFor(scope, storageKey); return null; }
 }
