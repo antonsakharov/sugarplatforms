@@ -34,6 +34,14 @@ Before upload, display:
 - private buckets;
 - short-lived signed URLs.
 
+### Private artifact storage
+
+Artifact storage is server-only and provider-neutral. Keys are derived as `<organization>/<workspace>/<assessment>/<random-id>` and original filenames never become storage paths. Every read, signed-access request, and delete operation revalidates the active tenant prefix before provider I/O.
+
+The credential-free demo adapter uses a private local filesystem. The managed adapter uses a private Supabase Storage bucket with a server-only secret, authenticated reads, Storage API deletion, and bounded signed-read URLs. Signed URLs default to five minutes and cannot be configured above one hour; they are transient capability URLs and must not be written to reports, assessment state, audit records, or logs. Selecting managed storage without required server-side credentials fails at configuration time.
+
+Mocked provider tests verify checksum enforcement and cross-tenant rejection, but live bucket isolation has not yet been certified. Confidential production use still requires real-bucket tests proving anonymous access is denied and tenant A cannot read, sign, overwrite, or delete tenant B objects.
+
 ### AI controls
 
 - source text treated as untrusted data;
@@ -69,4 +77,4 @@ Provider indexes and any future derived object-storage outputs must also partici
 
 ## Production readiness
 
-Before accepting confidential enterprise materials, tenant isolation, malware scanning, backup/restore, incident response, provider retention, PostgreSQL/RLS-backed audit/deletion-job persistence, an authenticated scheduler/worker, production object-storage deletion/reconciliation, data-processing terms, and log redaction must be verified.
+Before accepting confidential enterprise materials, tenant isolation, malware scanning/quarantine, backup/restore, incident response, provider retention, PostgreSQL/RLS-backed audit/deletion-job persistence, an authenticated scheduler/worker, live private-bucket deletion/reconciliation, data-processing terms, and log redaction must be verified.
