@@ -71,6 +71,7 @@ export class SupabasePrivateArtifactStorage implements ArtifactStorage {
 
     const id = randomUUID();
     const storageKey = `${tenantStoragePrefix(scope, assessmentId)}/${id}`;
+    const body = input.bytes.buffer.slice(input.bytes.byteOffset, input.bytes.byteOffset + input.bytes.byteLength) as ArrayBuffer;
     const response = await this.fetchImpl(this.objectUrl("object", storageKey), {
       method: "POST",
       headers: this.headers({
@@ -78,7 +79,7 @@ export class SupabasePrivateArtifactStorage implements ArtifactStorage {
         "x-upsert": "false",
         "cache-control": "no-store"
       }),
-      body: input.bytes
+      body
     });
     if (!response.ok) throw new Error(`Private artifact upload failed: ${await errorMessage(response)}`);
 
