@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { PRODUCT_LIMITS } from "@/lib/config";
+import { PRODUCT_LIMITS, STORAGE_CONFIG } from "@/lib/config";
 import { inspectArtifactBytes } from "@/lib/artifact-content-policy";
 import { parseArtifact, type ParsedArtifact } from "@/lib/artifact-parser";
 import { validateArtifactSet } from "@/lib/upload";
@@ -9,6 +9,8 @@ import { AuthenticationRequiredError, AuthorizationDeniedError } from "@/lib/aut
 import { requireServerPermission } from "@/lib/server-auth";
 import { getAssessmentRepository } from "@/lib/server-assessment-store";
 import { getArtifactStorage } from "@/lib/server-artifact-storage";
+import { getMalwareScanner } from "@/lib/server-malware-scanner";
+import type { MalwareScanResult } from "@/lib/malware-scanner";
 import { getProcessingRepository } from "@/lib/server-processing-store";
 import { scopeFromTenant } from "@/lib/tenancy";
 
@@ -17,7 +19,7 @@ export const runtime = "nodejs";
 type InspectedArtifact = {
   name: string; size: number; type: string; status: "validated" | "review_required" | "blocked"; errors: string[];
   checksumSha256: string; pageEstimate: { pages: number | null; method: string; confidence: string };
-  riskWarnings: Array<{ category: string; code: string; message: string }>; scanCoverage: string;
+  riskWarnings: Array<{ category: string; code: string; message: string }>; scanCoverage: string; malwareScan: MalwareScanResult;
 };
 type ProcessingArtifact = { artifactName: string; status: "parsed" | "failed" | "withheld"; parser?: string; segmentCount?: number; warnings?: string[]; message?: string };
 type ParsingResult = { status: "ready" | "partial" | "withheld"; parsedArtifacts: ParsedArtifact[]; processingArtifacts: ProcessingArtifact[]; errors: Array<{ artifactName: string; message: string }>; segmentCount: number };
@@ -44,18 +46,28 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
       const bytes = new Uint8Array(await file.arrayBuffer());
       fileBytes.set(file.name, bytes);
       const inspection = inspectArtifactBytes(file.name, bytes);
+      const malwareScan = await getMalwareScanner().scan({
+        originalName: file.name,
+        mediaType: file.type || "application/octet-stream",
+        bytes,
+        checksumSha256: inspection.checksumSha256
+      });
       const errors: string[] = [];
       const firstName = checksums.get(inspection.checksumSha256);
       if (firstName) errors.push(`Duplicate content: ${file.name} matches ${firstName}.`); else checksums.set(inspection.checksumSha256, file.name);
-      artifacts.push({ name: file.name, size: file.size, type: file.type || "application/octet-stream", status: errors.length > 0 ? "blocked" : inspection.riskWarnings.length > 0 || inspection.pageEstimate.pages === null ? "review_required" : "validated", errors, ...inspection });
+      if (malwareScan.status === "infected") errors.push("Artifact failed malware scanning and remains quarantined.");
+      if (malwareScan.status === "error") errors.push("Artifact malware scan could not be completed; upload fails closed and remains quarantined.");
+      artifacts.push({ name: file.name, size: file.size, type: file.type || "application/octet-stream", status: errors.length > 0 ? "blocked" : inspection.riskWarnings.length > 0 || inspection.pageEstimate.pages === null ? "review_required" : "validated", errors, ...inspection, malwareScan });
     }
 
     const measurablePages = artifacts.reduce((total, artifact) => total + (artifact.pageEstimate.pages ?? 0), 0);
     const unmeasurableFiles = artifacts.filter((artifact) => artifact.pageEstimate.pages === null).length;
     const setErrors: string[] = [];
     if (measurablePages > PRODUCT_LIMITS.maxTotalPages) setErrors.push(`Estimated total page count ${measurablePages} exceeds the ${PRODUCT_LIMITS.maxTotalPages}-page limit.`);
-    if (artifacts.some((artifact) => artifact.errors.length > 0)) setErrors.push("Duplicate artifact content must be removed or replaced.");
-    if (setErrors.length > 0) return NextResponse.json({ assessmentId: id, accepted: false, setErrors, artifacts, limits: { maxFiles: PRODUCT_LIMITS.maxFiles, maxFileBytes: PRODUCT_LIMITS.maxFileBytes, maxTotalPages: PRODUCT_LIMITS.maxTotalPages } }, { status: 400 });
+    if (artifacts.some((artifact) => artifact.errors.some((error) => error.startsWith("Duplicate content:")))) setErrors.push("Duplicate artifact content must be removed or replaced.");
+    if (artifacts.some((artifact) => artifact.malwareScan.status === "infected")) setErrors.push("One or more artifacts failed malware scanning. Quarantined artifacts are never persisted or parsed.");
+    if (artifacts.some((artifact) => artifact.malwareScan.status === "error")) setErrors.push("Malware scanning could not complete. The upload fails closed and no artifact bytes are persisted or parsed.");
+    if (setErrors.length > 0) return NextResponse.json({ assessmentId: id, accepted: false, quarantine: { released: false, persisted: false, parsed: false }, setErrors, artifacts, limits: { maxFiles: PRODUCT_LIMITS.maxFiles, maxFileBytes: PRODUCT_LIMITS.maxFileBytes, maxTotalPages: PRODUCT_LIMITS.maxTotalPages } }, { status: artifacts.some((artifact) => artifact.malwareScan.status === "error") ? 503 : 422 });
 
     const warningCount = artifacts.reduce((total, artifact) => total + artifact.riskWarnings.length, 0);
     const readyForAnalysis = warningCount === 0 && unmeasurableFiles === 0;
@@ -124,7 +136,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
       processingPersistence = { persisted: true, persistedAt: persisted.persistedAt, artifactCount: persisted.artifacts.length, segmentCount: persisted.parsedArtifacts.reduce((sum, artifact) => sum + artifact.sourceSegments.length, 0) };
     }
 
-    return NextResponse.json({ assessmentId: id, accepted: true, storageMode: readyForAnalysis ? "private-tenant-scoped-local-adapter" : "not-persisted-until-ready", persistedArtifacts, processingPersistence, limits: { maxFiles: PRODUCT_LIMITS.maxFiles, maxFileBytes: PRODUCT_LIMITS.maxFileBytes, maxTotalPages: PRODUCT_LIMITS.maxTotalPages }, artifacts, readiness, parsing, extraction }, { headers: { "Cache-Control": "no-store" } });
+    return NextResponse.json({ assessmentId: id, accepted: true, quarantine: { released: true, persisted: readyForAnalysis, parsed: readyForAnalysis }, storageMode: readyForAnalysis ? `private-tenant-scoped-${STORAGE_CONFIG.provider}-adapter` : "not-persisted-until-ready", persistedArtifacts, processingPersistence, limits: { maxFiles: PRODUCT_LIMITS.maxFiles, maxFileBytes: PRODUCT_LIMITS.maxFileBytes, maxTotalPages: PRODUCT_LIMITS.maxTotalPages }, artifacts, readiness, parsing, extraction }, { headers: { "Cache-Control": "no-store" } });
   } catch (error) {
     if (error instanceof AuthenticationRequiredError) return NextResponse.json({ error: error.message }, { status: 401 });
     if (error instanceof AuthorizationDeniedError) return NextResponse.json({ error: error.message }, { status: 403 });
