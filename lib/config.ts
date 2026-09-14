@@ -11,6 +11,10 @@ const envSchema = z.object({
   SUPABASE_SECRET_KEY: z.string().min(20).optional(),
   SUPABASE_STORAGE_BUCKET: z.string().trim().min(2).max(100).regex(/^[a-z0-9][a-z0-9._-]*$/i).default("sugar-platform-artifacts"),
   SUPABASE_SIGNED_URL_TTL_SECONDS: z.coerce.number().int().min(60).max(3600).default(300),
+  MALWARE_SCANNER_PROVIDER: z.enum(["local", "clamav"]).default("local"),
+  CLAMAV_HOST: z.string().trim().min(1).optional(),
+  CLAMAV_PORT: z.coerce.number().int().min(1).max(65535).default(3310),
+  CLAMAV_TIMEOUT_MS: z.coerce.number().int().min(1000).max(60000).default(10000),
   LOCAL_ORGANIZATION_ID: tenantIdSchema.default("local-org"),
   LOCAL_ORGANIZATION_NAME: z.string().trim().min(2).max(120).default("Local Organization"),
   LOCAL_WORKSPACE_ID: tenantIdSchema.default("local-demo"),
@@ -30,6 +34,9 @@ const envSchema = z.object({
     if (!value.SUPABASE_URL) ctx.addIssue({ code: "custom", path: ["SUPABASE_URL"], message: "SUPABASE_URL is required for Supabase artifact storage." });
     if (!value.SUPABASE_SECRET_KEY) ctx.addIssue({ code: "custom", path: ["SUPABASE_SECRET_KEY"], message: "SUPABASE_SECRET_KEY is required for Supabase artifact storage." });
   }
+  if (value.MALWARE_SCANNER_PROVIDER === "clamav" && !value.CLAMAV_HOST) {
+    ctx.addIssue({ code: "custom", path: ["CLAMAV_HOST"], message: "CLAMAV_HOST is required when the ClamAV malware scanner is selected." });
+  }
 });
 
 export const env = envSchema.parse(process.env);
@@ -44,6 +51,11 @@ export const STORAGE_CONFIG = {
     bucket: env.SUPABASE_STORAGE_BUCKET,
     signedUrlTtlSeconds: env.SUPABASE_SIGNED_URL_TTL_SECONDS
   } : null
+} as const;
+
+export const MALWARE_SCANNER_CONFIG = {
+  provider: env.MALWARE_SCANNER_PROVIDER,
+  clamav: env.MALWARE_SCANNER_PROVIDER === "clamav" ? { host: env.CLAMAV_HOST!, port: env.CLAMAV_PORT, timeoutMs: env.CLAMAV_TIMEOUT_MS } : null
 } as const;
 
 export const LOCAL_TENANT_CONFIG = {
