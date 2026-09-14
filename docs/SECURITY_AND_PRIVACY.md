@@ -22,6 +22,7 @@ Before upload, display:
 - duplicate detection;
 - executable rejection;
 - probable-secret scanning;
+- fail-closed malware scanning before persistence or parsing;
 - clear warning that detection is not perfect;
 - user acknowledgement of upload rules.
 
@@ -41,6 +42,14 @@ Artifact storage is server-only and provider-neutral. Keys are derived as `<orga
 The credential-free demo adapter uses a private local filesystem. The managed adapter uses a private Supabase Storage bucket with a server-only secret, authenticated reads, Storage API deletion, and bounded signed-read URLs. Signed URLs default to five minutes and cannot be configured above one hour; they are transient capability URLs and must not be written to reports, assessment state, audit records, or logs. Selecting managed storage without required server-side credentials fails at configuration time.
 
 Mocked provider tests verify checksum enforcement and cross-tenant rejection, but live bucket isolation has not yet been certified. Confidential production use still requires real-bucket tests proving anonymous access is denied and tenant A cannot read, sign, overwrite, or delete tenant B objects.
+
+### Malware scanning and quarantine
+
+Uploaded bytes remain in a pre-persistence quarantine boundary until every artifact receives an explicit clean malware-scan result. The gate executes before private object storage, parsing, extraction, or processing persistence. Any infected artifact rejects the complete focused artifact set; scanner timeout, outage, or unrecognized output also fails closed.
+
+The local/demo provider detects only bounded EICAR and executable signatures and must not be represented as production antivirus coverage. Production mode supports a server-only ClamAV `INSTREAM` boundary with configured host, port, and timeout. Checksums are revalidated before scanner provider execution, scanner responses never authorize tenant storage paths, and routine logs must not echo artifact contents.
+
+Live scanner-service hardening, signature freshness and health monitoring, worst-case throughput testing, and integrated production-storage isolation validation remain required before confidential production use.
 
 ### AI controls
 
@@ -77,4 +86,4 @@ Provider indexes and any future derived object-storage outputs must also partici
 
 ## Production readiness
 
-Before accepting confidential enterprise materials, tenant isolation, malware scanning/quarantine, backup/restore, incident response, provider retention, PostgreSQL/RLS-backed audit/deletion-job persistence, an authenticated scheduler/worker, live private-bucket deletion/reconciliation, data-processing terms, and log redaction must be verified.
+Before accepting confidential enterprise materials, tenant isolation, live malware-scanner operations, backup/restore, incident response, provider retention, PostgreSQL/RLS-backed audit/deletion-job persistence, an authenticated scheduler/worker, live private-bucket deletion/reconciliation, data-processing terms, and log redaction must be verified.
