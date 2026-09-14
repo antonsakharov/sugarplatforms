@@ -8,9 +8,9 @@ npm install
 npm run dev
 ```
 
-The credential-free local/single-instance path uses the server-owned local tenant, local-dev authenticated membership, SQLite persistence adapters, and private filesystem artifact storage. No external identity provider, PostgreSQL service, object-storage account, AI provider, or PDF provider is required to exercise the current end-to-end workflow locally.
+The credential-free local/single-instance path uses the server-owned local tenant, local-dev authenticated membership, SQLite persistence adapters, private filesystem artifact storage, and the local deterministic malware scanner. No external identity provider, PostgreSQL service, object-storage account, AI provider, PDF provider, or malware-scanner service is required to exercise the current end-to-end workflow locally.
 
-Do not use the local adapter for confidential enterprise material. Production readiness still requires verified production identity, PostgreSQL/RLS activation with live non-bypass tenant-isolation tests, production private object storage, malware/quarantine controls, PostgreSQL/RLS-backed audit/deletion with retention and backup semantics, backup/restore verification, and log/incident controls.
+Do not use the local adapter for confidential enterprise material. Production readiness still requires verified production identity, PostgreSQL/RLS activation with live non-bypass tenant-isolation tests, production private object storage, live malware-scanner operations, PostgreSQL/RLS-backed audit/deletion with retention and backup semantics, backup/restore verification, and log/incident controls.
 
 ## Validation
 
@@ -20,14 +20,29 @@ npm run validate
 
 `npm run validate` runs TypeScript checks, source-policy lint, all Node tests, and an optimized Next.js production build. GitHub Actions also packages the validated source tree as a repository-snapshot artifact after each run.
 
-Current tests cover assessment limits and persistence, assessment deletion/audit lifecycle, authentication/authorization, organization/workspace isolation, PostgreSQL RLS policy boundaries, upload safety, private artifact storage, deterministic parsing, source-addressable evidence persistence, extraction/review persistence and staleness, deterministic diagnostics, finding-review persistence/materialized accepted findings, AI candidate boundaries and promotion, entity/ID graph projection/export, maturity/recommendation projection, accepted-findings-only reporting, report snapshot/version export, formal print presentation, and deterministic PDF generation/provenance behavior.
+Current tests cover assessment limits and persistence, assessment deletion/audit lifecycle, authentication/authorization, organization/workspace isolation, PostgreSQL RLS policy boundaries, upload safety, malware quarantine ordering/provider behavior, private artifact storage, deterministic parsing, source-addressable evidence persistence, extraction/review persistence and staleness, deterministic diagnostics, finding-review persistence/materialized accepted findings, AI candidate boundaries and promotion, entity/ID graph projection/export, maturity/recommendation projection, accepted-findings-only reporting, report snapshot/version export, formal print presentation, and deterministic PDF generation/provenance behavior.
+
+## Malware scanner configuration
+
+Local/demo runs default to `MALWARE_SCANNER_PROVIDER=local`. This exercises the quarantine contract with bounded EICAR/executable signatures and is not production antivirus coverage.
+
+For a production-style ClamAV service:
+
+```env
+MALWARE_SCANNER_PROVIDER=clamav
+CLAMAV_HOST=clamav.internal
+CLAMAV_PORT=3310
+CLAMAV_TIMEOUT_MS=10000
+```
+
+ClamAV must be reachable only from trusted application infrastructure and should not expose port 3310 publicly. Scanner timeout, outage, or unrecognized output fails upload closed; there is no bypass-to-storage path.
 
 ## Current routes
 
 - `/` — product entry page
 - `/assessment/new` — guided assessment setup
 - `/assessment/[id]` — assessment workspace, including the administrator deletion danger zone
-- `/assessment/[id]/upload` — upload, readiness, parsing, evidence, and extraction workflow
+- `/assessment/[id]/upload` — upload, malware quarantine/readiness, parsing, evidence, and extraction workflow
 - `/assessment/[id]/review` — server-backed extraction review and approval
 - `/assessment/[id]/diagnostics` — deterministic diagnostics and server-backed finding review
 - `/assessment/[id]/ai-findings` — isolated candidate findings and explicit server-authorized promotion into normal finding review
@@ -36,7 +51,7 @@ Current tests cover assessment limits and persistence, assessment deletion/audit
 - `/assessment/[id]/report` — server-reviewed executive preview, durable immutable report history, JSON export, print, and authorized formal PDF export
 - `/api/assessments` — authenticated assessment validation/creation
 - `/api/assessments/[id]` — authenticated assessment read; admin-only `DELETE` permanently purges the assessment and returns an audit receipt
-- `/api/assessments/[id]/artifacts` — authenticated validation, private storage, parsing, extraction, and processing persistence
+- `/api/assessments/[id]/artifacts` — authenticated validation, malware quarantine, private storage, parsing, extraction, and processing persistence
 - `/api/assessments/[id]/processing` — authenticated no-store processing snapshot
 - `/api/assessments/[id]/extraction-review` — authenticated extraction-review read/write
 - `/api/assessments/[id]/finding-review` — authenticated finding-review read/write and accepted-finding materialization
@@ -62,7 +77,7 @@ The MVP remains deliberately bounded:
 - no passwords, tokens, API keys, private keys, credentials, or other secrets;
 - no raw production database exports or live production-system access.
 
-Validated artifact bytes are persisted only after upload-readiness checks pass, under server-derived random tenant-scoped private storage keys. Validated artifact metadata, parser/source segments, extraction snapshots, extraction review, finding review, materialized accepted findings, and report snapshots are server-persisted in the current local/single-instance adapter.
+Validated artifact bytes are persisted only after upload-readiness and malware-quarantine checks pass, under server-derived random tenant-scoped private storage keys. Validated artifact metadata, parser/source segments, extraction snapshots, extraction review, finding review, materialized accepted findings, and report snapshots are server-persisted in the current local/single-instance adapter.
 
 ## Reviewed-state authority
 
