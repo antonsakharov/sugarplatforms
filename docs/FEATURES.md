@@ -10,13 +10,13 @@ Status: in progress — assessment creation is server-persisted through a reposi
 
 User can select up to 10 supported files, receive server-side type/size/duplicate/page validation, receive probable-secret and prohibited-data warnings, remove or replace files, and see whether the artifact set is ready for parsing.
 
-Status: in progress — the complete upload-readiness workflow is implemented. Artifact bytes are persisted only after readiness checks pass, using server-derived random tenant-scoped storage keys. The storage boundary now supports both a private local filesystem adapter and a production-oriented Supabase private-bucket adapter with authenticated reads, provider API deletion, checksum verification, and bounded short-lived signed read URLs. Live production bucket isolation, malware/quarantine, production identity, and retention/backup validation remain open.
+Status: in progress — the complete upload-readiness workflow is implemented. Artifact bytes are persisted only after readiness checks pass, using server-derived random tenant-scoped storage keys. The storage boundary supports both a private local filesystem adapter and a production-oriented Supabase private-bucket adapter. A pre-persistence malware quarantine gate now scans every file before storage or parsing; infected or indeterminate sets fail closed. Live production bucket isolation, scanner operations, production identity, and retention/backup validation remain open.
 
 ## MVP priority 3 — Artifact parsing and evidence
 
 User can see processing status, inspect parsed content and source coordinates, see extracted-object provenance, and inspect parsing failures.
 
-Status: in progress — text/Markdown, JSON/YAML/OpenAPI, CSV, SQL DDL, and bounded direct-text PDF parsing produce source-addressable segments with stable locators and hashes. Validated artifact metadata, normalized source segments, parser warnings, and the current extraction snapshot are transactionally persisted under organization/workspace/assessment scope and can be resumed through an authenticated no-store API. Production-grade PDF coverage, malware/quarantine, and production PostgreSQL/RLS activation remain open.
+Status: in progress — text/Markdown, JSON/YAML/OpenAPI, CSV, SQL DDL, and bounded direct-text PDF parsing produce source-addressable segments with stable locators and hashes. Validated artifact metadata, normalized source segments, parser warnings, and the current extraction snapshot are transactionally persisted under organization/workspace/assessment scope and can be resumed through an authenticated no-store API. Production-grade PDF coverage and production PostgreSQL/RLS activation remain open.
 
 ## MVP priority 4 — Extraction review
 
@@ -59,6 +59,12 @@ Status: implemented for the local/single-instance demo workflow — `/sample` in
 Use the same tenant-safe artifact-storage boundary with either local private filesystem storage or a managed Supabase private bucket.
 
 Status: implemented at the code/provider-contract level. `ARTIFACT_STORAGE_PROVIDER=supabase` requires server-only project URL/secret configuration, preserves random tenant-scoped keys, validates SHA-256 before upload, uses authenticated private reads, deletes through the Storage API, and issues signed read URLs with a 60–3600 second TTL (300 seconds by default). Mocked provider tests cover upload/read/delete/sign behavior, checksum drift, and cross-tenant rejection. Live private-bucket/RLS isolation testing is still required before confidential production use.
+
+## Production-readiness feature — Malware scanning and quarantine
+
+Treat uploaded bytes as quarantined until the configured scanner reports every artifact clean. Infected or indeterminate scans must not reach object storage, parsing, extraction, or evidence persistence.
+
+Status: implemented at the local/demo and production integration-boundary level. The credential-free local scanner exercises EICAR and executable-signature rejection; the production boundary supports ClamAV INSTREAM with bounded timeout and fail-closed behavior. Checksums are revalidated before scanning, and the entire artifact set remains unpersisted if any scan is infected or unavailable. Live scanner infrastructure, signature-update monitoring, throughput validation, and production object-storage integration testing remain open.
 
 ## Production-readiness feature — Audit and deletion
 
