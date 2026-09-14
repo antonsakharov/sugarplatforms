@@ -18,8 +18,9 @@ test("server inspects content before private tenant-scoped persistence", () => {
   assert.match(route, /checksumSha256/);
   assert.match(route, /maxTotalPages/);
   assert.match(route, /requireServerPermission\("artifact:create"\)/);
+  assert.match(route, /getMalwareScanner\(\)\.scan/);
   assert.match(route, /getArtifactStorage\(\)\.put/);
-  assert.match(route, /private-tenant-scoped-local-adapter/);
+  assert.match(route, /private-tenant-scoped-\$\{STORAGE_CONFIG\.provider\}-adapter/);
   assert.match(route, /if \(readyForAnalysis\)/);
 });
 
