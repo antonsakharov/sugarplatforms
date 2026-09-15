@@ -1,0 +1,62 @@
+import { z } from "zod";
+import { userIdentitySchema, type UserIdentity } from "./auth";
+
+const supabaseUserSchema = z.object({
+  id: z.string().uuid(),
+  email: z.string().email(),
+  created_at: z.string().datetime(),
+  user_metadata: z.record(z.string(), z.unknown()).optional()
+});
+
+export type SupabaseAuthConfig = {
+  projectUrl: string;
+  publishableKey: string;
+  timeoutMs: number;
+};
+
+export class InvalidSessionError extends Error {
+  constructor(message = "The supplied session is invalid or expired.") {
+    super(message);
+    this.name = "InvalidSessionError";
+  }
+}
+
+function displayName(metadata: Record<string, unknown> | undefined, email: string) {
+  const candidate = metadata?.full_name ?? metadata?.name ?? metadata?.display_name;
+  return typeof candidate === "string" && candidate.trim().length >= 2
+    ? candidate.trim().slice(0, 120)
+    : email.split("@")[0].slice(0, 120);
+}
+
+export async function verifySupabaseAccessToken(
+  token: string,
+  config: SupabaseAuthConfig,
+  fetchImpl: typeof fetch = fetch
+): Promise<UserIdentity> {
+  const accessToken = token.trim();
+  if (accessToken.length < 20) throw new InvalidSessionError();
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), config.timeoutMs);
+  try {
+    const response = await fetchImpl(`${config.projectUrl.replace(/\/$/, "")}/auth/v1/user`, {
+      method: "GET",
+      headers: { Authorization: `Bearer ${accessToken}`, apikey: config.publishableKey },
+      cache: "no-store",
+      signal: controller.signal
+    });
+    if (!response.ok) throw new InvalidSessionError();
+    const parsed = supabaseUserSchema.safeParse(await response.json());
+    if (!parsed.success) throw new InvalidSessionError("Identity provider returned an invalid user envelope.");
+    return userIdentitySchema.parse({
+      id: parsed.data.id,
+      email: parsed.data.email,
+      displayName: displayName(parsed.data.user_metadata, parsed.data.email),
+      createdAt: parsed.data.created_at
+    });
+  } catch (error) {
+    if (error instanceof InvalidSessionError) throw error;
+    throw new InvalidSessionError("Identity verification is unavailable.");
+  } finally {
+    clearTimeout(timer);
+  }
+}
