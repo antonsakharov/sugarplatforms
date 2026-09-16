@@ -1,10 +1,12 @@
 import { z } from "zod";
 
 const tenantIdSchema = z.string().trim().min(2).max(80).regex(/^[a-z0-9][a-z0-9_-]*$/i);
-
 const envSchema = z.object({
   NEXT_PUBLIC_DEMO_MODE: z.enum(["true", "false"]).default("true"),
   ASSESSMENT_DB_PATH: z.string().trim().min(1).default(".data/sugar-platform-diagnostic.sqlite"),
+  AUTH_PROVIDER: z.enum(["local", "supabase"]).default("local"),
+  AUTH_ACCESS_TOKEN_COOKIE_NAME: z.string().trim().min(2).max(80).regex(/^[A-Za-z0-9_-]+$/).default("sugar-access-token"),
+  SUPABASE_AUTH_TIMEOUT_MS: z.coerce.number().int().min(1000).max(30000).default(5000),
   ARTIFACT_STORAGE_PROVIDER: z.enum(["local", "supabase"]).default("local"),
   PRIVATE_ARTIFACT_ROOT: z.string().trim().min(1).default(".data/private-artifacts"),
   SUPABASE_URL: z.string().url().optional(),
@@ -30,54 +32,16 @@ const envSchema = z.object({
   MAX_TOTAL_PAGES: z.coerce.number().int().positive().max(150).default(150),
   MAX_PRIMARY_ENTITIES: z.coerce.number().int().positive().max(1).default(1)
 }).superRefine((value, ctx) => {
-  if (value.ARTIFACT_STORAGE_PROVIDER === "supabase") {
-    if (!value.SUPABASE_URL) ctx.addIssue({ code: "custom", path: ["SUPABASE_URL"], message: "SUPABASE_URL is required for Supabase artifact storage." });
-    if (!value.SUPABASE_SECRET_KEY) ctx.addIssue({ code: "custom", path: ["SUPABASE_SECRET_KEY"], message: "SUPABASE_SECRET_KEY is required for Supabase artifact storage." });
-  }
-  if (value.MALWARE_SCANNER_PROVIDER === "clamav" && !value.CLAMAV_HOST) {
-    ctx.addIssue({ code: "custom", path: ["CLAMAV_HOST"], message: "CLAMAV_HOST is required when the ClamAV malware scanner is selected." });
-  }
+  if ((value.ARTIFACT_STORAGE_PROVIDER === "supabase" || value.AUTH_PROVIDER === "supabase") && !value.SUPABASE_URL) ctx.addIssue({ code: "custom", path: ["SUPABASE_URL"], message: "SUPABASE_URL is required for the selected Supabase provider." });
+  if (value.ARTIFACT_STORAGE_PROVIDER === "supabase" && !value.SUPABASE_SECRET_KEY) ctx.addIssue({ code: "custom", path: ["SUPABASE_SECRET_KEY"], message: "SUPABASE_SECRET_KEY is required for Supabase artifact storage." });
+  if (value.MALWARE_SCANNER_PROVIDER === "clamav" && !value.CLAMAV_HOST) ctx.addIssue({ code: "custom", path: ["CLAMAV_HOST"], message: "CLAMAV_HOST is required when the ClamAV malware scanner is selected." });
 });
 
 export const env = envSchema.parse(process.env);
-
 export const PERSISTENCE_CONFIG = { assessmentDatabasePath: env.ASSESSMENT_DB_PATH } as const;
-export const STORAGE_CONFIG = {
-  provider: env.ARTIFACT_STORAGE_PROVIDER,
-  privateArtifactRoot: env.PRIVATE_ARTIFACT_ROOT,
-  supabase: env.ARTIFACT_STORAGE_PROVIDER === "supabase" ? {
-    projectUrl: env.SUPABASE_URL!,
-    secretKey: env.SUPABASE_SECRET_KEY!,
-    bucket: env.SUPABASE_STORAGE_BUCKET,
-    signedUrlTtlSeconds: env.SUPABASE_SIGNED_URL_TTL_SECONDS
-  } : null
-} as const;
-
-export const MALWARE_SCANNER_CONFIG = {
-  provider: env.MALWARE_SCANNER_PROVIDER,
-  clamav: env.MALWARE_SCANNER_PROVIDER === "clamav" ? { host: env.CLAMAV_HOST!, port: env.CLAMAV_PORT, timeoutMs: env.CLAMAV_TIMEOUT_MS } : null
-} as const;
-
-export const LOCAL_TENANT_CONFIG = {
-  organizationId: env.LOCAL_ORGANIZATION_ID,
-  organizationName: env.LOCAL_ORGANIZATION_NAME,
-  workspaceId: env.LOCAL_WORKSPACE_ID,
-  workspaceName: env.LOCAL_WORKSPACE_NAME
-} as const;
-
-export const LOCAL_AUTH_CONFIG = {
-  enabled: env.LOCAL_AUTH_ENABLED === "true",
-  userId: env.LOCAL_USER_ID,
-  email: env.LOCAL_USER_EMAIL,
-  displayName: env.LOCAL_USER_NAME,
-  role: env.LOCAL_USER_ROLE
-} as const;
-
-export const PRODUCT_LIMITS = {
-  maxActiveAssessments: env.MAX_ACTIVE_ASSESSMENTS_PER_WORKSPACE,
-  maxFiles: env.MAX_UPLOAD_FILES,
-  maxFileBytes: env.MAX_UPLOAD_BYTES,
-  maxFileMegabytes: Math.round(env.MAX_UPLOAD_BYTES / 1024 / 1024),
-  maxTotalPages: env.MAX_TOTAL_PAGES,
-  maxPrimaryEntities: env.MAX_PRIMARY_ENTITIES
-} as const;
+export const AUTH_CONFIG = { provider: env.AUTH_PROVIDER, accessTokenCookieName: env.AUTH_ACCESS_TOKEN_COOKIE_NAME, supabase: env.AUTH_PROVIDER === "supabase" ? { projectUrl: env.SUPABASE_URL!, timeoutMs: env.SUPABASE_AUTH_TIMEOUT_MS } : null } as const;
+export const STORAGE_CONFIG = { provider: env.ARTIFACT_STORAGE_PROVIDER, privateArtifactRoot: env.PRIVATE_ARTIFACT_ROOT, supabase: env.ARTIFACT_STORAGE_PROVIDER === "supabase" ? { projectUrl: env.SUPABASE_URL!, secretKey: env.SUPABASE_SECRET_KEY!, bucket: env.SUPABASE_STORAGE_BUCKET, signedUrlTtlSeconds: env.SUPABASE_SIGNED_URL_TTL_SECONDS } : null } as const;
+export const MALWARE_SCANNER_CONFIG = { provider: env.MALWARE_SCANNER_PROVIDER, clamav: env.MALWARE_SCANNER_PROVIDER === "clamav" ? { host: env.CLAMAV_HOST!, port: env.CLAMAV_PORT, timeoutMs: env.CLAMAV_TIMEOUT_MS } : null } as const;
+export const LOCAL_TENANT_CONFIG = { organizationId: env.LOCAL_ORGANIZATION_ID, organizationName: env.LOCAL_ORGANIZATION_NAME, workspaceId: env.LOCAL_WORKSPACE_ID, workspaceName: env.LOCAL_WORKSPACE_NAME } as const;
+export const LOCAL_AUTH_CONFIG = { enabled: env.LOCAL_AUTH_ENABLED === "true", userId: env.LOCAL_USER_ID, email: env.LOCAL_USER_EMAIL, displayName: env.LOCAL_USER_NAME, role: env.LOCAL_USER_ROLE } as const;
+export const PRODUCT_LIMITS = { maxActiveAssessments: env.MAX_ACTIVE_ASSESSMENTS_PER_WORKSPACE, maxFiles: env.MAX_UPLOAD_FILES, maxFileBytes: env.MAX_UPLOAD_BYTES, maxFileMegabytes: Math.round(env.MAX_UPLOAD_BYTES / 1024 / 1024), maxTotalPages: env.MAX_TOTAL_PAGES, maxPrimaryEntities: env.MAX_PRIMARY_ENTITIES } as const;
