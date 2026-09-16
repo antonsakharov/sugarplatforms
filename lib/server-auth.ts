@@ -1,8 +1,8 @@
-import { AUTH_CONFIG, LOCAL_AUTH_CONFIG } from "./config";
-import { authenticatedContextSchema, AuthenticationRequiredError, requirePermission, type AuthenticatedContext, type Permission } from "./auth";
-import { authenticateProductionSession } from "./production-auth";
-import { getAssessmentRepository, getServerTenantContext } from "./server-assessment-store";
-import { scopeFromTenant } from "./tenancy";
+import { AUTH_CONFIG, LOCAL_AUTH_CONFIG } from "./config.ts";
+import { authenticatedContextSchema, AuthenticationRequiredError, requirePermission, type AuthenticatedContext, type Permission } from "./auth.ts";
+import { authenticateProductionSession } from "./production-auth.ts";
+import { getAssessmentRepository, getServerTenantContext } from "./server-assessment-store.ts";
+import { scopeFromTenant } from "./tenancy.ts";
 function getLocalAuthContext(): AuthenticatedContext {
   if (!LOCAL_AUTH_CONFIG.enabled) throw new AuthenticationRequiredError();
   const tenant = getServerTenantContext(); const scope = scopeFromTenant(tenant); const createdAt = new Date().toISOString();
@@ -25,9 +25,6 @@ export async function getServerAuthContext(request: Request): Promise<Authentica
 export function requireServerPermission(permission: Permission): AuthenticatedContext;
 export function requireServerPermission(request: Request, permission: Permission): Promise<AuthenticatedContext>;
 export function requireServerPermission(requestOrPermission: Request | Permission, maybePermission?: Permission): AuthenticatedContext | Promise<AuthenticatedContext> {
-  if (typeof requestOrPermission === "string") {
-    if (AUTH_CONFIG.provider !== "local") throw new AuthenticationRequiredError();
-    return requirePermission(getLocalAuthContext(), requestOrPermission);
-  }
+  if (typeof requestOrPermission === "string") { if (AUTH_CONFIG.provider !== "local") throw new AuthenticationRequiredError(); return requirePermission(getLocalAuthContext(), requestOrPermission); }
   return getServerAuthContext(requestOrPermission).then((context) => requirePermission(context, maybePermission!));
 }
