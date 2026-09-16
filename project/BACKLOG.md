@@ -40,19 +40,20 @@ Statuses: `[ ] planned`, `[-] in progress`, `[x] complete`.
 
 - [-] Durable database persistence — assessment metadata, validated artifact metadata, normalized source segments, parser provenance, extraction snapshots, extraction-review decisions/approval, finding-review decisions, materialized accepted findings, and report history are server-persisted via tenant-scoped SQLite local/single-instance adapters
 - [x] Organization and workspace tenancy — persisted organization/workspace identity, server-owned local tenant context, tenant-scoped assessment operations, and focused isolation tests are implemented
-- [x] Authentication and authorization foundation — server-resolved user/workspace membership, viewer/editor/admin permissions, 401/403 fail-closed API guards, and local-dev identity adapter are implemented; production IdP/session verification remains open
+- [x] Authentication and authorization foundation — verified Supabase identity composition, persisted membership authorization, viewer/editor/admin permissions, and fail-closed local/demo separation are implemented
+- [-] Request-scoped production auth activation — selectable local/Supabase provider, bearer/cookie extraction, no-store identity verification, exact persisted membership lookup, and request-aware session + assessment-create routes are implemented; remaining protected routes still need migration before production mode is complete
 - [x] PostgreSQL row-level security foundation — relational tenant keys, forced RLS policies, membership-gated reads, editor/admin assessment inserts, transaction-local tenant context, and database one-active-assessment enforcement are implemented
 - [x] Private object storage foundation — validated artifact bytes are persisted only after upload/content checks, under random tenant-scoped keys through a server-only storage interface; local mode uses a private filesystem adapter and does not expose storage paths
-- [x] Server-backed artifact metadata and source/evidence persistence — validated artifact metadata, source-addressable parser segments, parser warnings, and extraction snapshots are transactionally persisted and tenant-scoped; authenticated resumable reads are available
-- [x] Server-backed extraction-review decisions and approved extraction persistence — review decisions are tenant-scoped, authenticated, server-persisted, and bound to the exact extraction fingerprint; stale extraction changes invalidate prior approval
-- [x] Server-backed finding-review decisions and accepted findings persistence — authenticated finding review is tenant-scoped, server-persisted, bound to canonical deterministic diagnostics, stale on extraction changes, and materializes accepted findings only after explicit completion
-- [x] Server-backed accepted-findings consumption — maturity, entity/ID map, recommendations, AI-candidate promotion handoff, and executive report hydrate authenticated no-store reviewed state from the server; browser state is compatibility cache only
-- [x] Server-backed report version history and authorization — report versions are generated server-side from current reviewed state, immutable, tenant-scoped, role-authorized, and formal PDF export resolves persisted snapshots by ID
+- [x] Server-backed artifact metadata and source/evidence persistence
+- [x] Server-backed extraction-review decisions and approved extraction persistence
+- [x] Server-backed finding-review decisions and accepted findings persistence
+- [x] Server-backed accepted-findings consumption
+- [x] Server-backed report version history and authorization
 - [ ] Live database/storage tenant-isolation integration tests against a real non-superuser/non-`BYPASSRLS` PostgreSQL role and production private object storage
-- [x] Production Supabase private-storage adapter with bounded short-lived signed read URLs — server-only provider selection, checksum verification, tenant-scoped random keys, authenticated reads, provider API deletion, and mocked cross-tenant/provider-contract tests are implemented; live bucket isolation remains credential-dependent
-- [x] Malware/quarantine upload gate — server-selected scanner runs before storage/parsing, checksum drift is rejected, infected or indeterminate sets fail closed, local demo signatures exercise the boundary, and ClamAV INSTREAM provides the production scanner interface; live scanner infrastructure validation remains open
-- [x] Audit and deletion workflow — admin-only full assessment deletion now purges tenant-scoped private artifacts and persisted assessment state while retaining minimal durable success/failure audit receipts
-- [x] Operational deletion job controls and runbook — durable tenant-scoped jobs persist progress, bound retries/backoff, reclaim crashed attempts with leases, expose redacted admin status, and support bounded reconciliation; production scheduler/worker activation remains open
+- [x] Production Supabase private-storage adapter with bounded short-lived signed read URLs
+- [x] Malware/quarantine upload gate
+- [x] Audit and deletion workflow
+- [x] Operational deletion job controls and runbook
 
 ## Secondary sample
 
