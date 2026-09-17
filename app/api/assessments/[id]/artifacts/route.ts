@@ -27,7 +27,7 @@ type ParsingResult = { status: "ready" | "partial" | "withheld"; parsedArtifacts
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   try {
-    const auth = requireServerPermission("artifact:create");
+    const auth = await requireServerPermission(request, "artifact:create");
     const scope = scopeFromTenant(auth.tenant);
     if (!getAssessmentRepository().findById(scope, id)) return NextResponse.json({ error: "Assessment not found." }, { status: 404 });
 
@@ -46,12 +46,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
       const bytes = new Uint8Array(await file.arrayBuffer());
       fileBytes.set(file.name, bytes);
       const inspection = inspectArtifactBytes(file.name, bytes);
-      const malwareScan = await getMalwareScanner().scan({
-        originalName: file.name,
-        mediaType: file.type || "application/octet-stream",
-        bytes,
-        checksumSha256: inspection.checksumSha256
-      });
+      const malwareScan = await getMalwareScanner().scan({ originalName: file.name, mediaType: file.type || "application/octet-stream", bytes, checksumSha256: inspection.checksumSha256 });
       const errors: string[] = [];
       const firstName = checksums.get(inspection.checksumSha256);
       if (firstName) errors.push(`Duplicate content: ${file.name} matches ${firstName}.`); else checksums.set(inspection.checksumSha256, file.name);
@@ -114,25 +109,9 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
         const stored = persistedArtifacts.find((item) => item.name === parsed.artifactName);
         const inspected = artifacts.find((item) => item.name === parsed.artifactName);
         if (!stored || !inspected) return [];
-        return [{
-          storageArtifactId: stored.id,
-          parserArtifactId: parsed.artifactId,
-          originalName: parsed.artifactName,
-          mediaType: inspected.type,
-          size: stored.size,
-          checksumSha256: stored.checksumSha256,
-          parser: parsed.parser,
-          warnings: parsed.warnings,
-          createdAt: stored.persistedAt
-        }];
+        return [{ storageArtifactId: stored.id, parserArtifactId: parsed.artifactId, originalName: parsed.artifactName, mediaType: inspected.type, size: stored.size, checksumSha256: stored.checksumSha256, parser: parsed.parser, warnings: parsed.warnings, createdAt: stored.persistedAt }];
       });
-      const persisted = getProcessingRepository().replace(scope, {
-        assessmentId: id,
-        artifacts: metadata,
-        parsedArtifacts: parsing.parsedArtifacts,
-        extraction,
-        persistedAt: new Date().toISOString()
-      });
+      const persisted = getProcessingRepository().replace(scope, { assessmentId: id, artifacts: metadata, parsedArtifacts: parsing.parsedArtifacts, extraction, persistedAt: new Date().toISOString() });
       processingPersistence = { persisted: true, persistedAt: persisted.persistedAt, artifactCount: persisted.artifacts.length, segmentCount: persisted.parsedArtifacts.reduce((sum, artifact) => sum + artifact.sourceSegments.length, 0) };
     }
 
