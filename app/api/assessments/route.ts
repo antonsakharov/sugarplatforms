@@ -3,10 +3,9 @@ import { assessmentInputSchema, createAssessmentDraft } from "@/lib/assessment";
 import { ActiveAssessmentLimitError, TenantScopeError } from "@/lib/assessment-repository";
 import { AuthenticationRequiredError, AuthorizationDeniedError } from "@/lib/auth";
 import { PRODUCT_LIMITS } from "@/lib/config";
+import { createAssessmentForRequest } from "@/lib/server-assessment-access";
 import { requireServerPermission } from "@/lib/server-auth";
-import { getAssessmentRepository } from "@/lib/server-assessment-store";
 import { InvalidSessionError } from "@/lib/supabase-auth";
-import { scopeFromTenant } from "@/lib/tenancy";
 export const runtime = "nodejs";
 export async function POST(request: Request) {
   if (PRODUCT_LIMITS.maxPrimaryEntities !== 1 || PRODUCT_LIMITS.maxActiveAssessments !== 1) return NextResponse.json({ error: "Server assessment limits are misconfigured." }, { status: 500 });
@@ -14,7 +13,7 @@ export async function POST(request: Request) {
   const parsed = assessmentInputSchema.safeParse(payload); if (!parsed.success) return NextResponse.json({ error: "Assessment details are invalid.", fieldErrors: parsed.error.flatten().fieldErrors }, { status: 400 });
   try {
     const auth = await requireServerPermission(request, "assessment:create");
-    const assessment = createAssessmentDraft(parsed.data); getAssessmentRepository().create(scopeFromTenant(auth.tenant), assessment);
+    const assessment = createAssessmentDraft(parsed.data); await createAssessmentForRequest(request, auth, assessment);
     return NextResponse.json({ assessment, tenant: auth.tenant, actor: { id: auth.user.id, role: auth.membership.role }, persistence: "server-authz-scoped" }, { status: 201, headers: { "Cache-Control": "no-store" } });
   } catch (error) {
     if (error instanceof AuthenticationRequiredError || error instanceof InvalidSessionError) return NextResponse.json({ error: "Authenticated access is required." }, { status: 401 });
