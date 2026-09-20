@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Sugar Platform Diagnostic Assessment Input",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["companyName", "assessmentTitle", "industry", "focusArea", "primaryEntity", "businessConcern", "reportAudience", "limitsAcknowledged"],
+  "properties": {
+    "companyName": {"type": "string", "minLength": 2, "maxLength": 120},
+    "assessmentTitle": {"type": "string", "minLength": 3, "maxLength": 160},
+    "industry": {"type": "string", "minLength": 2, "maxLength": 100},
+    "focusArea": {"enum": ["entity-identifier-fragmentation", "system-integration-complexity", "duplicated-platform-capabilities", "ownership-governance-gaps", "api-data-contract-inconsistency", "general-platform-diagnostic"]},
+    "primaryEntity": {"type": "string", "minLength": 2, "maxLength": 120},
+    "knownSystems": {"type": "string", "maxLength": 2000},
+    "businessConcern": {"type": "string", "minLength": 10, "maxLength": 3000},
+    "reportAudience": {"type": "string", "minLength": 2, "maxLength": 200},
+    "limitsAcknowledged": {"const": true}
+  }
+}
