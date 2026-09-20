@@ -16,13 +16,13 @@ Status: in progress — the complete upload-readiness workflow is implemented. A
 
 User can see processing status, inspect parsed content and source coordinates, see extracted-object provenance, and inspect parsing failures.
 
-Status: in progress — text/Markdown, JSON/YAML/OpenAPI, CSV, SQL DDL, and bounded direct-text PDF parsing produce source-addressable segments with stable locators and hashes. Validated artifact metadata, normalized source segments, parser warnings, and the current extraction snapshot are transactionally persisted under organization/workspace/assessment scope and can be resumed through an authenticated no-store API. Production-grade PDF coverage and production PostgreSQL/RLS activation remain open.
+Status: in progress — text/Markdown, JSON/YAML/OpenAPI, CSV, SQL DDL, and bounded direct-text PDF parsing produce source-addressable segments with stable locators and hashes. Validated artifact metadata, normalized source segments, parser warnings, and the current extraction snapshot are transactionally persisted under organization/workspace/assessment scope and can be resumed through an authenticated no-store API. Managed PostgreSQL/RLS persistence now covers this processing boundary at the code/migration level; live two-tenant validation remains open.
 
 ## MVP priority 4 — Extraction review
 
 User can review extracted systems, entities, identifiers, integrations, capabilities, and owners; rename/reject/merge/confirm objects; inspect evidence; and approve extraction for analysis.
 
-Status: implemented for the real local/single-instance workflow with durable review state — evidence-linked candidate inventory, explicit rename/reject/merge/confirm actions, same-kind merge guardrails, evidence drill-down, and approval gating are available. Review decisions and approval are authenticated, tenant-scoped, server-persisted, and SHA-256-bound to the exact persisted extraction snapshot. Processing changes invalidate prior approval. Browser localStorage is compatibility cache only. Production PostgreSQL/RLS-backed review persistence remains open.
+Status: implemented for the real local/single-instance workflow with durable review state, and now implemented at the managed PostgreSQL/RLS code/migration boundary. Evidence-linked candidate inventory, explicit rename/reject/merge/confirm actions, same-kind merge guardrails, evidence drill-down, and approval gating are available. Review decisions are authenticated and tenant-scoped. Managed saves use the verified end-user JWT, forced RLS, editor/admin authorization, and a SECURITY INVOKER RPC that atomically compares the exact reviewed extraction JSONB with the current persisted extraction before writing review state. Processing changes therefore invalidate in-flight approval. Live two-tenant Supabase validation remains open.
 
 ## MVP priority 5 — Entity and ID map
 
@@ -34,7 +34,7 @@ Status: implemented for the current workflow with server-reviewed downstream sta
 
 User can run analysis; inspect impact and evidence; inspect isolated AI-assisted candidate findings; and accept, edit, or reject final findings.
 
-Status: implemented for the local/single-instance workflow with durable deterministic finding review. Deterministic rules cover fragmented identifiers, competing authority, duplicate matching logic, duplicate platform capabilities, ownership gaps, direct database coupling, and long synchronous chains. Finding review is authenticated, tenant-scoped, bound to canonical diagnostics, and materializes accepted findings only after explicit completion. AI-assisted candidate findings remain behind a provider boundary and require explicit server-authorized promotion into normal review.
+Status: implemented for the local/single-instance workflow with durable deterministic finding review. Deterministic rules cover fragmented identifiers, competing authority, duplicate matching logic, duplicate platform capabilities, ownership gaps, direct database coupling, and long synchronous chains. Finding review is authenticated, tenant-scoped, bound to canonical diagnostics, and materializes accepted findings only after explicit completion. AI-assisted candidate findings remain behind a provider boundary and require explicit server-authorized promotion into normal review. Managed PostgreSQL/RLS finding-review persistence remains open.
 
 ## MVP priority 7 — Maturity and recommendations
 
