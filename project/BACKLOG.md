@@ -21,7 +21,7 @@ Statuses: `[ ] planned`, `[-] in progress`, `[x] complete`, `[!] blocked`.
 - [x] DIA-008 Long synchronous chain rule
 - [x] DIA-009 AI-assisted candidate findings
 - [-] DIA-010 Evidence coverage validation
-- [-] DIA-011 Finding review workflow
+- [-] DIA-011 Finding review workflow — local workflow complete; managed PostgreSQL/RLS persistence now implemented, live tenant validation pending
 - [x] DIA-012 Focused maturity summary
 - [x] DIA-013 Explicit promotion of approved AI candidates into normal finding review
 - [x] VIS-001 Entity/ID graph projection
@@ -38,7 +38,7 @@ Statuses: `[ ] planned`, `[-] in progress`, `[x] complete`, `[!] blocked`.
 
 ## Production-readiness work
 
-- [-] Durable database persistence — SQLite remains the local/single-instance adapter. Managed Supabase PostgreSQL/RLS now covers workspace membership, assessment create/read, artifact metadata, source-addressable evidence segments, extraction snapshots, and extraction-review state. Finding review, reports, audit/deletion, and jobs still require managed migration.
+- [-] Durable database persistence — SQLite remains the local/single-instance adapter. Managed Supabase PostgreSQL/RLS now covers workspace membership, assessment create/read, artifact metadata, source-addressable evidence segments, extraction snapshots, extraction-review state, finding-review state, and accepted-finding materialization. Reports, audit/deletion, and jobs still require managed migration.
 - [x] Organization and workspace tenancy
 - [x] Authentication and authorization foundation
 - [x] Request-scoped production auth activation
@@ -46,6 +46,7 @@ Statuses: `[ ] planned`, `[-] in progress`, `[x] complete`, `[!] blocked`.
 - [x] Managed PostgreSQL assessment/membership adapter
 - [x] Managed PostgreSQL artifact metadata/source-segment/extraction-snapshot adapter with atomic RLS-authorized replacement
 - [x] Managed PostgreSQL extraction-review persistence with database-side stale-extraction enforcement
+- [x] Managed PostgreSQL finding-review persistence with atomic accepted-finding materialization and stale extraction-approval enforcement
 - [x] Private object storage foundation
 - [x] Server-backed artifact metadata and source/evidence persistence
 - [x] Server-backed extraction-review decisions and approved extraction persistence
