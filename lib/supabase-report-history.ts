@@ -21,7 +21,8 @@ async function request(fetchImpl: FetchLike, config: SupabaseReportHistoryConfig
   } finally { clearTimeout(timer); }
 }
 export class SupabaseReportHistoryStore {
-  constructor(private readonly config: SupabaseReportHistoryConfig, private readonly fetchImpl: FetchLike = fetch) {}
+  private readonly config: SupabaseReportHistoryConfig; private readonly fetchImpl: FetchLike;
+  constructor(config: SupabaseReportHistoryConfig, fetchImpl: FetchLike = fetch) { this.config = config; this.fetchImpl = fetchImpl; }
   async list(accessToken: string, scope: TenantScope, assessmentId: string): Promise<ReportSnapshot[]> {
     const path = `report_snapshots?select=snapshot_json&organization_id=eq.${encodeURIComponent(scope.organizationId)}&workspace_id=eq.${encodeURIComponent(scope.workspaceId)}&assessment_id=eq.${encodeURIComponent(assessmentId)}&order=version.asc`;
     const response = await request(this.fetchImpl, this.config, accessToken, path); const rows = z.array(rowSchema).parse(await response.json());
