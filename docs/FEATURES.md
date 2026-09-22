@@ -16,25 +16,25 @@ Status: in progress — the complete upload-readiness workflow is implemented. A
 
 User can see processing status, inspect parsed content and source coordinates, see extracted-object provenance, and inspect parsing failures.
 
-Status: in progress — text/Markdown, JSON/YAML/OpenAPI, CSV, SQL DDL, and bounded direct-text PDF parsing produce source-addressable segments with stable locators and hashes. Validated artifact metadata, normalized source segments, parser warnings, and the current extraction snapshot are transactionally persisted under organization/workspace/assessment scope and can be resumed through an authenticated no-store API. Managed PostgreSQL/RLS persistence now covers this processing boundary at the code/migration level; live two-tenant validation remains open.
+Status: in progress — text/Markdown, JSON/YAML/OpenAPI, CSV, SQL DDL, and bounded direct-text PDF parsing produce source-addressable segments with stable locators and hashes. Validated artifact metadata, normalized source segments, parser warnings, and the current extraction snapshot are transactionally persisted under organization/workspace/assessment scope and can be resumed through an authenticated no-store API. Managed PostgreSQL/RLS persistence covers this processing boundary at the code/migration level; live two-tenant validation remains open.
 
 ## MVP priority 4 — Extraction review
 
 User can review extracted systems, entities, identifiers, integrations, capabilities, and owners; rename/reject/merge/confirm objects; inspect evidence; and approve extraction for analysis.
 
-Status: implemented for the real local/single-instance workflow with durable review state, and now implemented at the managed PostgreSQL/RLS code/migration boundary. Evidence-linked candidate inventory, explicit rename/reject/merge/confirm actions, same-kind merge guardrails, evidence drill-down, and approval gating are available. Review decisions are authenticated and tenant-scoped. Managed saves use the verified end-user JWT, forced RLS, editor/admin authorization, and a SECURITY INVOKER RPC that atomically compares the exact reviewed extraction JSONB with the current persisted extraction before writing review state. Processing changes therefore invalidate in-flight approval. Live two-tenant Supabase validation remains open.
+Status: implemented for the real local/single-instance workflow and the managed PostgreSQL/RLS code/migration boundary. Evidence-linked candidate inventory, explicit rename/reject/merge/confirm actions, same-kind merge guardrails, evidence drill-down, and approval gating are available. Managed saves use the verified end-user JWT, forced RLS, editor/admin authorization, and a SECURITY INVOKER RPC that rejects stale extraction state. Live two-tenant Supabase validation remains open.
 
 ## MVP priority 5 — Entity and ID map
 
 User can see the focused primary entity, confirmed entity/identifier/system nodes, direct system integration relationships, directly stated creator/consumer/authority relationships, accepted-finding overlays, evidence drill-down, graph filters, and static export.
 
-Status: implemented for the current workflow with server-reviewed downstream state — the graph projection hydrates the authenticated current assessment, extraction approval, diagnostics, finding review, and materialized accepted findings from no-store server APIs and fails closed on stale/incomplete review state. Filters and SVG/JSON exports never create new facts or add raw artifact content.
+Status: implemented for the current workflow with server-reviewed downstream state — the graph projection hydrates authenticated reviewed state and fails closed on stale/incomplete review state. Filters and SVG/JSON exports never create new facts or add raw artifact content.
 
 ## MVP priority 6 — Diagnostic findings
 
 User can run analysis; inspect impact and evidence; inspect isolated AI-assisted candidate findings; and accept, edit, or reject final findings.
 
-Status: implemented for the local/single-instance workflow with durable deterministic finding review. Deterministic rules cover fragmented identifiers, competing authority, duplicate matching logic, duplicate platform capabilities, ownership gaps, direct database coupling, and long synchronous chains. Finding review is authenticated, tenant-scoped, bound to canonical diagnostics, and materializes accepted findings only after explicit completion. AI-assisted candidate findings remain behind a provider boundary and require explicit server-authorized promotion into normal review. Managed PostgreSQL/RLS finding-review persistence remains open.
+Status: implemented for local/single-instance and managed PostgreSQL/RLS persistence. Deterministic rules cover fragmented identifiers, competing authority, duplicate matching logic, duplicate platform capabilities, ownership gaps, direct database coupling, and long synchronous chains. Finding review is authenticated, tenant-scoped, bound to canonical diagnostics, and materializes accepted findings only after explicit completion. Managed writes use the verified end-user JWT and atomically bind review state to the approved extraction boundary. Live two-tenant validation remains open.
 
 ## MVP priority 7 — Maturity and recommendations
 
@@ -46,7 +46,7 @@ Status: implemented with server-authoritative accepted findings. Only materializ
 
 User can generate a report from accepted findings, preview executive and technical sections, save explicit report versions, export a structured report snapshot, produce a formally styled print view, and download a product-managed PDF from a saved immutable version.
 
-Status: implemented with authenticated server-backed report history for the local/single-instance workflow. Reports are regenerated server-side from reviewed state, saved as immutable monotonically versioned snapshots, and PDF export re-authorizes and resolves the persisted report by ID. Production PostgreSQL/RLS-backed report persistence and private generated-report object storage remain open.
+Status: implemented with authenticated immutable report history for both the local/single-instance and managed PostgreSQL/RLS paths. Managed report generation reads the selected persistence provider end to end, report saves require the current completed finding-review provenance, version allocation is atomic in PostgreSQL, and PDF export re-authorizes and resolves the persisted snapshot through the selected provider. Generated-report private object storage and live two-tenant Supabase validation remain open.
 
 ## Secondary demo feature — Acme HealthTech
 
@@ -58,19 +58,19 @@ Status: implemented for the local/single-instance demo workflow — `/sample` in
 
 Use the same tenant-safe artifact-storage boundary with either local private filesystem storage or a managed Supabase private bucket.
 
-Status: implemented at the code/provider-contract level. `ARTIFACT_STORAGE_PROVIDER=supabase` requires server-only project URL/secret configuration, preserves random tenant-scoped keys, validates SHA-256 before upload, uses authenticated private reads, deletes through the Storage API, and issues signed read URLs with a 60–3600 second TTL (300 seconds by default). Mocked provider tests cover upload/read/delete/sign behavior, checksum drift, and cross-tenant rejection. Live private-bucket/RLS isolation testing is still required before confidential production use.
+Status: implemented at the code/provider-contract level. `ARTIFACT_STORAGE_PROVIDER=supabase` requires server-only project URL/secret configuration, preserves random tenant-scoped keys, validates SHA-256 before upload, uses authenticated private reads, deletes through the Storage API, and issues signed read URLs with a 60–3600 second TTL. Live private-bucket/RLS isolation testing is still required before confidential production use.
 
 ## Production-readiness feature — Malware scanning and quarantine
 
 Treat uploaded bytes as quarantined until the configured scanner reports every artifact clean. Infected or indeterminate scans must not reach object storage, parsing, extraction, or evidence persistence.
 
-Status: implemented at the local/demo and production integration-boundary level. The credential-free local scanner exercises EICAR and executable-signature rejection; the production boundary supports ClamAV INSTREAM with bounded timeout and fail-closed behavior. Checksums are revalidated before scanning, and the entire artifact set remains unpersisted if any scan is infected or unavailable. Live scanner infrastructure, signature-update monitoring, throughput validation, and production object-storage integration testing remain open.
+Status: implemented at the local/demo and production integration-boundary level. The credential-free local scanner exercises EICAR and executable-signature rejection; the production boundary supports ClamAV INSTREAM with bounded timeout and fail-closed behavior. Live scanner infrastructure, signature-update monitoring, throughput validation, and production object-storage integration testing remain open.
 
 ## Production-readiness feature — Audit and deletion
 
 Delete an assessment only through a server-authorized administrator action. The workflow deletes private artifact objects, transactionally removes processing/extraction/review/finding/report state plus the assessment row, and retains minimal tenant-scoped audit receipts.
 
-Status: implemented for the credential-free local/single-instance workflow with durable reconciliation controls. Cross-tenant deletion fails closed and audit/job reads are admin-only. Each deletion has tenant-scoped progress checkpoints, bounded retry/backoff, and crash recovery. The provider-neutral deletion contract also applies to Supabase storage. Production PostgreSQL/RLS job/audit persistence, scheduler/worker activation, backup/retention deletion guarantees, and live production-storage validation remain open.
+Status: implemented for the credential-free local/single-instance workflow with durable reconciliation controls. Production PostgreSQL/RLS job/audit persistence, scheduler/worker activation, backup/retention deletion guarantees, and live production-storage validation remain open.
 
 ## Future features
 
