@@ -35,10 +35,11 @@ Statuses: `[ ] planned`, `[-] in progress`, `[x] complete`, `[!] blocked`.
 - [x] REP-005 Report versioning and structured JSON export — local and managed PostgreSQL/RLS immutable history implemented
 - [x] REP-006 Print stylesheet and formal report styling
 - [x] REP-007 Formal PDF export — authorized from persisted local or managed report snapshots
+- [-] REP-008 Private generated-report object storage — tenant-scoped materialization, checksum/idempotency, signed access, and deletion lifecycle implemented; managed RLS metadata adapter activation pending
 
 ## Production-readiness work
 
-- [-] Durable database persistence — SQLite remains the local/single-instance adapter. Managed Supabase PostgreSQL/RLS now covers workspace membership, assessment create/read, processing/evidence, extraction review, finding review/accepted findings, and immutable report history. Audit/deletion and jobs still require managed migration.
+- [-] Durable database persistence — SQLite remains the local/single-instance adapter. Managed Supabase PostgreSQL/RLS covers workspace membership, assessment create/read, processing/evidence, extraction review, finding review/accepted findings, and immutable report history. Generated-report metadata migration exists but its request-token-backed adapter, audit/deletion, and jobs still require managed activation.
 - [x] Organization and workspace tenancy
 - [x] Authentication and authorization foundation
 - [x] Request-scoped production auth activation
@@ -48,12 +49,10 @@ Statuses: `[ ] planned`, `[-] in progress`, `[x] complete`, `[!] blocked`.
 - [x] Managed PostgreSQL extraction-review persistence with database-side stale-extraction enforcement
 - [x] Managed PostgreSQL finding-review persistence with atomic accepted-finding materialization and stale extraction-approval enforcement
 - [x] Managed PostgreSQL immutable report-history persistence with atomic version allocation and current-finding-review provenance enforcement
+- [-] Managed generated-report object metadata — RLS migration added; verified end-user JWT adapter activation pending
 - [x] Private object storage foundation
-- [x] Server-backed artifact metadata and source/evidence persistence
-- [x] Server-backed extraction-review decisions and approved extraction persistence
-- [x] Server-backed finding-review decisions and accepted findings persistence
-- [x] Server-backed accepted-findings consumption
-- [x] Server-backed report version history and authorization
+- [x] Generated PDF private-object materialization and local metadata persistence
+- [x] Generated-report deletion lifecycle integration
 - [!] Live database/storage tenant-isolation integration tests against real authenticated non-`BYPASSRLS` identities — credentials/infrastructure unavailable in the build environment
 - [x] Production Supabase private-storage adapter with bounded short-lived signed read URLs
 - [x] Malware/quarantine upload gate
