@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sugarplatforms.dev/schemas/ai-candidate-promotion.schema.json",
+  "title": "AiCandidatePromotion",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "assessmentId", "candidateId", "promotedFindingId", "sourceCandidateGeneratedAt", "sourceDiagnosticGeneratedAt", "extractionApprovedAt", "provider", "promptVersion", "promotedAt"],
+  "properties": {
+    "schemaVersion": {"const": "1.0"},
+    "assessmentId": {"type": "string", "minLength": 1},
+    "candidateId": {"type": "string", "minLength": 1},
+    "promotedFindingId": {"type": "string", "minLength": 1},
+    "sourceCandidateGeneratedAt": {"type": "string", "minLength": 1},
+    "sourceDiagnosticGeneratedAt": {"type": "string", "minLength": 1},
+    "extractionApprovedAt": {"type": "string", "minLength": 1},
+    "provider": {"type": "string", "minLength": 1},
+    "promptVersion": {"type": "string", "minLength": 1},
+    "promotedAt": {"type": "string", "minLength": 1}
+  }
+}
