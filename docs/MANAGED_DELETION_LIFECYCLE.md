@@ -1,0 +1,5 @@
+# Managed deletion lifecycle activation
+
+The managed PostgreSQL/RLS path prepares deletion atomically, records a pending audit event, captures the complete tenant-scoped private-object plan, and creates a durable bounded-retry job. The executor deletes each private object idempotently and checkpoints completion before relational finalization is permitted. Finalization is administrator/JWT/RLS-bound and fails closed if any checkpoint is missing. The assessment purge and success audit receipt are transactional; operational job/audit state remains for reconciliation.
+
+Request-driven DELETE and bounded reconciliation select this managed path only when managed PostgreSQL persistence is configured. Local/demo deletion behavior is unchanged. Live two-tenant Supabase certification, scheduler/worker activation, and backup/retention guarantees remain production gates.
