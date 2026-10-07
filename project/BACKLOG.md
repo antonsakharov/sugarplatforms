@@ -151,3 +151,10 @@ A feature is complete only when:
 - documentation is updated;
 - sample assessment remains functional;
 - no placeholder business logic is presented as complete.
+
+
+### 2026-10-07 PDF bounded filter-chain increment
+- [x] Decode directly referenced `/ASCIIHexDecode` page streams, including odd-nibble padding defined by PDF semantics.
+- [x] Decode ordered `/ASCIIHexDecode` -> `/FlateDecode` chains while retaining exact page provenance.
+- [x] Preserve fail-closed behavior for unsupported filters and undecodable streams.
+- [-] Parsing/source-addressable evidence remains in progress until production-grade font/encoding and OCR coverage plus full dependency-backed validation are certified.
