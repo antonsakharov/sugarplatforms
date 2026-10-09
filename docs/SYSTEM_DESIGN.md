@@ -63,6 +63,8 @@ Single application boundary for:
 - redaction hooks;
 - usage tracking.
 
+The extraction provider interface isolates the domain pipeline from a specific model vendor. Demo mode uses a deterministic local extractor that emits only directly supported architecture facts. A production OpenAI Responses adapter is available behind the same interface, uses schema-constrained output, and remains disabled in the demo route until production privacy and tenancy controls are ready.
+
 ### Job runner
 
 Processes:
@@ -123,6 +125,8 @@ Produces structured:
 - owners;
 - authority claims;
 - evidence.
+
+Every emitted candidate object requires direct source-segment evidence. Extraction output is schema validated before it can proceed to human review. Duplicate direct claims may reconcile by normalized kind/name while retaining all evidence references; ambiguous records are not silently merged.
 
 ### Review module
 

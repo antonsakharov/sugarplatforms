@@ -1,0 +1,89 @@
+# Security and Privacy
+
+## MVP posture
+
+Sugar Platform Diagnostic accepts architecture metadata only. It must not request or intentionally process production customer records, regulated personal records, credentials, secrets, or raw production datasets.
+
+## User-facing guidance
+
+Before upload, display:
+
+> Upload architecture metadata only. Do not upload customer records, patient records, production data, passwords, API keys, access tokens, private keys, or other secrets.
+
+## Required controls
+
+### Upload controls
+
+- maximum 10 files;
+- maximum 25 MB per file;
+- maximum 150 pages total where measurable;
+- allowlisted file types;
+- random private storage keys;
+- duplicate detection;
+- executable rejection;
+- probable-secret scanning;
+- fail-closed malware scanning before persistence or parsing;
+- clear warning that detection is not perfect;
+- user acknowledgement of upload rules.
+
+### Authentication and authorization
+
+- authenticated access for real assessments;
+- organization-scoped roles;
+- server-side authorization;
+- row-level security;
+- private buckets;
+- short-lived signed URLs.
+
+### Private artifact storage
+
+Artifact storage is server-only and provider-neutral. Keys are derived as `<organization>/<workspace>/<assessment>/<random-id>` and original filenames never become storage paths. Every read, signed-access request, and delete operation revalidates the active tenant prefix before provider I/O.
+
+The credential-free demo adapter uses a private local filesystem. The managed adapter uses a private Supabase Storage bucket with a server-only secret, authenticated reads, Storage API deletion, and bounded signed-read URLs. Signed URLs default to five minutes and cannot be configured above one hour; they are transient capability URLs and must not be written to reports, assessment state, audit records, or logs. Selecting managed storage without required server-side credentials fails at configuration time.
+
+Mocked provider tests verify checksum enforcement and cross-tenant rejection, but live bucket isolation has not yet been certified. Confidential production use still requires real-bucket tests proving anonymous access is denied and tenant A cannot read, sign, overwrite, or delete tenant B objects.
+
+### Malware scanning and quarantine
+
+Uploaded bytes remain in a pre-persistence quarantine boundary until every artifact receives an explicit clean malware-scan result. The gate executes before private object storage, parsing, extraction, or processing persistence. Any infected artifact rejects the complete focused artifact set; scanner timeout, outage, or unrecognized output also fails closed.
+
+The local/demo provider detects only bounded EICAR and executable signatures and must not be represented as production antivirus coverage. Production mode supports a server-only ClamAV `INSTREAM` boundary with configured host, port, and timeout. Checksums are revalidated before scanner provider execution, scanner responses never authorize tenant storage paths, and routine logs must not echo artifact contents.
+
+Live scanner-service hardening, signature freshness and health monitoring, worst-case throughput testing, and integrated production-storage isolation validation remain required before confidential production use.
+
+### AI controls
+
+- source text treated as untrusted data;
+- prompt injection cannot override system instructions;
+- structured extraction output;
+- evidence required;
+- direct/derived/inferred distinction;
+- human review before publication;
+- no external tool execution based on uploaded content;
+- demo extraction remains local and deterministic;
+- activation of an external model requires explicit server-side configuration and production privacy controls;
+- external Responses requests disable provider-side storage where supported and require strict structured output.
+
+### Logging and secrets
+
+- no raw artifact content in routine logs;
+- no credentials in source control;
+- server-only secrets;
+- separate development/production credentials;
+- redaction of likely sensitive values.
+
+### Deletion and audit
+
+Full assessment deletion is a server-authorized administrator action. Tenant scope is resolved from the authenticated membership; callers cannot provide organization/workspace scope or arbitrary storage keys.
+
+The local/single-instance workflow records a minimal `assessment.deletion.requested` event, removes server-derived private artifact objects, then transactionally deletes normalized/source evidence, extraction state, extraction review, finding review/materialized findings, saved report snapshots, artifact metadata, and the assessment record. A successful or failed operation keeps a minimal tenant-scoped audit receipt containing identifiers, actor, timestamps, outcome, and bounded deletion counts/error text, but no artifact content, evidence, findings, or report bodies.
+
+Deletion recovery is also durable. Each operation has a tenant-scoped job that stores only operational metadata: server-derived object keys, per-object completion checkpoints, attempt count/budget, retry timing, a short execution lease, bounded error text, and the terminal receipt. The default budget is three attempts with exponential backoff beginning at 30 seconds and capped at 15 minutes; running attempts have a five-minute lease so interrupted work becomes reclaimable. Administrator job status is redacted and never returns storage keys. Reconciliation is server-authorized, tenant-scoped, and bounded to at most 20 due jobs per invocation.
+
+If private object deletion fails, relational assessment state is retained and failure is recorded rather than reporting successful deletion. Object deletion is idempotent and completed object keys are checkpointed so retries skip successful work. If a process exits after the relational purge commits but before job completion is recorded, reconciliation repairs the job from the durable `assessment.deletion.completed` audit receipt instead of replaying the purge.
+
+Provider indexes and any future derived object-storage outputs must also participate in the same lifecycle once introduced.
+
+## Production readiness
+
+Before accepting confidential enterprise materials, tenant isolation, live malware-scanner operations, backup/restore, incident response, provider retention, PostgreSQL/RLS-backed audit/deletion-job persistence, an authenticated scheduler/worker, live private-bucket deletion/reconciliation, data-processing terms, and log redaction must be verified.

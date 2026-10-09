@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sugarplatforms.local/schemas/report-snapshot.schema.json",
+  "title": "Sugar Platform Diagnostic report snapshot export",
+  "type": "object",
+  "required": ["schemaVersion", "exportFormat", "exportedAt", "snapshot"],
+  "properties": {
+    "schemaVersion": { "const": "1.0" },
+    "exportFormat": { "const": "sugar-platform-diagnostic-report-json" },
+    "exportedAt": { "type": "string", "format": "date-time" },
+    "snapshot": {
+      "type": "object",
+      "required": ["schemaVersion", "id", "assessmentId", "version", "versionLabel", "createdAt", "generatedFromDiagnosticAt", "report"],
+      "properties": {
+        "schemaVersion": { "const": "1.0" },
+        "id": { "type": "string", "minLength": 1 },
+        "assessmentId": { "type": "string", "minLength": 1 },
+        "version": { "type": "integer", "minimum": 1 },
+        "versionLabel": { "type": "string", "pattern": "^v[1-9][0-9]*$" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "generatedFromDiagnosticAt": { "type": "string", "format": "date-time" },
+        "report": { "$ref": "report.schema.json" }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}
