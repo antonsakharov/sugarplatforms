@@ -89,3 +89,7 @@ A CTO can upload a limited artifact set and receive:
 ## Status
 
 The local/single-instance application journey is implemented through guided upload, evidence-backed extraction/review, deterministic findings, Entity/ID map, maturity/recommendations, immutable report history, formal PDF export, audited deletion controls, and the Acme HealthTech guided sample. Production confidential-data readiness still requires production identity, PostgreSQL/RLS activation with live isolation tests, managed private object storage, malware/quarantine controls, and production operational infrastructure.
+
+## October 9, 2026 recovery branch
+
+This dedicated branch restores the last published application baseline and adds a verified PDF page-tree traversal. It is not yet synchronized with the complete approved local backup and must remain a draft until dependency/build/tenant-isolation validation and the missing newer application changes are reconciled. No production deployment is implied.

@@ -143,3 +143,7 @@ Newly created assessments must be durably persisted by the server before the cre
 ## ADR-036 — Tenant scope is explicit and server-owned before authentication
 **Status:** Accepted
 The persistence boundary must model organization and workspace identity before confidential state is migrated. The local/single-instance adapter persists organizations and workspaces, enforces that a workspace belongs to exactly one organization, and requires both IDs for assessment reads and writes. The active local tenant is resolved only from server configuration; API clients cannot supply or switch tenant IDs. This provides deterministic tenant scoping and isolation tests but is explicitly not authentication or authorization. Production access still requires authenticated organization membership, role checks, PostgreSQL row-level security, and tenant-isolation validation at the database/storage layers.
+
+## ADR-071 — Verified PDF page tree before physical page claims
+**Status:** Accepted (2026-10-09)
+The bounded parser must traverse Catalog/Pages/Kids in physical order, validate Parent/Count and reject cycles, duplicates, and missing objects before emitting page locators. Without a Catalog, only fragment locators are permitted. Invalid page graphs fail closed; the full local package remains the approved recovery source until synchronized.

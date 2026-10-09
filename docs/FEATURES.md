@@ -75,3 +75,6 @@ Status: implemented for the credential-free local/single-instance workflow with 
 ## Future features
 
 GitHub/Jira/Confluence/service-catalog connectors, continuous drift detection, assessment comparison, collaboration, enterprise SSO, and customer-managed deployment.
+
+### 2026-10-09 page-tree evidence correctness
+A dedicated recovery branch now contains the application baseline and page-tree hardening. Physical PDF pages are ordered through verified Catalog/Pages/Kids/Parent/Count references, not PDF object declaration order. The full approved local ZIP includes newer parsing, validation, and production-readiness increments that remain to be reconciled before merge.

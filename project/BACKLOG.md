@@ -73,3 +73,9 @@ Statuses: `[ ] planned`, `[-] in progress`, `[x] complete`, `[!] blocked`.
 ## Definition of done
 
 A feature is complete only when the intended user action works, tests exist, build/type/lint pass, evidence links are preserved, documentation is current, and incomplete business logic is not represented as finished.
+
+## 2026-10-09 recovery and parsing status
+- [x] PAR-005a Physical PDF page-tree provenance (bounded local parser and recovery-branch implementation; full certification pending).
+- [-] PAR-005b Font/CMap and production PDF parsing.
+- [!] FND-RECOVER Restore full latest approved application package to canonical default branch; recovery branch contains an earlier application baseline and today's page-tree slice but is not merge-ready.
+- [!] FND-LOCK Repair dependency lockfile, install dependencies, run build/type/lint/full tests and live tenant-isolation checks.

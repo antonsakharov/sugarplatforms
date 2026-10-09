@@ -66,3 +66,35 @@ test("PDF parser fails closed for unsupported compressed/scanned content", () =>
 test("unsupported formats fail closed instead of pretending to parse", () => {
   assert.throws(() => parseArtifact("architecture.docx", bytes("not supported")), /No deterministic parser/);
 });
+
+
+test("PDF physical page numbers follow Kids order rather than object declaration order", () => {
+  const value = "%PDF-1.7\n1 0 obj << /Type /Catalog /Pages 2 0 R >> endobj\n" +
+    "2 0 obj << /Type /Pages /Kids [4 0 R 3 0 R] /Count 2 >> endobj\n" +
+    "3 0 obj << /Type /Page /Parent 2 0 R /Contents 5 0 R >> endobj\n" +
+    "4 0 obj << /Type /Page /Parent 2 0 R /Contents 6 0 R >> endobj\n" +
+    "5 0 obj << /Length 30 >> stream\nBT (CRM second) Tj ET\nendstream endobj\n" +
+    "6 0 obj << /Length 30 >> stream\nBT (Billing first) Tj ET\nendstream endobj\n%%EOF";
+  const result = parseArtifact("pages.pdf", new TextEncoder().encode(value));
+  assert.equal(result.sourceSegments[0].locator.page, 1);
+  assert.match(result.sourceSegments[0].content, /Billing first/);
+  assert.equal(result.sourceSegments[1].locator.page, 2);
+  assert.match(result.sourceSegments[1].content, /CRM second/);
+});
+
+test("PDF page tree rejects incorrect counts and duplicate Kids", () => {
+  const template = (kids, count) => "%PDF-1.7\n" +
+    "1 0 obj << /Type /Catalog /Pages 2 0 R >> endobj\n" +
+    "2 0 obj << /Type /Pages /Kids [" + kids + "] /Count " + count + " >> endobj\n" +
+    "3 0 obj << /Type /Page /Parent 2 0 R /Contents 5 0 R >> endobj\n" +
+    "5 0 obj << /Length 22 >> stream\nBT (CRM) Tj ET\nendstream endobj\n%%EOF";
+  assert.throws(() => parseArtifact("count.pdf", new TextEncoder().encode(template("3 0 R", 2))), /Count does not match/);
+  assert.throws(() => parseArtifact("repeated.pdf", new TextEncoder().encode(template("3 0 R 3 0 R", 2))), /repeated reference/);
+});
+
+test("PDF without a provable Catalog only emits fragment locators", () => {
+  const value = "%PDF-1.7\nBT (CRM owns ID) Tj ET\n%%EOF";
+  const result = parseArtifact("fragment.pdf", new TextEncoder().encode(value));
+  assert.equal(result.sourceSegments[0].locator.type, "pdf-text-fragment");
+  assert.equal(result.sourceSegments[0].locator.page, undefined);
+});
