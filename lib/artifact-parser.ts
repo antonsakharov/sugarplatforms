@@ -1,4 +1,5 @@
 import { createHash } from "node:crypto";
+import { orderedPdfPageRefs } from "./pdf-page-tree.ts";
 
 export type ParserKind =
   | "text"
@@ -12,7 +13,7 @@ export type ParserKind =
   | "pdf-text";
 
 export type Locator = {
-  type: "line-range" | "json-pointer" | "csv-row-range" | "pdf-page";
+  type: "line-range" | "json-pointer" | "csv-row-range" | "pdf-page" | "pdf-text-fragment";
   value: string;
   startLine?: number;
   endLine?: number;
@@ -179,13 +180,57 @@ function extractPdfText(block: string) {
 }
 function parsePdf(name: string, bytes: Uint8Array, artifactId: string) {
   const raw = new TextDecoder("latin1").decode(bytes);
-  if (!raw.startsWith("%PDF-")) throw new Error(`Unable to parse ${name} as PDF: PDF header is missing.`);
-  if (/\/Encrypt\b/.test(raw)) throw new Error(`Unable to parse ${name} as PDF: encrypted PDFs are not supported.`);
-  const textBlocks = [...raw.matchAll(/BT([\s\S]*?)ET/g)].map((match) => extractPdfText(match[1])).filter(Boolean);
-  if (textBlocks.length === 0) throw new Error(`Unable to parse ${name} as PDF: no directly addressable text operators were found. Scanned or compressed PDFs require the production PDF adapter.`);
-  const pageCount = Math.max(1, (raw.match(/\/Type\s*\/Page\b/g) ?? []).length); const perPage = Math.max(1, Math.ceil(textBlocks.length / pageCount)); const segments: SourceSegment[] = [];
-  for (let start = 0; start < textBlocks.length; start += perPage) { const page = Math.min(pageCount, Math.floor(start / perPage) + 1); const content = textBlocks.slice(start, start + perPage).join("\n").slice(0, MAX_SEGMENT_CHARS); segments.push(makeSegment(artifactId, name, segments.length, "pdf-text", { type: "pdf-page", value: `page ${page}`, page }, content, `PDF page ${page}`)); }
-  return { segments, warning: "PDF parsing uses a bounded direct-text adapter in demo mode; compressed streams, OCR, complex encodings, and exact layout require the production PDF adapter." };
+  if (!raw.startsWith("%PDF-")) throw new Error("Unable to parse PDF: PDF header is missing.");
+  if (/\/Encrypt\b/.test(raw)) throw new Error("Unable to parse PDF: encrypted PDFs are not supported.");
+  const objects = new Map<string, string>();
+  for (const m of raw.matchAll(/(?:^|[\r\n])\s*(\d+)\s+(\d+)\s+obj\b([\s\S]*?)endobj/g)) {
+    const ref = m[1] + " " + m[2];
+    if (objects.has(ref)) throw new Error("PDF contains repeated object IDs; incremental revisions require the production PDF adapter.");
+    objects.set(ref, m[3]);
+  }
+  const refs = orderedPdfPageRefs(objects);
+  const segments: SourceSegment[] = [];
+  if (refs) {
+    for (let i = 0; i < refs.length; i += 1) {
+      const pageBody = objects.get(refs[i])!;
+      const contentsArray = /\/Contents\s*\[([^\]]*)\]/.exec(pageBody)?.[1];
+      const contentRefs = contentsArray
+        ? [...contentsArray.matchAll(/(\d+)\s+(\d+)\s+R/g)].map((m) => m[1] + " " + m[2])
+        : (() => { const m = /\/Contents\s+(\d+)\s+(\d+)\s+R/.exec(pageBody); return m ? [m[1] + " " + m[2]] : []; })();
+      const texts: string[] = [];
+      for (const ref of contentRefs) {
+        const body = objects.get(ref);
+        if (!body) throw new Error("PDF page provenance contains a missing Contents reference.");
+        if (/\/Filter\b/.test(body)) throw new Error("PDF filtered content requires the production PDF adapter.");
+        const stream = /stream\r?\n([\s\S]*?)\r?\nendstream/.exec(body)?.[1];
+        if (stream === undefined || stream.length > 4 * 1024 * 1024 || /[\x80-\xff]/.test(stream))
+          throw new Error("PDF undecodable content requires the production PDF adapter.");
+        const text = [...stream.matchAll(/\bBT\b([\s\S]*?)\bET\b/g)].map((m) => extractPdfText(m[1])).filter(Boolean).join(" ");
+        if (text) texts.push(text);
+      }
+      const text = texts.join(" ").replace(/\s+/g, " ").trim();
+      for (let offset = 0, part = 1; offset < text.length; offset += MAX_SEGMENT_CHARS, part += 1) {
+        const page = i + 1;
+        const content = text.slice(offset, offset + MAX_SEGMENT_CHARS);
+        segments.push(makeSegment(artifactId, name, segments.length, "pdf-text",
+          { type: "pdf-page", value: "page " + page, page, ...(part > 1 ? { fragment: part } : {}) },
+          content, "PDF page " + page));
+      }
+    }
+  } else {
+    // Without a Catalog/Kids proof, text is usable only with fragment coordinates.
+    const blocks = [...raw.matchAll(/\bBT\b([\s\S]*?)\bET\b/g)].map((m) => extractPdfText(m[1])).filter(Boolean);
+    for (const block of blocks) for (let offset = 0; offset < block.length; offset += MAX_SEGMENT_CHARS) {
+      const part = segments.length + 1;
+      segments.push(makeSegment(artifactId, name, segments.length, "pdf-text",
+        { type: "pdf-text-fragment", value: "direct-text fragment " + part, fragment: part },
+        block.slice(offset, offset + MAX_SEGMENT_CHARS), "PDF direct-text fragment " + part));
+    }
+  }
+  if (segments.length === 0) throw new Error("Unable to parse PDF: no supported directly addressable text. Use the production PDF adapter.");
+  return { segments, warning: refs
+    ? "Page locators are verified against the Catalog/Pages/Kids tree; complex fonts, filtered streams and OCR require the production PDF adapter."
+    : "No provable PDF page tree: direct-text fragment locators were used instead of synthetic page numbers." };
 }
 
 export function parseArtifact(name: string, bytes: Uint8Array): ParsedArtifact {
