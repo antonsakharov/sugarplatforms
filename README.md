@@ -93,3 +93,7 @@ The local/single-instance application journey is implemented through guided uplo
 ## October 9, 2026 recovery branch
 
 This dedicated branch restores the last published application baseline and adds a verified PDF page-tree traversal. It is not yet synchronized with the complete approved local backup and must remain a draft until dependency/build/tenant-isolation validation and the missing newer application changes are reconciled. No production deployment is implied.
+
+
+### 2026-10-11 recovery staging
+This branch stages the fail-closed PDF ToUnicode character-range decoder and tests on top of the application recovery baseline. It is not the complete approved local package and must not be merged until the full parser integration, missing application updates, and dependency-backed CI are restored. See `project/VALIDATED_2026-10-11.md`.

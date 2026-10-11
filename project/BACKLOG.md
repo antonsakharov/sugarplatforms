@@ -79,3 +79,10 @@ A feature is complete only when the intended user action works, tests exist, bui
 - [-] PAR-005b Font/CMap and production PDF parsing.
 - [!] FND-RECOVER Restore full latest approved application package to canonical default branch; recovery branch contains an earlier application baseline and today's page-tree slice but is not merge-ready.
 - [!] FND-LOCK Repair dependency lockfile, install dependencies, run build/type/lint/full tests and live tenant-isolation checks.
+
+
+### 2026-10-11 PDF CMap range staging
+- [x] Stage bounded one-byte ToUnicode `bfchar`/`bfrange` decoder, eight standalone regression tests, and ADR-073.
+- [-] Integrate current full local parser/tests into canonical recovery branch; local backup contains working end-to-end PDF range parsing.
+- [!] FND-SYNC Canonical `main` remains design-only; recovery branch is not merge-ready.
+- [!] FND-LOCK Synchronize npm lockfile and certify build/type/full tests and live tenant isolation.

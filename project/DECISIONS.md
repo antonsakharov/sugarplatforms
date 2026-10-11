@@ -147,3 +147,8 @@ The persistence boundary must model organization and workspace identity before c
 ## ADR-071 — Verified PDF page tree before physical page claims
 **Status:** Accepted (2026-10-09)
 The bounded parser must traverse Catalog/Pages/Kids in physical order, validate Parent/Count and reject cycles, duplicates, and missing objects before emitting page locators. Without a Catalog, only fragment locators are permitted. Invalid page graphs fail closed; the full local package remains the approved recovery source until synchronized.
+
+
+## ADR-073 — Bounded single-byte ToUnicode bfrange mappings
+**Status:** Accepted (2026-10-11)
+Allow explicitly selected one-byte font CMaps with bounded `bfchar`, BMP scalar `bfrange`, and exact-length destination arrays. Reject malformed/overlapping/partial/overflow/surrogate mappings without guessing. See `project/DECISION_073.md`.
