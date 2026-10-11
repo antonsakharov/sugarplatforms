@@ -81,4 +81,4 @@ A dedicated recovery branch now contains the application baseline and page-tree 
 
 
 ### 2026-10-11 — Bounded ToUnicode character ranges (recovery staging)
-The approved local/demo parser now accepts one-byte `bfrange` BMP scalar sequences and explicit UTF-16BE arrays alongside `bfchar`, preserving verified page locators and rejecting invalid/partial mappings. The branch stages the standalone decoder and tests, but **the full parser integration is still only in the downloadable working backup**. Parsing remains in progress; production font coverage, lockfile and tenant isolation are not certified.
+The approved local/demo parser now accepts one-byte `bfrange` BMP scalar sequences and explicit UTF-16BE arrays alongside `bfchar`, preserving verified page locators and rejecting invalid/partial mappings. The recovery branch now integrates the bounded unfiltered selected-font CMap decoder with page evidence and focused tests; however **the complete newer PDF filter-chain parser and other local increments remain only in the downloadable working backup**. Parsing remains in progress; production font coverage, lockfile and tenant isolation are not certified.

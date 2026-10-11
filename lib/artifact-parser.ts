@@ -1,5 +1,7 @@
 import { createHash } from "node:crypto";
 import { orderedPdfPageRefs } from "./pdf-page-tree.ts";
+import { extractPdfText } from "./pdf-text-operand-decoder.ts";
+import { parseSingleByteToUnicodeCMap } from "./pdf-to-unicode.ts";
 
 export type ParserKind =
   | "text"
@@ -169,14 +171,26 @@ function parseSqlDdl(name: string, text: string, artifactId: string) {
   return lineChunks(artifactId, name, "sql-ddl", text, boundaries);
 }
 
-function unescapePdfLiteral(value: string) {
-  return value.replace(/\\([nrtbf])/g, (_, code: string) => ({ n: "\n", r: "\r", t: "\t", b: "\b", f: "\f" }[code] ?? code)).replace(/\\([()\\])/g, "$1").replace(/\\[0-7]{1,3}/g, " ");
-}
-function extractPdfText(block: string) {
-  const values: string[] = [];
-  for (const match of block.matchAll(/\((?:\\.|[^\\)])*\)\s*Tj/g)) { const literal = /^\((.*)\)\s*Tj$/s.exec(match[0])?.[1]; if (literal) values.push(unescapePdfLiteral(literal)); }
-  for (const match of block.matchAll(/\[((?:.|\n|\r)*?)\]\s*TJ/g)) for (const literal of match[1].matchAll(/\((?:\\.|[^\\)])*\)/g)) values.push(unescapePdfLiteral(literal[0].slice(1, -1)));
-  return values.join(" ").replace(/\s+/g, " ").trim();
+/** Only directly declared, unfiltered, selected-font CMaps may decode glyphs. */
+function pdfPageFontMaps(pageObject: string, objects: ReadonlyMap<string, string>): ReadonlyMap<string, ReadonlyMap<number, string> | null> {
+  const resourceRef = /\/Resources\s+(\d+)\s+(\d+)\s+R\b/.exec(pageObject);
+  const resourceBody = resourceRef ? objects.get(resourceRef[1] + " " + resourceRef[2]) : pageObject;
+  const fontDict = /\/Font\s*<<([\s\S]*?)>>/.exec(resourceBody ?? "")?.[1];
+  const maps = new Map<string, ReadonlyMap<number, string> | null>();
+  if (!fontDict) return maps;
+  for (const match of fontDict.matchAll(/\/([A-Za-z0-9_.-]+)\s+(\d+)\s+(\d+)\s+R\b/g)) {
+    const fontName = match[1];
+    if (maps.has(fontName)) { maps.set(fontName, null); continue; }
+    const fontObject = objects.get(match[2] + " " + match[3]);
+    const cmapRef = fontObject && /\/ToUnicode\s+(\d+)\s+(\d+)\s+R\b/.exec(fontObject);
+    if (!cmapRef) continue;
+    const cmapObject = objects.get(cmapRef[1] + " " + cmapRef[2]);
+    const cmapStream = cmapObject && !/\/Filter\b/.test(cmapObject)
+      ? /stream\r?\n([\s\S]*?)\r?\nendstream/.exec(cmapObject)?.[1]
+      : undefined;
+    maps.set(fontName, cmapStream === undefined ? null : parseSingleByteToUnicodeCMap(cmapStream));
+  }
+  return maps;
 }
 function parsePdf(name: string, bytes: Uint8Array, artifactId: string) {
   const raw = new TextDecoder("latin1").decode(bytes);
@@ -193,6 +207,7 @@ function parsePdf(name: string, bytes: Uint8Array, artifactId: string) {
   if (refs) {
     for (let i = 0; i < refs.length; i += 1) {
       const pageBody = objects.get(refs[i])!;
+      const fontMaps = pdfPageFontMaps(pageBody, objects);
       const contentsArray = /\/Contents\s*\[([^\]]*)\]/.exec(pageBody)?.[1];
       const contentRefs = contentsArray
         ? [...contentsArray.matchAll(/(\d+)\s+(\d+)\s+R/g)].map((m) => m[1] + " " + m[2])
@@ -203,9 +218,11 @@ function parsePdf(name: string, bytes: Uint8Array, artifactId: string) {
         if (!body) throw new Error("PDF page provenance contains a missing Contents reference.");
         if (/\/Filter\b/.test(body)) throw new Error("PDF filtered content requires the production PDF adapter.");
         const stream = /stream\r?\n([\s\S]*?)\r?\nendstream/.exec(body)?.[1];
-        if (stream === undefined || stream.length > 4 * 1024 * 1024 || /[\x80-\xff]/.test(stream))
+        if (stream === undefined || stream.length > 4 * 1024 * 1024)
           throw new Error("PDF undecodable content requires the production PDF adapter.");
-        const text = [...stream.matchAll(/\bBT\b([\s\S]*?)\bET\b/g)].map((m) => extractPdfText(m[1])).filter(Boolean).join(" ");
+        const chunks = [...stream.matchAll(/\bBT\b([\s\S]*?)\bET\b/g)].map((m) => extractPdfText(m[1], fontMaps));
+        if (chunks.some((chunk) => chunk === null)) throw new Error("PDF font mapping is ambiguous; use the production PDF adapter.");
+        const text = chunks.filter(Boolean).join(" ");
         if (text) texts.push(text);
       }
       const text = texts.join(" ").replace(/\s+/g, " ").trim();
@@ -219,7 +236,7 @@ function parsePdf(name: string, bytes: Uint8Array, artifactId: string) {
     }
   } else {
     // Without a Catalog/Kids proof, text is usable only with fragment coordinates.
-    const blocks = [...raw.matchAll(/\bBT\b([\s\S]*?)\bET\b/g)].map((m) => extractPdfText(m[1])).filter(Boolean);
+    const blocks = [...raw.matchAll(/\bBT\b([\s\S]*?)\bET\b/g)].map((m) => extractPdfText(m[1])).filter((text): text is string => typeof text === "string" && text.length > 0);
     for (const block of blocks) for (let offset = 0; offset < block.length; offset += MAX_SEGMENT_CHARS) {
       const part = segments.length + 1;
       segments.push(makeSegment(artifactId, name, segments.length, "pdf-text",
@@ -229,7 +246,7 @@ function parsePdf(name: string, bytes: Uint8Array, artifactId: string) {
   }
   if (segments.length === 0) throw new Error("Unable to parse PDF: no supported directly addressable text. Use the production PDF adapter.");
   return { segments, warning: refs
-    ? "Page locators are verified against the Catalog/Pages/Kids tree; complex fonts, filtered streams and OCR require the production PDF adapter."
+    ? "Page locators are verified against the Catalog/Pages/Kids tree; multibyte/inherited font CMaps, filtered streams and OCR require the production PDF adapter."
     : "No provable PDF page tree: direct-text fragment locators were used instead of synthetic page numbers." };
 }
 

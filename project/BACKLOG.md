@@ -83,6 +83,6 @@ A feature is complete only when the intended user action works, tests exist, bui
 
 ### 2026-10-11 PDF CMap range staging
 - [x] Stage bounded one-byte ToUnicode `bfchar`/`bfrange` decoder, eight standalone regression tests, and ADR-073.
-- [-] Integrate current full local parser/tests into canonical recovery branch; local backup contains working end-to-end PDF range parsing.
+- [-] Reconcile the complete newer local PDF filter-chain parser and regression suite into canonical recovery branch; this branch integrates the bounded unfiltered CMap range slice.
 - [!] FND-SYNC Canonical `main` remains design-only; recovery branch is not merge-ready.
 - [!] FND-LOCK Synchronize npm lockfile and certify build/type/full tests and live tenant isolation.

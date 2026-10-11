@@ -5,4 +5,4 @@
 - Full test suite before standalone tests: 153/177 passed; 24 dependency or native-module-resolution failures. Standalone tests add 8 passing cases.
 - Typecheck blocked by missing dependencies; build blocked (`next` unavailable); offline npm install fails because `better-sqlite3` is not cached.
 - Live Supabase tenant isolation not executed. No production deployment.
-- This GitHub branch stages the decoder but does not yet contain the complete local parser integration. It is not merge-ready.
+- This GitHub branch includes bounded unfiltered selected-font CMap integration and two parser regressions, but still lacks the full newer local PDF filter-chain implementation and test suite. It is not merge-ready.

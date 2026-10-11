@@ -98,3 +98,27 @@ test("PDF without a provable Catalog only emits fragment locators", () => {
   assert.equal(result.sourceSegments[0].locator.type, "pdf-text-fragment");
   assert.equal(result.sourceSegments[0].locator.page, undefined);
 });
+
+
+function boundedCmapPdf(operand, cmap) {
+  const pdf = "%PDF-1.7\n" +
+    "1 0 obj << /Type /Catalog /Pages 2 0 R >> endobj\n" +
+    "2 0 obj << /Type /Pages /Kids [3 0 R] /Count 1 >> endobj\n" +
+    "3 0 obj << /Type /Page /Parent 2 0 R /Resources << /Font << /F1 4 0 R >> >> /Contents 6 0 R >> endobj\n" +
+    "4 0 obj << /Type /Font /Subtype /Type1 /ToUnicode 5 0 R >> endobj\n" +
+    "5 0 obj << /Length 128 >> stream\n" + cmap + "\nendstream endobj\n" +
+    "6 0 obj << /Length 64 >> stream\nBT /F1 12 Tf " + operand + " Tj ET\nendstream endobj\n%%EOF";
+  return new TextEncoder().encode(pdf);
+}
+
+test("PDF selected-font bfrange maps bytes and preserves verified page", () => {
+  const cmap = "1 begincodespacerange\n<00> <FF>\nendcodespacerange\n1 beginbfrange\n<80> <81> <0041>\nendbfrange";
+  const result = parseArtifact("range.pdf", boundedCmapPdf("<8081>", cmap));
+  assert.equal(result.sourceSegments[0].content, "AB");
+  assert.equal(result.sourceSegments[0].locator.page, 1);
+});
+
+test("PDF selected-font invalid bfrange fails closed instead of guessing", () => {
+  const cmap = "1 begincodespacerange\n<00> <FF>\nendcodespacerange\n1 beginbfrange\n<80> <81> [<0041>]\nendbfrange";
+  assert.throws(() => parseArtifact("invalid-range.pdf", boundedCmapPdf("<8081>", cmap)), /production PDF adapter|font mapping is ambiguous/);
+});
