@@ -1,10 +1,18 @@
+import { parsePdfCodespaces } from "./pdf-codespaces.ts";
 /**
- * Bounded, fail-closed single-byte PDF ToUnicode CMap reader.
- * Only one-byte codespaces, bfchar and bfrange (BMP scalar or explicit
- * UTF-16BE array) are supported. Unsupported mappings never guess glyphs.
+ * Bounded, fail-closed PDF ToUnicode CMap reader.
+ * Supports disjoint, same-width one- or two-byte codespace ranges, bfchar, and
+ * bfrange. Mixed-width codespaces, inheritance, and unsupported operators
+ * must be handled by a production PDF adapter, never guessed here.
  */
 export const MAX_PDF_CMAP_BYTES = 64 * 1024;
-const MAX_GLYPHS = 256;
+const MAX_GLYPHS = 1024;
+const MAX_UNICODE_UNITS_PER_GLYPH = 64;
+
+export type PdfUnicodeCMap = Readonly<{
+  codeBytes: 1 | 2;
+  glyphs: ReadonlyMap<number, string>;
+}>;
 
 function utf16be(hex: string): string | null {
   if (hex.length === 0 || hex.length % 4 !== 0 || !/^[0-9a-fA-F]+$/.test(hex)) return null;
@@ -17,55 +25,49 @@ function utf16be(hex: string): string | null {
   }
 }
 
-function consumePairs(body: string, expected: number, add: (code: number, hex: string) => boolean): boolean {
-  const pattern = /\s*<([0-9a-fA-F]{2})>\s*<([0-9a-fA-F]+)>/gy;
-  let offset = 0;
-  for (let index = 0; index < expected; index += 1) {
-    pattern.lastIndex = offset;
-    const match = pattern.exec(body);
-    if (!match || !add(parseInt(match[1], 16), match[2])) return false;
-    offset = pattern.lastIndex;
-  }
-  return body.slice(offset).trim() === "";
-}
-
-export function parseSingleByteToUnicodeCMap(source: string): ReadonlyMap<number, string> | null {
+export function parseToUnicodeCMap(source: string): PdfUnicodeCMap | null {
   if (Buffer.byteLength(source, "latin1") > MAX_PDF_CMAP_BYTES ||
       /\b(?:begincidchar|begincidrange|beginnotdefchar|beginnotdefrange|usecmap)\b/i.test(source)) return null;
-  const spaces = [...source.matchAll(/(\d+)\s+begincodespacerange\s*([\s\S]*?)\s*endcodespacerange\b/g)];
-  if (spaces.length !== 1 || Number(spaces[0][1]) !== 1 ||
-      (source.match(/\bbegincodespacerange\b/g) ?? []).length !== 1) return null;
-  const space = /^\s*<([0-9a-fA-F]{2})>\s*<([0-9a-fA-F]{2})>\s*$/.exec(spaces[0][2]);
-  if (!space) return null;
-  const first = parseInt(space[1], 16);
-  const last = parseInt(space[2], 16);
-  if (first > last) return null;
+
+  const codespaces = parsePdfCodespaces(source);
+  if (!codespaces) return null;
+  const { codeBytes, contains, containsRange } = codespaces;
 
   const chars = [...source.matchAll(/(\d+)\s+beginbfchar\s*([\s\S]*?)\s*endbfchar\b/g)];
-  const ranges = [...source.matchAll(/(\d+)\s+beginbfrange\s*([\s\S]*?)\s*endbfrange\b/g)];
+  const rangeBlocks = [...source.matchAll(/(\d+)\s+beginbfrange\s*([\s\S]*?)\s*endbfrange\b/g)];
   if (chars.length !== (source.match(/\bbeginbfchar\b/g) ?? []).length ||
-      ranges.length !== (source.match(/\bbeginbfrange\b/g) ?? []).length ||
-      chars.length + ranges.length === 0) return null;
+      rangeBlocks.length !== (source.match(/\bbeginbfrange\b/g) ?? []).length ||
+      chars.length + rangeBlocks.length === 0) return null;
 
   const result = new Map<number, string>();
   const add = (code: number, hex: string): boolean => {
     const value = utf16be(hex);
-    if (code < first || code > last || value === null || result.has(code) || result.size >= MAX_GLYPHS) return false;
+    if (!contains(code) || value === null || value.length > MAX_UNICODE_UNITS_PER_GLYPH ||
+        result.has(code) || result.size >= MAX_GLYPHS) return false;
     result.set(code, value);
     return true;
   };
+  const sourceHex = `[0-9a-fA-F]{${codeBytes * 2}}`;
+  const pair = new RegExp(`\\s*<(${sourceHex})>\\s*<([0-9a-fA-F]+)>`, "gy");
   for (const block of chars) {
     const expected = Number(block[1]);
-    if (!Number.isSafeInteger(expected) || expected < 1 || expected > MAX_GLYPHS ||
-        !consumePairs(block[2], expected, add)) return null;
+    if (!Number.isSafeInteger(expected) || expected < 1 || expected > MAX_GLYPHS) return null;
+    let offset = 0;
+    for (let index = 0; index < expected; index += 1) {
+      pair.lastIndex = offset;
+      const match = pair.exec(block[2]);
+      if (!match || !add(parseInt(match[1], 16), match[2])) return null;
+      offset = pair.lastIndex;
+    }
+    if (block[2].slice(offset).trim() !== "") return null;
   }
 
-  for (const block of ranges) {
+  for (const block of rangeBlocks) {
     const expected = Number(block[1]);
     if (!Number.isSafeInteger(expected) || expected < 1 || expected > MAX_GLYPHS) return null;
-    // Each entry: <start> <end> <UTF-16BE BMP start> OR
-    // <start> <end> [<UTF-16BE> ...]. Arrays must have exact range length.
-    const entry = /\s*<([0-9a-fA-F]{2})>\s*<([0-9a-fA-F]{2})>\s*(<([0-9a-fA-F]+)>|\[\s*((?:<\s*[0-9a-fA-F]+\s*>\s*)+)\])/gy;
+    // Scalar bfrange destinations expand only within BMP non-surrogate values.
+    // Array destinations may be longer, valid UTF-16BE strings.
+    const entry = new RegExp(`\\s*<(${sourceHex})>\\s*<(${sourceHex})>\\s*(<([0-9a-fA-F]+)>|\\[\\s*((?:<\\s*[0-9a-fA-F]+\\s*>\\s*)+)\\])`, "gy");
     let offset = 0;
     for (let index = 0; index < expected; index += 1) {
       entry.lastIndex = offset;
@@ -74,15 +76,14 @@ export function parseSingleByteToUnicodeCMap(source: string): ReadonlyMap<number
       offset = entry.lastIndex;
       const start = parseInt(match[1], 16);
       const end = parseInt(match[2], 16);
-      if (end < start || start < first || end > last || result.size + end - start + 1 > MAX_GLYPHS) return null;
+      if (end < start || !containsRange(start, end) || result.size + end - start + 1 > MAX_GLYPHS) return null;
       if (match[4] !== undefined) {
-        // Conservative scalar expansion: only BMP non-surrogate units.
         if (match[4].length !== 4) return null;
         const base = parseInt(match[4], 16);
         if (base + end - start > 0xffff) return null;
         for (let code = start; code <= end; code += 1) {
           const unit = base + code - start;
-          if (unit >= 0xd800 && unit <= 0xdfff ||
+          if ((unit >= 0xd800 && unit <= 0xdfff) ||
               !add(code, unit.toString(16).padStart(4, "0"))) return null;
         }
       } else {
@@ -95,5 +96,11 @@ export function parseSingleByteToUnicodeCMap(source: string): ReadonlyMap<number
     }
     if (block[2].slice(offset).trim() !== "") return null;
   }
-  return result;
+  return { codeBytes, glyphs: result };
+}
+
+/** Backwards-compatible single-byte adapter; rejects two-byte codespaces. */
+export function parseSingleByteToUnicodeCMap(source: string): ReadonlyMap<number, string> | null {
+  const parsed = parseToUnicodeCMap(source);
+  return parsed?.codeBytes === 1 ? parsed.glyphs : null;
 }
