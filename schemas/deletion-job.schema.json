@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sugarplatform.dev/schemas/deletion-job.schema.json",
+  "title": "Assessment Deletion Job",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["operationId", "organizationId", "workspaceId", "assessmentId", "actorUserId", "status", "storageKeys", "deletedStorageKeys", "attemptCount", "maxAttempts", "nextAttemptAt", "leaseExpiresAt", "lastError", "receipt", "createdAt", "updatedAt"],
+  "properties": {
+    "operationId": { "type": "string", "format": "uuid" },
+    "organizationId": { "type": "string", "minLength": 2, "maxLength": 100 },
+    "workspaceId": { "type": "string", "minLength": 2, "maxLength": 100 },
+    "assessmentId": { "type": "string", "minLength": 2, "maxLength": 100 },
+    "actorUserId": { "type": "string", "minLength": 2, "maxLength": 100 },
+    "status": { "enum": ["queued", "running", "retry_scheduled", "completed", "exhausted"] },
+    "storageKeys": { "type": "array", "items": { "type": "string", "minLength": 1, "maxLength": 500 } },
+    "deletedStorageKeys": { "type": "array", "items": { "type": "string", "minLength": 1, "maxLength": 500 } },
+    "attemptCount": { "type": "integer", "minimum": 0 },
+    "maxAttempts": { "type": "integer", "minimum": 1, "maximum": 10 },
+    "nextAttemptAt": { "type": ["string", "null"], "format": "date-time" },
+    "leaseExpiresAt": { "type": ["string", "null"], "format": "date-time" },
+    "lastError": { "type": ["string", "null"], "maxLength": 500 },
+    "receipt": { "type": ["object", "null"] },
+    "createdAt": { "type": "string", "format": "date-time" },
+    "updatedAt": { "type": "string", "format": "date-time" }
+  }
+}

@@ -4,7 +4,7 @@ Sugar Platform Diagnostic is a limited, real, upload-based platform assessment p
 
 A user creates a focused assessment, uploads a controlled set of architecture artifacts, reviews extracted systems/entities/identifiers, runs evidence-backed diagnostics, and receives a platform map plus an executive report.
 
-A preloaded **Acme HealthTech** assessment remains available as a secondary sample path so prospects can see the result before uploading their own material.
+A guided **Acme HealthTech** Patient-identity assessment is available as a secondary sample path. It seeds the same server-backed reviewed-state pipeline as a real uploaded assessment so prospects can inspect evidence, findings, the Entity/ID map, maturity, recommendations, and an immutable executive report before uploading their own material.
 
 ## Primary product flow
 
@@ -88,5 +88,12 @@ A CTO can upload a limited artifact set and receive:
 
 ## Status
 
-Product direction and system design: updated for limited platform diagnostics  
-Application code: next phase
+The local/single-instance application journey is implemented through guided upload, evidence-backed extraction/review, deterministic findings, Entity/ID map, maturity/recommendations, immutable report history, formal PDF export, audited deletion controls, and the Acme HealthTech guided sample. Production confidential-data readiness still requires production identity, PostgreSQL/RLS activation with live isolation tests, managed private object storage, malware/quarantine controls, and production operational infrastructure.
+
+## October 9, 2026 recovery branch
+
+This dedicated branch restores the last published application baseline and adds a verified PDF page-tree traversal. It is not yet synchronized with the complete approved local backup and must remain a draft until dependency/build/tenant-isolation validation and the missing newer application changes are reconciled. No production deployment is implied.
+
+
+### 2026-10-11 recovery staging
+This branch integrates the fail-closed PDF ToUnicode character-range decoder into its older unfiltered PDF adapter and includes tests on top of the application recovery baseline. It is not the complete approved local package and must not be merged until the full parser integration, missing application updates, and dependency-backed CI are restored. See `project/VALIDATED_2026-10-11.md`.
