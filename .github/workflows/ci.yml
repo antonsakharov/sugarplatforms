@@ -1,0 +1,37 @@
+name: validate
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+      - 'agent/**'
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          package-manager-cache: false
+      - name: Verify approved baseline and dependency lockfile
+        run: node scripts/check-baseline.mjs
+      - run: npm ci --no-audit --no-fund
+      - run: npm run validate
+      - name: Package source-only recovery snapshot
+        if: always()
+        run: |
+          npm run recovery:manifest
+          npm run recovery:verify
+          python3 scripts/package-recovery.py --root . --manifest recovery-manifest.json --output sugar-platform-diagnostic-${{ github.run_id }}.zip
+      - name: Upload repository snapshot
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: sugar-platform-diagnostic-${{ github.run_id }}
+          path: sugar-platform-diagnostic-${{ github.run_id }}.zip
+          if-no-files-found: error
+          retention-days: 14
