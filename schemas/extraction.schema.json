@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sugarplatforms.local/schemas/extraction.schema.json",
+  "title": "Sugar Platform Diagnostic Extraction Envelope",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "provider", "promptVersion", "status", "objects", "warnings", "stats"],
+  "properties": {
+    "schemaVersion": {"const": "1.0"},
+    "provider": {"type": "string", "minLength": 1},
+    "promptVersion": {"type": "string", "minLength": 1},
+    "status": {"enum": ["ready", "partial", "withheld"]},
+    "objects": {
+      "type": "array",
+      "maxItems": 200,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "kind", "name", "normalizedName", "confidence", "extractionMethod", "evidence", "attributes"],
+        "properties": {
+          "id": {"type": "string", "minLength": 1},
+          "kind": {"enum": ["system", "entity", "identifier", "integration", "capability", "owner"]},
+          "name": {"type": "string", "minLength": 1, "maxLength": 120},
+          "normalizedName": {"type": "string", "minLength": 1, "maxLength": 120},
+          "confidence": {"type": "number", "minimum": 0, "maximum": 1},
+          "extractionMethod": {"type": "string", "minLength": 1},
+          "evidence": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["segmentId", "artifactId", "artifactName", "locator", "evidenceType"],
+              "properties": {
+                "segmentId": {"type": "string", "minLength": 1},
+                "artifactId": {"type": "string", "minLength": 1},
+                "artifactName": {"type": "string", "minLength": 1},
+                "locator": {"type": "string", "minLength": 1},
+                "evidenceType": {"const": "direct"}
+              }
+            }
+          },
+          "attributes": {"type": "object", "additionalProperties": {"type": "string"}}
+        }
+      }
+    },
+    "warnings": {"type": "array", "items": {"type": "string"}},
+    "stats": {
+      "type": "object", "additionalProperties": false,
+      "required": ["objectCount", "evidenceReferenceCount"],
+      "properties": {
+        "objectCount": {"type": "integer", "minimum": 0},
+        "evidenceReferenceCount": {"type": "integer", "minimum": 0}
+      }
+    }
+  }
+}
