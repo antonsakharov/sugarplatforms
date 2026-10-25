@@ -18,6 +18,13 @@ Recovered the missing pinned `better-sqlite3@12.10.1` dependency closure using p
 - `npm test`: **264/288 passed; 24 failed**, all failures in dependency-backed modules with missing `node_modules`. No new baseline-gate or publisher regressions.
 - Live two-tenant PostgreSQL/storage/scanner isolation: **NOT EXECUTED**, no production credentials or services available.
 
+## Canonical GitHub recovery publication
+
+- Dedicated branch: `agent/canonical-recovery-lockfile-2026-10-25`.
+- Draft PR: `https://github.com/antonsakharov/sugarplatforms/pull/56` (open, draft, not merged).
+- Published candidate Git tree contained **369 blobs**: all 368 manifest-listed source files plus `recovery-manifest.json`. Recursive Git blob comparison: **368/368 matching**, zero missing, modified, or unexpected paths; the published branch commit's tree SHA was verified against the staged tree.
+- `main` was not modified. CI runs were triggered; their outcome was not yet established when this record was prepared.
+
 ## Release assessment
 
 Lockfile metadata consistency is repaired but release certification is **not complete**. Do not merge/deploy until complete GitHub source parity, networked `npm ci`, type checking, full tests, build, and live authenticated tenant isolation pass. No production deployment or customer-record ingestion occurred.

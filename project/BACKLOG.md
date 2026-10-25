@@ -260,6 +260,6 @@ A feature is complete only when the intended user action works, tests exist, bui
 - [x] FND-LOCK-GATE Extend dependency-free baseline preflight to verify registry URL allowlist, SHA-512 integrity syntax, pinned versions, and required transitive closure; add regression tests.
 - [x] FND-LOCK-DRYRUN Verify npm lock consistency using `npm ci --offline --ignore-scripts --dry-run` (does not fetch packages).
 - [!] FND-LOCK-INSTALL Run a real clean `npm ci` with registry access, then full typecheck, build and all tests in CI; offline runner has no cached tarballs.
-- [!] FND-SYNC-20261025 Publish and verify complete source + recovery manifest on a dedicated draft PR, never main, before considering merge.
+- [x] FND-SYNC-20261025 Publish and verify the complete 368-file source snapshot + manifest on `agent/canonical-recovery-lockfile-2026-10-25`, draft PR #56. Full Git blob parity confirmed; **DO NOT MERGE** until CI and security release gates pass.
 - [!] SEC-LIVE Authenticated non-`BYPASSRLS` two-tenant PostgreSQL, private storage, and scanner isolation remain release blockers.
 - [-] PAR-005 Full production-grade PDF parsing remains incomplete; bounded local/demo evidence decoding is not OCR or object-stream/layout coverage.

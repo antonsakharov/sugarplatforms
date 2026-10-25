@@ -142,3 +142,6 @@ Status: **implemented and locally tested; not release-certified**. Direct single
 
 ### 2026-10-25 — Reproducible dependency recovery
 The `better-sqlite3@12.10.1` dependency and its required transitive package metadata are now present in the npm v3 lockfile, with published SHA-512 integrity values sourced from a versioned public npm lockfile. The baseline gate verifies registry URL allowlisting, integrity syntax and required dependency closure. `npm ci --offline --ignore-scripts --dry-run` confirms npm lock consistency without downloading packages. This **does not** certify actual installation, native-module compatibility, full build/tests, GitHub parity or production tenant isolation. No assessment or upload limits were changed.
+
+### 2026-10-25 — Complete GitHub recovery candidate
+The full 368-file approved source snapshot plus manifest was published to the dedicated agent branch and draft PR #56 with exact recursive Git blob parity. This closes the source-publication gap **on the review branch**, not on canonical `main`. The PR must remain a draft until dependency-backed CI, actual native SQLite installation, full application validation, and live two-tenant security certification pass. No merge or deployment occurred.

@@ -223,3 +223,6 @@ Run `node --experimental-strip-types --test tests/pdf-tiff-predictor.test.mjs te
 
 ### 2026-10-25 — Dependency lock recovery
 Run `npm run baseline:check` to verify canonical design files and pinned direct/transitive npm lock entries. `npm ci --offline --ignore-scripts --dry-run --no-audit --no-fund` checks lockfile consistency without downloading packages. Then, **on a networked build host**, run `npm ci --no-audit --no-fund && npm run validate`; actual tarball SRI verification and native SQLite installation require this step. The repaired lockfile records were sourced from a public npm v3 lockfile at `oliverjessner/sqlite-hub` commit `818a59e3b68fd377cda6f474b12dd1a44b64c6f2` (Decision 087). Never replace integrity values with placeholders or treat a dry run as build certification.
+
+### Complete recovery PR — 2026-10-25
+Review draft PR #56 (`agent/canonical-recovery-lockfile-2026-10-25`) rather than older partial recovery PRs. The branch's complete recursive tree was verified against the source manifest; do not merge until a networked GitHub Actions run passes `npm ci && npm run validate`, native SQLite compatibility is confirmed, and live non-`BYPASSRLS` two-tenant database/storage/scanner isolation is certified. `main` was not modified and production was not deployed.

@@ -157,3 +157,6 @@ The local/demo PDF parser now supports bounded single-filter Flate TIFF Predicto
 
 ### Dependency integrity recovery (2026-10-25)
 The previously missing `better-sqlite3@12.10.1` npm lock metadata is restored from published integrity records. `npm run baseline:check` now checks the full required transitive closure, registry URL allowlist and SHA-512 SRI format. The offline `npm ci --ignore-scripts --dry-run` succeeds but **does not install packages**. Full `npm ci`, type checking, build, tests, and production security certification remain required in a networked environment. See `project/DECISION_087.md`.
+
+### Canonical recovery review (2026-10-25)
+The complete approved application source is available for review on `agent/canonical-recovery-lockfile-2026-10-25` in draft PR #56. The branch contains every source file in the verified recovery manifest plus the manifest itself. `main` remains the canonical design baseline until a human-reviewed merge after release gates pass. No production deployment was performed.
