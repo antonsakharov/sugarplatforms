@@ -10,7 +10,7 @@ The production Next.js bundler and TypeScript understand the `@/*` import alias,
 ## Decision
 
 - Register a dependency-free Node ESM loader only in the `npm test` command, using Node's `--import` plus `node:module.register` API. This does not modify the Next.js production runtime or browser bundle.
-- Map only the repository-local `@/lib/<safe-path>` namespace to existing `.ts`, `.tsx`, `.mjs` or `.js` source files. Reject traversal, unsupported aliases and missing files. Leave standard npm and `node:` imports to the default resolver.
+- Map only the repository-local `@/lib/<safe-path>` namespace and extensionless relative imports originating **inside `lib/`** to existing `.ts`, `.tsx`, `.mjs` or `.js` source files. Reject traversal, unsupported aliases and missing files. Leave standard npm and `node:` imports to the default resolver.
 - Add positive, negative and passthrough regression tests. Keep the existing `--experimental-strip-types` execution path and never invoke external services for test-module resolution.
 - Require a fresh GitHub Actions run to validate the complete dependency-backed test suite and build; an offline local runner without native SQLite cannot certify them.
 
