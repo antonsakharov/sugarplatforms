@@ -2,8 +2,8 @@
   "schemaVersion": 1,
   "algorithm": "sha256+git-blob-sha1",
   "fileCount": 368,
-  "totalBytes": 1339973,
-  "treeSha256": "3a376c1d925bbbd8a957bda6124b2c396c61cf3dedc373389dbbdc6c79b9c25e",
+  "totalBytes": 1340634,
+  "treeSha256": "eb2ac6f73114caca8f590c911d624586478b901f0cd126e9df8c579ba3d33abe",
   "files": [
     {
       "path": ".env.example",
@@ -49,9 +49,9 @@
     },
     {
       "path": "VALIDATION.md",
-      "bytes": 24393,
-      "sha256": "31c9ced115d388775cf383953cd44e30e266df2eaaa1ffcdec0662c6ea177f20",
-      "gitBlobSha": "7dd8391662eafdd98bf1d7660ab4cac91add5323"
+      "bytes": 24769,
+      "sha256": "6fa10ebb5d519b2c3604ed9e730fbdb155c6f93cfcf683a09443129eb2a9b33f",
+      "gitBlobSha": "2bf3e4829da3043b651a9ab49979997a0cb1cdc5"
     },
     {
       "path": "app/api/admin/deletion-jobs/reconcile/route.ts",
@@ -763,9 +763,9 @@
     },
     {
       "path": "lib/pdf-stream-filters.ts",
-      "bytes": 8517,
-      "sha256": "b626d532b6ac985a109d7b1718694e72b5df66fad5cada94f87e1086b9bf73b3",
-      "gitBlobSha": "ae4c7616947e6423986f66da36a72b651209e7e6"
+      "bytes": 8605,
+      "sha256": "4022351950b86b3402e9b1f4f7053a3862407c2c9b5c538397a03d0bc3a9a88c",
+      "gitBlobSha": "1a04df26eaa1b0e638b10b96115440fd1a7bf8ed"
     },
     {
       "path": "lib/pdf-text-operand-decoder.ts",
@@ -1627,9 +1627,9 @@
     },
     {
       "path": "project/VALIDATED_2026-10-25.md",
-      "bytes": 2726,
-      "sha256": "925b671743441e5a22918beb099e250f68a9ea3917994e8f94b83b936bd357b3",
-      "gitBlobSha": "4a644108d540bad6eecb2babfe5e75f769e06b3b"
+      "bytes": 2923,
+      "sha256": "0b065422413abaedb4371bc0ae44d4961b974b3f75cc8599255d8ad4929b8f57",
+      "gitBlobSha": "8fd94c3b07558f17593957f1aa82571d39c1d580"
     },
     {
       "path": "project/VALIDATION_2026-09-26.md",

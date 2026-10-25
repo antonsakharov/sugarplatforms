@@ -156,7 +156,8 @@ export function decodePdfStream(objectBody: string, maxBytes: number): string | 
   const config = streamFilters(dictionary);
   if (config === null) return null;
   try {
-    let decoded = Buffer.from(streamMatch[1], "latin1");
+    // Keep the buffer generic across native zlib and bounded decoder adapters.
+    let decoded: Buffer = Buffer.from(streamMatch[1], "latin1");
     if (decoded.length > maxBytes) return null;
     for (const filter of config.filters) {
       if (filter === "ASCIIHexDecode" || filter === "AHx") {

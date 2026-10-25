@@ -214,3 +214,5 @@ See `project/VALIDATED_2026-10-24.md` for command-level results. The decoder add
 
 ### 2026-10-25 — Authentic npm lock metadata recovery
 `better-sqlite3@12.10.1` and 36 missing transitive pinned package records were restored from a versioned public npm v3 lockfile with published SHA-512 SRI values (Decision 087). Baseline preflight now rejects non-registry tarball URLs, invalid integrity strings, malformed installed package paths and missing required transitive dependencies. Offline `npm ci --ignore-scripts --dry-run` succeeds but real `npm ci` fails with `ENOTCACHED` because the runner has no package tarballs. Full typecheck/build and live tenant isolation remain uncertified. See `project/VALIDATED_2026-10-25.md`.
+
+**Networked CI follow-up (2026-10-25):** GitHub Actions verified the repaired lockfile and completed a real `npm ci`. Initial `npm run validate` stopped at six TypeScript `Buffer` generic-assignment errors in `lib/pdf-stream-filters.ts`. The shared decoded-stream variable now uses an explicit `Buffer` type; the next CI run must prove the fix before this PR is merge-ready.
