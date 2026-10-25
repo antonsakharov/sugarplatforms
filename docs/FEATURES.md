@@ -148,3 +148,6 @@ The full 368-file approved source snapshot plus manifest was published to the de
 
 ### 2026-10-25 — CI test harness correction
 GitHub Actions now reaches dependency-backed validation after a successful `npm ci`; a test-only Node ESM alias loader resolves `@/lib/*` without affecting production bundling or security. Full suite and build certification remain subject to a fresh CI run, and the draft recovery PR must not merge before all gates pass.
+
+### 2026-10-25 — Networked CI green
+GitHub Actions on the complete canonical recovery draft PR passed real `npm ci`, TypeScript, lint, **365/365 tests**, and Next.js build. Source parity is verified on the review branch. This is **not production security certification**: live authenticated tenant isolation, managed storage and malware scanning integration remain open, and the bounded local PDF parser does not cover arbitrary PDFs. PR #56 remains draft; no merge/deploy.

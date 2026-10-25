@@ -259,7 +259,7 @@ A feature is complete only when the intended user action works, tests exist, bui
 - [x] FND-LOCK-METADATA Restore authentic published `better-sqlite3@12.10.1` tarball SRI and 36 missing transitive lock records, with compatible pinned root dependencies retained.
 - [x] FND-LOCK-GATE Extend dependency-free baseline preflight to verify registry URL allowlist, SHA-512 integrity syntax, pinned versions, and required transitive closure; add regression tests.
 - [x] FND-LOCK-DRYRUN Verify npm lock consistency using `npm ci --offline --ignore-scripts --dry-run` (does not fetch packages).
-- [!] FND-LOCK-INSTALL Run a real clean `npm ci` with registry access, then full typecheck, build and all tests in CI; offline runner has no cached tarballs.
+- [x] FND-LOCK-INSTALL GitHub Actions completed real `npm ci` with registry SRI verification, typecheck, lint, **365/365 tests**, and production Next.js build.
 - [x] FND-SYNC-20261025 Publish and verify the complete 368-file source snapshot + manifest on `agent/canonical-recovery-lockfile-2026-10-25`, draft PR #56. Full Git blob parity confirmed; **DO NOT MERGE** until CI and security release gates pass.
 - [!] SEC-LIVE Authenticated non-`BYPASSRLS` two-tenant PostgreSQL, private storage, and scanner isolation remain release blockers.
 - [-] PAR-005 Full production-grade PDF parsing remains incomplete; bounded local/demo evidence decoding is not OCR or object-stream/layout coverage.
@@ -267,4 +267,4 @@ A feature is complete only when the intended user action works, tests exist, bui
 ### 2026-10-25 — Networked CI follow-up
 - [x] FND-CI-TYPES Resolve six `Buffer` generic assignment errors in the PDF stream filter chain; networked TypeScript validation passed after the fix.
 - [x] FND-CI-ALIAS Add a test-only ESM loader for `@/lib/*` imports and traversal/passthrough regression tests, without changing the production Next.js runtime.
-- [!] FND-CI-RECHECK Await fresh GitHub Actions `npm ci && npm run validate` results for the complete recovery PR; keep PR #56 draft and unmerged.
+- [x] FND-CI-RECHECK Two GitHub Actions runs on the complete recovery PR passed `npm ci && npm run validate` (365/365 tests, successful Next.js build). Keep PR #56 draft and unmerged pending live production security certification.

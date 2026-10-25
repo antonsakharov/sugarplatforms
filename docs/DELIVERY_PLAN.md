@@ -120,3 +120,6 @@ Phase 3 local/demo parsing now reverses strict Flate TIFF Predictor 2 horizontal
 
 ### 2026-10-25 — Dependency recovery increment
 The native SQLite lockfile gap is resolved at the pinned metadata level using published npm integrity records. A dependency-free transitive closure and SRI-format preflight now gates CI. Offline npm dry-run succeeds, but real npm package downloads are unavailable in this build runner; clean `npm ci`, full type checking, tests, Next.js build and live two-tenant security checks remain required before release. The canonical `main` branch must be recovered through a complete, hash-verified draft PR, never an automatic merge.
+
+### 2026-10-25 — Canonical recovery and dependency CI milestone
+A complete hash-verified source snapshot is published on draft PR #56, and networked GitHub Actions passed clean `npm ci`, TypeScript, lint, all **365 tests**, and Next.js production build. This resolves the canonical publication and dependency-backed CI blockers. Production deployment and merging remain prohibited until real authenticated non-`BYPASSRLS` two-tenant PostgreSQL/private storage/malware isolation and operational controls are certified. PDF production adapter coverage remains a separate feature gap.
