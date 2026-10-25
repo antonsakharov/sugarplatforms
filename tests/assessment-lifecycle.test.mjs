@@ -99,3 +99,20 @@ test("storage failure records a failure receipt and leaves database assessment s
     assert.deepEqual(events.map((event) => event.outcome), ["pending", "failure"]);
   });
 });
+
+
+test("audit receipts preserve insertion order when timestamps have equal millisecond precision", async () => {
+  await withFixture(async ({ databasePath }) => {
+    seedAssessment(databasePath);
+    const lifecycle = new SqliteAssessmentLifecycleRepository(databasePath);
+    const plan = lifecycle.prepareDeletion(scope, assessmentId, "admin_user");
+    lifecycle.recordFailure(scope, assessmentId, "admin_user", plan.operationId, new Error("test storage failure"));
+    const db = new DatabaseSync(databasePath);
+    db.prepare("UPDATE audit_events SET created_at=? WHERE assessment_id=?").run(createdAt, assessmentId);
+    // Reverse UUID lexical order to prove UUIDs are not a valid event tie-breaker.
+    db.prepare("UPDATE audit_events SET id=? WHERE event_type=?").run("ffffffff-ffff-4fff-8fff-ffffffffffff", "assessment.deletion.requested");
+    db.prepare("UPDATE audit_events SET id=? WHERE event_type=?").run("00000000-0000-4000-8000-000000000000", "assessment.deletion.failed");
+    db.close();
+    assert.deepEqual(lifecycle.listAudit(scope, assessmentId).map((event) => event.outcome), ["pending", "failure"]);
+  });
+});

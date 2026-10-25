@@ -229,3 +229,6 @@ Review draft PR #56 (`agent/canonical-recovery-lockfile-2026-10-25`) rather than
 
 ### 2026-10-25 — Native Node test alias support
 `npm test` uses `scripts/register-test-loader.mjs` and `scripts/node-test-alias-loader.mjs` to resolve only `@/lib/*` TypeScript aliases and extensionless relative imports originating inside `lib/` under Node 22's native ESM test runner. Next.js/TypeScript continue to use `tsconfig.json` path mapping in production. Run `node --experimental-strip-types --import ./scripts/register-test-loader.mjs --test tests/node-test-alias-loader.test.mjs` for isolated alias guard tests. See Decision 088. Do not use the test loader as a production authorization or filesystem access mechanism.
+
+### 2026-10-25 — Deterministic audit receipt tests
+`tests/assessment-lifecycle.test.mjs` includes an equal-timestamp audit regression with reverse UUID lexical order; SQLite must return request before failure using insertion order. Run it with `npm test` after real `npm ci`; the offline runner cannot load the native SQLite module. See Decision 089.

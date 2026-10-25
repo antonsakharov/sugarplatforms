@@ -268,3 +268,7 @@ A feature is complete only when the intended user action works, tests exist, bui
 - [x] FND-CI-TYPES Resolve six `Buffer` generic assignment errors in the PDF stream filter chain; networked TypeScript validation passed after the fix.
 - [x] FND-CI-ALIAS Add a test-only ESM loader for `@/lib/*` imports and traversal/passthrough regression tests, without changing the production Next.js runtime.
 - [x] FND-CI-RECHECK Two GitHub Actions runs on the complete recovery PR passed `npm ci && npm run validate` (365/365 tests, successful Next.js build). Keep PR #56 draft and unmerged pending live production security certification.
+
+### 2026-10-25 — CI audit determinism
+- [x] SEC-AUDIT-ORDER Stabilize SQLite deletion audit ordering for same-millisecond request/failure events and add a deterministic tie-break regression.
+- [!] SEC-LIVE Real authenticated non-BYPASSRLS two-tenant PostgreSQL, private object storage and malware scanner isolation remains a separate production release gate.

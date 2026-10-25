@@ -117,3 +117,6 @@ The bounded local/demo PDF stream decoder accepts only direct single-filter Flat
 
 ### 2026-10-25 — Dependency supply-chain validation
 The source baseline gate rejects npm lock entries with untrusted tarball origins, malformed SHA-512 SRI, missing pinned versions or missing required transitive packages. The restored `better-sqlite3@12.10.1` SRI records are from a versioned public npm lockfile and are not treated as a substitute for actual npm registry integrity verification during `npm ci`. This gate does not relax upload content restrictions, secret scanning, malware quarantine, tenant authorization, private storage, deletion, or evidence requirements. No production deployment is authorized without full CI and live non-`BYPASSRLS` tenant-isolation testing.
+
+### 2026-10-25 — Local audit ordering
+SQLite deletion audit receipts now use `(created_at, rowid)` order, not UUID order, so request and outcome records sharing one millisecond are presented in insertion order. This is a local/single-instance determinism fix only; production PostgreSQL audit, non-`BYPASSRLS` tenant isolation and storage deletion guarantees still require live validation. See Decision 089.

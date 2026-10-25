@@ -224,3 +224,6 @@ Accept standard `/RunLengthDecode` (`/RL`) page-content and selected-font CMap s
 
 ## ADR-088 — Dependency-free test-only ESM alias loader (2026-10-25)
 **Status:** Accepted for CI recovery. Node 22 native tests do not resolve Next.js/TypeScript `@/lib/*` aliases. Register a strictly scoped, traversal-rejecting `node:module` loader for `npm test` only, with dedicated regression tests; never alter production import resolution or relax security boundaries. See `project/DECISION_088.md`.
+
+## ADR-089 — Stable same-millisecond SQLite audit ordering (2026-10-25)
+**Status:** Accepted. Local SQLite audit queries order by timestamp and insertion `rowid`, never random UUID, so a deletion request precedes its completion/failure receipt even when timestamps tie. Regression coverage forces equal timestamps and reverse UUID ordering. This does not certify managed PostgreSQL or live tenant isolation. See `project/DECISION_089.md`.

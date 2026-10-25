@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
   "algorithm": "sha256+git-blob-sha1",
-  "fileCount": 372,
-  "totalBytes": 1350784,
-  "treeSha256": "4fc49d49ed36d6f08a93a08085d73bc16373edea82f420d6dd61aa6b10beb6a3",
+  "fileCount": 373,
+  "totalBytes": 1355504,
+  "treeSha256": "7fd6149be593239a8ccee20c527176b108cd5a6764ea6730ed8ff6d8903ae6c4",
   "files": [
     {
       "path": ".env.example",
@@ -19,9 +19,9 @@
     },
     {
       "path": "DEVELOPMENT.md",
-      "bytes": 26217,
-      "sha256": "472ecf53d5bbe465003f18dc016b0fbd5479f89306d1dcec71a41912a07c557c",
-      "gitBlobSha": "14733d0889c513dd9fa2ca0f0ead2921570721c2"
+      "bytes": 26571,
+      "sha256": "0fd04ac3053e46826b8627c1ec6e4c44612170a2dcd8745c2a57bf336419bb5c",
+      "gitBlobSha": "cca1aa71ab7f8840f0b0dd61d51c88e35482006b"
     },
     {
       "path": "Dockerfile",
@@ -49,9 +49,9 @@
     },
     {
       "path": "VALIDATION.md",
-      "bytes": 25366,
-      "sha256": "e12f618afa91312af0338f58445d0fead2c1af0c64793f61a6bba2798bf1469d",
-      "gitBlobSha": "9d36dca391c05ffee6e750ffcc20e5be8c0a3a09"
+      "bytes": 25828,
+      "sha256": "2fef09de58274715a67ceeb65187879eab8067bc579912c40f4ab6bf5b485d8b",
+      "gitBlobSha": "cbc02887153ef0f5019351f59a225f808e218e86"
     },
     {
       "path": "app/api/admin/deletion-jobs/reconcile/route.ts",
@@ -541,9 +541,9 @@
     },
     {
       "path": "docs/SECURITY_AND_PRIVACY.md",
-      "bytes": 11306,
-      "sha256": "f78f2cac6126805ee7ffc0f159e48981d0696569825399edd8735a48b9f339ae",
-      "gitBlobSha": "787a8a8b55bb8edef3ee6a3b273f5ef154a3c463"
+      "bytes": 11717,
+      "sha256": "f04e53456a494d0b38977cdb11684308e311436a2df134684fddfe969b20e713",
+      "gitBlobSha": "3018d6a1adbb070e7b0ec510073e888ccf995261"
     },
     {
       "path": "docs/SYSTEM_DESIGN.md",
@@ -595,9 +595,9 @@
     },
     {
       "path": "lib/assessment-lifecycle.ts",
-      "bytes": 7969,
-      "sha256": "2fe9e6710b9baa1e3b3657641376596898da7b2f6b9f0eab8b7b2fd98495b06e",
-      "gitBlobSha": "94ccb9c9d9b9598ed03849576d2f99b4b4e40a06"
+      "bytes": 7972,
+      "sha256": "4edca509e4a4e4bbbf11f15a6180f916061022b28066fe72753239af8fd0daa5",
+      "gitBlobSha": "94a7e5d81fdbd4f3fd95f0a67f0e3c059f863e9b"
     },
     {
       "path": "lib/assessment-repository.ts",
@@ -1051,9 +1051,9 @@
     },
     {
       "path": "project/BACKLOG.md",
-      "bytes": 26644,
-      "sha256": "9c9abb6bc1e70188adc2525216109f72c2d22e460fc9a81579dcb108b5971bb6",
-      "gitBlobSha": "cd674d481e2b1e9a46c66abd3a437c00d6ea1860"
+      "bytes": 27006,
+      "sha256": "342870d5358ab4064862b6245bac166007eb4093e81d9d073ef13d65ec1de40e",
+      "gitBlobSha": "ad7a9d11048c9a8ce05fc4bb7639a63c9d5d5143"
     },
     {
       "path": "project/BUILD_STATUS.md",
@@ -1069,9 +1069,9 @@
     },
     {
       "path": "project/DECISIONS.md",
-      "bytes": 27213,
-      "sha256": "96868fa6f05ae149241f4ad0dca90cf34dd31edb2ec79b7802eac47e6d1162ef",
-      "gitBlobSha": "550b6f18fa7021d3b8058189801731d6fbfdf4a2"
+      "bytes": 27655,
+      "sha256": "b7dff6d33a5319566e71bf5eb38cb99eecbc208f1f279c3c3e444f3769fcc77c",
+      "gitBlobSha": "bd46b1cbf3d7070a0019cbafaba3ce23dcaf4584"
     },
     {
       "path": "project/DECISION_037.md",
@@ -1380,6 +1380,12 @@
       "gitBlobSha": "90c26a3f777a3ac321a90a321fbc8fab32cff80b"
     },
     {
+      "path": "project/DECISION_089.md",
+      "bytes": 1230,
+      "sha256": "15d82edbd28cae66243f2f7fb383da7125bedf238923b9bfaf6ab16ef683ec36",
+      "gitBlobSha": "1191f87782e5d9561033e57d1f0146ce25a209dd"
+    },
+    {
       "path": "project/GITHUB_SYNC_2026-10-09.md",
       "bytes": 1323,
       "sha256": "0a4eb78100ff50792905e92786400972c988bc6ce8465812e0ee8ed5f9ecfbeb",
@@ -1633,9 +1639,9 @@
     },
     {
       "path": "project/VALIDATED_2026-10-25.md",
-      "bytes": 3928,
-      "sha256": "9ee17680d1af47c32c07da7e882510bd8ea926945e7de5cca5a3824abb6b9084",
-      "gitBlobSha": "abf5655a780d7b95c088434ed59bcfa4dfbccc76"
+      "bytes": 4247,
+      "sha256": "78e9f5cbc0ffbd2fa14c567f3665f200699a58dd78d9fd87fa59f208bcbcf1f0",
+      "gitBlobSha": "a4b126e7f4c7b68dfbcab0762cca4c114b81d11f"
     },
     {
       "path": "project/VALIDATION_2026-09-26.md",
@@ -1843,9 +1849,9 @@
     },
     {
       "path": "tests/assessment-lifecycle.test.mjs",
-      "bytes": 7478,
-      "sha256": "95a76dc740ca8877718a1054a9b72dfd06accca2a5b0464c9164d42ccedb5b2e",
-      "gitBlobSha": "abe1babedf7b6dd567b669edff46ab773c5ce4a6"
+      "bytes": 8615,
+      "sha256": "8935b9708349565c48701a595042d555dc5328e8a413861c2f6c2bee67a7cd4a",
+      "gitBlobSha": "b04ff4e9ef818088e9371b05209d5fee255abd15"
     },
     {
       "path": "tests/assessment-persistence.test.mjs",
