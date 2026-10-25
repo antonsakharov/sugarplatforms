@@ -161,4 +161,4 @@ The previously missing `better-sqlite3@12.10.1` npm lock metadata is restored fr
 ### Canonical recovery review (2026-10-25)
 The complete approved application source is available for review on `agent/canonical-recovery-lockfile-2026-10-25` in draft PR #56. The branch contains every source file in the verified recovery manifest plus the manifest itself. `main` remains the canonical design baseline until a human-reviewed merge after release gates pass. No production deployment was performed.
 
-**CI status (2026-10-25):** The complete draft recovery branch passed networked `npm ci`, TypeScript, lint, **365/365 tests**, and Next.js build. Live production tenant/storage/scanner security certification is still required; PR #56 remains draft and unmerged.
+**CI status (2026-10-25):** The complete draft recovery branch passed networked `npm ci`, TypeScript, lint, **366/366 tests**, and Next.js build. Live production tenant/storage/scanner security certification is still required; PR #56 remains draft and unmerged.

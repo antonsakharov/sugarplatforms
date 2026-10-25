@@ -2,8 +2,8 @@
   "schemaVersion": 1,
   "algorithm": "sha256+git-blob-sha1",
   "fileCount": 373,
-  "totalBytes": 1355504,
-  "treeSha256": "7fd6149be593239a8ccee20c527176b108cd5a6764ea6730ed8ff6d8903ae6c4",
+  "totalBytes": 1356654,
+  "treeSha256": "8dc58e147f85543fcb46a3b6b5f51c6ee20422b3b4ad19646c569822a0936141",
   "files": [
     {
       "path": ".env.example",
@@ -44,14 +44,14 @@
     {
       "path": "README.md",
       "bytes": 12563,
-      "sha256": "85cf332a37215cbd034238345ff1eb89181149d90c47bf1941c0be0e46e97e4e",
-      "gitBlobSha": "0622aa0070847a0b9d1e2c5b16dd30e08116c361"
+      "sha256": "f785f68f031325dcbb47c37005c747e5983936da5469eee42c6cfdb5d036ef35",
+      "gitBlobSha": "d006451668f55231b4f84ab189044a974fd7f4b0"
     },
     {
       "path": "VALIDATION.md",
-      "bytes": 25828,
-      "sha256": "2fef09de58274715a67ceeb65187879eab8067bc579912c40f4ab6bf5b485d8b",
-      "gitBlobSha": "cbc02887153ef0f5019351f59a225f808e218e86"
+      "bytes": 26355,
+      "sha256": "e421266a1f539fff2ceb3e2cf70be33bd7cf11b65863e3193fc280e034f76126",
+      "gitBlobSha": "a5af53631b0a3a9ec1146a20db40f96fab4ee3d0"
     },
     {
       "path": "app/api/admin/deletion-jobs/reconcile/route.ts",
@@ -356,8 +356,8 @@
     {
       "path": "docs/DELIVERY_PLAN.md",
       "bytes": 10804,
-      "sha256": "500d65d654508b0ba75d64a77eb2d9f597f78013d80a77a607db42a72697d818",
-      "gitBlobSha": "3c037424b4cf6f22da4a797f33e76287982b9065"
+      "sha256": "09644f0c83bcb94e68acdee032e08b324e568d7dddcc951c21bcfc347f0c7710",
+      "gitBlobSha": "660c43a04ad84df5a5fec1e06eb17c76bc5f9729"
     },
     {
       "path": "docs/DEMO_SCENARIO.md",
@@ -392,8 +392,8 @@
     {
       "path": "docs/FEATURES.md",
       "bytes": 23603,
-      "sha256": "b2091b3eff7d0438f4c84ec94c54e0538225e370627a7f1f2746597c8ada4134",
-      "gitBlobSha": "ab8ba0cf4e5b6e465f1a2524070a672b5ee19655"
+      "sha256": "1efb3fad67394208ddfbe69708a1bb17650a7992dde49688d173be89937791f3",
+      "gitBlobSha": "b73c2670570b6eba34f5d996545954966bc2dd9e"
     },
     {
       "path": "docs/FINDING_REVIEW_PERSISTENCE.md",
@@ -1052,8 +1052,8 @@
     {
       "path": "project/BACKLOG.md",
       "bytes": 27006,
-      "sha256": "342870d5358ab4064862b6245bac166007eb4093e81d9d073ef13d65ec1de40e",
-      "gitBlobSha": "ad7a9d11048c9a8ce05fc4bb7639a63c9d5d5143"
+      "sha256": "dba1cf67b9c1639c3996d33075602b5acda1d0ffc25532008dc444eabe1e35a0",
+      "gitBlobSha": "cac5d51aced6a5e13a57125a2592125e4836ce8d"
     },
     {
       "path": "project/BUILD_STATUS.md",
@@ -1639,9 +1639,9 @@
     },
     {
       "path": "project/VALIDATED_2026-10-25.md",
-      "bytes": 4247,
-      "sha256": "78e9f5cbc0ffbd2fa14c567f3665f200699a58dd78d9fd87fa59f208bcbcf1f0",
-      "gitBlobSha": "a4b126e7f4c7b68dfbcab0762cca4c114b81d11f"
+      "bytes": 4870,
+      "sha256": "c98c8d4bd3e0c244533edb2faa544a6821dbe265db48c3f77ddf85545d218736",
+      "gitBlobSha": "372486584396193381934245b544410890323025"
     },
     {
       "path": "project/VALIDATION_2026-09-26.md",
