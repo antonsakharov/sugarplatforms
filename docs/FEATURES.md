@@ -145,3 +145,6 @@ The `better-sqlite3@12.10.1` dependency and its required transitive package meta
 
 ### 2026-10-25 — Complete GitHub recovery candidate
 The full 368-file approved source snapshot plus manifest was published to the dedicated agent branch and draft PR #56 with exact recursive Git blob parity. This closes the source-publication gap **on the review branch**, not on canonical `main`. The PR must remain a draft until dependency-backed CI, actual native SQLite installation, full application validation, and live two-tenant security certification pass. No merge or deployment occurred.
+
+### 2026-10-25 — CI test harness correction
+GitHub Actions now reaches dependency-backed validation after a successful `npm ci`; a test-only Node ESM alias loader resolves `@/lib/*` without affecting production bundling or security. Full suite and build certification remain subject to a fresh CI run, and the draft recovery PR must not merge before all gates pass.

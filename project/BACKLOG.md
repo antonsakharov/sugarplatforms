@@ -263,3 +263,8 @@ A feature is complete only when the intended user action works, tests exist, bui
 - [x] FND-SYNC-20261025 Publish and verify the complete 368-file source snapshot + manifest on `agent/canonical-recovery-lockfile-2026-10-25`, draft PR #56. Full Git blob parity confirmed; **DO NOT MERGE** until CI and security release gates pass.
 - [!] SEC-LIVE Authenticated non-`BYPASSRLS` two-tenant PostgreSQL, private storage, and scanner isolation remain release blockers.
 - [-] PAR-005 Full production-grade PDF parsing remains incomplete; bounded local/demo evidence decoding is not OCR or object-stream/layout coverage.
+
+### 2026-10-25 — Networked CI follow-up
+- [x] FND-CI-TYPES Resolve six `Buffer` generic assignment errors in the PDF stream filter chain; networked TypeScript validation passed after the fix.
+- [x] FND-CI-ALIAS Add a test-only ESM loader for `@/lib/*` imports and traversal/passthrough regression tests, without changing the production Next.js runtime.
+- [!] FND-CI-RECHECK Await fresh GitHub Actions `npm ci && npm run validate` results for the complete recovery PR; keep PR #56 draft and unmerged.

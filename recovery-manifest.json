@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
   "algorithm": "sha256+git-blob-sha1",
-  "fileCount": 368,
-  "totalBytes": 1340634,
-  "treeSha256": "eb2ac6f73114caca8f590c911d624586478b901f0cd126e9df8c579ba3d33abe",
+  "fileCount": 372,
+  "totalBytes": 1346662,
+  "treeSha256": "53b373ba31ee2721533bdbb64afafa7d4e76101f5fb627abf9c74e0cdc823fd1",
   "files": [
     {
       "path": ".env.example",
@@ -19,9 +19,9 @@
     },
     {
       "path": "DEVELOPMENT.md",
-      "bytes": 25583,
-      "sha256": "f3ba7587dc61f9ea952d50fa2130b17117186eb81a533f314b95d3965d4f3a63",
-      "gitBlobSha": "8c419141107658d40e3caa4c743708c4fde6dbf6"
+      "bytes": 26156,
+      "sha256": "7e1615d4e47212cd43bd310d096ae7ecfd0a748bbcbae8338e19810bc1638caa",
+      "gitBlobSha": "db550f52c115056882f09f908e65c77e39fce8d1"
     },
     {
       "path": "Dockerfile",
@@ -391,9 +391,9 @@
     },
     {
       "path": "docs/FEATURES.md",
-      "bytes": 22757,
-      "sha256": "7f6f5864cc98b3d22f0f44727eef36e747fcb2ab184b1852262f2927c94b1a28",
-      "gitBlobSha": "b7ab78bbd9ffb79e3c0196e067fa0839ab2a966e"
+      "bytes": 23126,
+      "sha256": "6d734cc38c3df885416a11507fdcef87b7093a0d48acd72f2c54b155d248105c",
+      "gitBlobSha": "a42c7b4ccea8023e4837ee68fd13ad61e5e24427"
     },
     {
       "path": "docs/FINDING_REVIEW_PERSISTENCE.md",
@@ -1045,15 +1045,15 @@
     },
     {
       "path": "package.json",
-      "bytes": 998,
-      "sha256": "787cd92aa14f5b54ccc3a9518d5b8073390cd9a0b2a3a43490f991f47008350d",
-      "gitBlobSha": "9de147e26903989b5b23f820f2c4f971d75e0677"
+      "bytes": 1042,
+      "sha256": "56705fd86e55051da7ad0a4750793992be059f7eac3fed8687984370653b6957",
+      "gitBlobSha": "5543b7c84909db57fd066bdb030b7e8be49923a7"
     },
     {
       "path": "project/BACKLOG.md",
-      "bytes": 26055,
-      "sha256": "1bca2cd67b56218faf014bf6eb00e8c8d5c70d4f6f0d8a9a67dcb7f17037c87b",
-      "gitBlobSha": "4cb54cbb5729ec3b8b652f6acdf4e2375dd2f795"
+      "bytes": 26558,
+      "sha256": "b7e3341ad5198a0fd7aaec53b965ce78db3b29a2a93d6a2e7de18b10686bbd98",
+      "gitBlobSha": "64889e7c966fe3cd5c647101948b43f9e7f91f75"
     },
     {
       "path": "project/BUILD_STATUS.md",
@@ -1069,9 +1069,9 @@
     },
     {
       "path": "project/DECISIONS.md",
-      "bytes": 26804,
-      "sha256": "4d78744834122555f59b4114ef6b2f7e6ed200e48a9ebc38ea55f1e996e2f788",
-      "gitBlobSha": "ffb2c262d1aea31f7d958ecb1f9b61fc73f2b5e3"
+      "bytes": 27213,
+      "sha256": "96868fa6f05ae149241f4ad0dca90cf34dd31edb2ec79b7802eac47e6d1162ef",
+      "gitBlobSha": "550b6f18fa7021d3b8058189801731d6fbfdf4a2"
     },
     {
       "path": "project/DECISION_037.md",
@@ -1374,6 +1374,12 @@
       "gitBlobSha": "1af356a69a63592936b765e863375e92510d536c"
     },
     {
+      "path": "project/DECISION_088.md",
+      "bytes": 1542,
+      "sha256": "7daa3c9fa7435053ebbeec1ce2c9a0907db62207507196feb3c7d3c6a29d1f28",
+      "gitBlobSha": "da233fb55d455b851d28cab57dbfdf98c0c4d20f"
+    },
+    {
       "path": "project/GITHUB_SYNC_2026-10-09.md",
       "bytes": 1323,
       "sha256": "0a4eb78100ff50792905e92786400972c988bc6ce8465812e0ee8ed5f9ecfbeb",
@@ -1627,9 +1633,9 @@
     },
     {
       "path": "project/VALIDATED_2026-10-25.md",
-      "bytes": 2923,
-      "sha256": "0b065422413abaedb4371bc0ae44d4961b974b3f75cc8599255d8ad4929b8f57",
-      "gitBlobSha": "8fd94c3b07558f17593957f1aa82571d39c1d580"
+      "bytes": 3129,
+      "sha256": "e5bf9a99a6a33148695e9a2cb0de45a270a19b3364dda436f3d1e42ca1d91f0d",
+      "gitBlobSha": "47f63d912ce921b6ec99057f597e67a981151ddd"
     },
     {
       "path": "project/VALIDATION_2026-09-26.md",
@@ -1770,6 +1776,12 @@
       "gitBlobSha": "1edde4272c009a51224afddb5c24861a3d1d6734"
     },
     {
+      "path": "scripts/node-test-alias-loader.mjs",
+      "bytes": 1272,
+      "sha256": "a44248ba56a2c829dd214b1fb6c232ab525da3af11da3bbeef293e8035397b78",
+      "gitBlobSha": "c6b5e857bbb9da7328a3c60130863539171d99d1"
+    },
+    {
       "path": "scripts/package-recovery.py",
       "bytes": 3755,
       "sha256": "9acc5c9fcf4ec9c8d6651daef28ba142cf3db8bba93adbc86f83b3c318fbe2ed",
@@ -1792,6 +1804,12 @@
       "bytes": 6978,
       "sha256": "42fc9f1f7a19be6dc1b34780cb43c1ed82a325f25cb17f90dd2f10c36e829345",
       "gitBlobSha": "657b8d205c9acf53030c2e419d5f2a17694258a9"
+    },
+    {
+      "path": "scripts/register-test-loader.mjs",
+      "bytes": 183,
+      "sha256": "d17f104293e16c0dd242995549db40797d83bd60633fcaf235f51cb94aed6d53",
+      "gitBlobSha": "1f9b21caee020f8da0568a6458356a74ebf1503c"
     },
     {
       "path": "server.js",
@@ -1990,6 +2008,12 @@
       "bytes": 3561,
       "sha256": "9d8c622db5da0cef2e9f05249041e76cbdf31d7c06c45e8167ec0ba5afcb7421",
       "gitBlobSha": "78e8eb32fcd1f4b4da2f0915a5a1fc1ff8186cb5"
+    },
+    {
+      "path": "tests/node-test-alias-loader.test.mjs",
+      "bytes": 927,
+      "sha256": "f767e84c6c5254ec86ee6928f8ad1e5539dad1f4060d5453b0e82bed43fb7008",
+      "gitBlobSha": "0256acde17fab78d24c1d102d5007499238f94b5"
     },
     {
       "path": "tests/parser.test.mjs",

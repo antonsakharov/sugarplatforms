@@ -11,7 +11,7 @@
     "start": "node server.js",
     "lint": "node scripts/lint.mjs",
     "typecheck": "tsc --noEmit",
-    "test": "node --experimental-strip-types --test tests/*.test.mjs",
+    "test": "node --experimental-strip-types --import ./scripts/register-test-loader.mjs --test tests/*.test.mjs",
     "validate": "npm run typecheck && npm run lint && npm run test && npm run build",
     "baseline:check": "node scripts/check-baseline.mjs",
     "recovery:manifest": "node scripts/recovery-snapshot.mjs write . recovery-manifest.json",

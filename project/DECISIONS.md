@@ -221,3 +221,6 @@ Accept standard `/RunLengthDecode` (`/RL`) page-content and selected-font CMap s
 
 ## ADR-087 — Authentic npm lock recovery and transitive supply-chain gate (2026-10-25)
 **Status:** Accepted for recovery. Restore the published `better-sqlite3@12.10.1` and transitive SHA-512 records from a versioned third-party npm v3 lockfile (source commit `818a59e3b68fd377cda6f474b12dd1a44b64c6f2`), retain compatible pinned transitive versions, and fail closed on missing required packages, untrusted tarball URLs, invalid SRI or unpinned versions. `npm ci --offline --dry-run` checks lock consistency only; real install/build and live tenant security remain mandatory release gates. See `project/DECISION_087.md`.
+
+## ADR-088 — Dependency-free test-only ESM alias loader (2026-10-25)
+**Status:** Accepted for CI recovery. Node 22 native tests do not resolve Next.js/TypeScript `@/lib/*` aliases. Register a strictly scoped, traversal-rejecting `node:module` loader for `npm test` only, with dedicated regression tests; never alter production import resolution or relax security boundaries. See `project/DECISION_088.md`.
