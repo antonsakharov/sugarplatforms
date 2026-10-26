@@ -272,3 +272,11 @@ A feature is complete only when the intended user action works, tests exist, bui
 ### 2026-10-25 — CI audit determinism
 - [x] SEC-AUDIT-ORDER Stabilize SQLite deletion audit ordering for same-millisecond request/failure events and add a deterministic tie-break regression.
 - [!] SEC-LIVE Real authenticated non-BYPASSRLS two-tenant PostgreSQL, private object storage and malware scanner isolation remains a separate production release gate.
+
+### 2026-10-26 — Bounded PDF object-stream evidence
+- [x] PAR-005b13 Expand strictly indexed, direct-length Flate `/ObjStm` generation-zero dictionary objects with per-stream and aggregate limits.
+- [x] PAR-006b13 Preserve proven Catalog/Pages/Kids physical-page locators across compressed page-tree objects; reject malformed indexes, duplicate IDs, nested streams, and unprovable trees.
+- [x] PAR-005b13-TEST Add 11 positive/adversarial regression tests; 78 focused parser tests pass locally.
+- [-] PAR-005 Full PDF support remains in progress: xref/incremental revisions, complex object streams, inherited CMaps, OCR, and layout reconstruction require a production PDF adapter.
+- [!] SEC-LIVE Live authenticated non-BYPASSRLS PostgreSQL/private-storage/malware two-tenant certification remains unavailable.
+- [!] CI-20261026 Full dependency-backed CI must run on the new agent PR; the offline local runtime cannot fetch npm tarballs.

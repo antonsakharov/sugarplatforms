@@ -330,3 +330,6 @@ The MVP is complete when a user can:
 5. inspect evidence-backed findings;
 6. view an entity/ID map;
 7. generate an executive report.
+
+### 2026-10-26 — Bounded object-stream adapter
+The credential-free PDF parsing module may expand a strictly bounded Flate PDF 1.5 `/ObjStm` dictionary subset before existing page-tree/font resolution. Object IDs and byte offsets are validated; only Catalog/Pages/Kids-proven physical page coordinates become evidence. Unsupported xref revisions, object-stream variants, OCR, and layout reconstruction remain for the production PDF adapter. No new persistence schema, background job, UI or external service is required for this parsing slice.

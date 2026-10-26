@@ -120,3 +120,6 @@ The source baseline gate rejects npm lock entries with untrusted tarball origins
 
 ### 2026-10-25 — Local audit ordering
 SQLite deletion audit receipts now use `(created_at, rowid)` order, not UUID order, so request and outcome records sharing one millisecond are presented in insertion order. This is a local/single-instance determinism fix only; production PostgreSQL audit, non-`BYPASSRLS` tenant isolation and storage deletion guarantees still require live validation. See Decision 089.
+
+### PDF object-stream handling (2026-10-26)
+The local/demo parser expands only bounded, direct-length Flate `/ObjStm` dictionary objects with strict index/offset, duplicate-ID and aggregate caps; malformed, encrypted, nested, revisioned or unprovable structures fail closed. Verified page-tree references are required before emitting physical-page evidence. This does not replace a security-reviewed production PDF parser, malware scanning, tenant isolation, or upload restrictions. See Decision 090.

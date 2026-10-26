@@ -232,3 +232,6 @@ Review draft PR #56 (`agent/canonical-recovery-lockfile-2026-10-25`) rather than
 
 ### 2026-10-25 — Deterministic audit receipt tests
 `tests/assessment-lifecycle.test.mjs` includes an equal-timestamp audit regression with reverse UUID lexical order; SQLite must return request before failure using insertion order. Run it with `npm test` after real `npm ci`; the offline runner cannot load the native SQLite module. See Decision 089.
+
+### Bounded PDF 1.5 object streams (2026-10-26)
+The local/demo PDF adapter now expands Flate-compressed `/ObjStm` dictionary objects before verifying page references. Run `node --experimental-strip-types --import ./scripts/register-test-loader.mjs --test tests/pdf-object-streams.test.mjs tests/parser.test.mjs` for dependency-light checks. This subset rejects malformed indexes, nested streams, unsupported filters and unprovable page trees; it does not support arbitrary xref revisions or OCR. See `project/DECISION_090.md` and `project/VALIDATED_2026-10-26.md`. Production release still requires green networked CI and live tenant-isolation certification.

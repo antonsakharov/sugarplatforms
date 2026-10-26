@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
   "algorithm": "sha256+git-blob-sha1",
-  "fileCount": 373,
-  "totalBytes": 1356654,
-  "treeSha256": "8dc58e147f85543fcb46a3b6b5f51c6ee20422b3b4ad19646c569822a0936141",
+  "fileCount": 377,
+  "totalBytes": 1376137,
+  "treeSha256": "922a1ec5593b37db2c5b81c6b934ded2bd0e94292cc9b1f1f62fb78565bfea7f",
   "files": [
     {
       "path": ".env.example",
@@ -19,9 +19,9 @@
     },
     {
       "path": "DEVELOPMENT.md",
-      "bytes": 26571,
-      "sha256": "0fd04ac3053e46826b8627c1ec6e4c44612170a2dcd8745c2a57bf336419bb5c",
-      "gitBlobSha": "cca1aa71ab7f8840f0b0dd61d51c88e35482006b"
+      "bytes": 27231,
+      "sha256": "9bbfc414f3baae3c182f9beaad02c837e76c14771d82ed83b95fa6a5e7238fb0",
+      "gitBlobSha": "06d2dcfd73e8aeba986fc2dc212790dfb814a277"
     },
     {
       "path": "Dockerfile",
@@ -43,15 +43,15 @@
     },
     {
       "path": "README.md",
-      "bytes": 12563,
-      "sha256": "f785f68f031325dcbb47c37005c747e5983936da5469eee42c6cfdb5d036ef35",
-      "gitBlobSha": "d006451668f55231b4f84ab189044a974fd7f4b0"
+      "bytes": 12955,
+      "sha256": "fe15f847a734d528442d45d80ce12f968eeccbfe55b1474fd7dc7f749fb8fd6a",
+      "gitBlobSha": "7e2815a736305bbb287e75719f98a4aa9af68694"
     },
     {
       "path": "VALIDATION.md",
-      "bytes": 26355,
-      "sha256": "e421266a1f539fff2ceb3e2cf70be33bd7cf11b65863e3193fc280e034f76126",
-      "gitBlobSha": "a5af53631b0a3a9ec1146a20db40f96fab4ee3d0"
+      "bytes": 26809,
+      "sha256": "0b5f5e900c4a5806acdc98e624988434c5562a39875228a496b4c79aa8f176f8",
+      "gitBlobSha": "b13831a5adf999b82b66093c1606168ecd4b5b09"
     },
     {
       "path": "app/api/admin/deletion-jobs/reconcile/route.ts",
@@ -355,9 +355,9 @@
     },
     {
       "path": "docs/DELIVERY_PLAN.md",
-      "bytes": 10804,
-      "sha256": "09644f0c83bcb94e68acdee032e08b324e568d7dddcc951c21bcfc347f0c7710",
-      "gitBlobSha": "660c43a04ad84df5a5fec1e06eb17c76bc5f9729"
+      "bytes": 11282,
+      "sha256": "77b4ca28cff7752d57368aebbfb4538c42f822fd055e468eb001d3c491b9f3fa",
+      "gitBlobSha": "007408bd369e954cba4c5e0b5709e25daba34c62"
     },
     {
       "path": "docs/DEMO_SCENARIO.md",
@@ -391,9 +391,9 @@
     },
     {
       "path": "docs/FEATURES.md",
-      "bytes": 23603,
-      "sha256": "1efb3fad67394208ddfbe69708a1bb17650a7992dde49688d173be89937791f3",
-      "gitBlobSha": "b73c2670570b6eba34f5d996545954966bc2dd9e"
+      "bytes": 23833,
+      "sha256": "a77ee20e3bcc03a11957719d51bac6509ff1893ab7f021c5f720ead77413f5ec",
+      "gitBlobSha": "6529325ccb5a2bfe9beb971601aaca7fe9eeb313"
     },
     {
       "path": "docs/FINDING_REVIEW_PERSISTENCE.md",
@@ -541,15 +541,15 @@
     },
     {
       "path": "docs/SECURITY_AND_PRIVACY.md",
-      "bytes": 11717,
-      "sha256": "f04e53456a494d0b38977cdb11684308e311436a2df134684fddfe969b20e713",
-      "gitBlobSha": "3018d6a1adbb070e7b0ec510073e888ccf995261"
+      "bytes": 12219,
+      "sha256": "718b841356d235471e840aac26874c31a0d705dc31f74cf7c857d6b8cd890440",
+      "gitBlobSha": "aeec049148ca849533243a6a821bada58fda0931"
     },
     {
       "path": "docs/SYSTEM_DESIGN.md",
-      "bytes": 7277,
-      "sha256": "96a480534182edd9fa22e221b62c513019e42999af832513b0c22155588e291b",
-      "gitBlobSha": "0aa4e8a127e4d2f6581b53995d919bf52df9e582"
+      "bytes": 7822,
+      "sha256": "eef898d78ac0925ca82aceea54bdc55c401d39db40091b3e689cef0e4285a63f",
+      "gitBlobSha": "223a3aa1ea1b16df03141bec013b06a9a7ff83f8"
     },
     {
       "path": "docs/TENANCY.md",
@@ -583,9 +583,9 @@
     },
     {
       "path": "lib/artifact-parser.ts",
-      "bytes": 16432,
-      "sha256": "df5312e83cb78bcf11c3bb066ca00a9d40e468063ecfad7c906acb060d4367ed",
-      "gitBlobSha": "2b3eff14a824de1caef252091487f6bd74917557"
+      "bytes": 16722,
+      "sha256": "c3f957595ec9917dffb2f578f6f3b19afc1a464faae8ddb87c988fc60ac88ecf",
+      "gitBlobSha": "5fc0a26119f1730b05958d084a866ac784177e3e"
     },
     {
       "path": "lib/artifact-storage.ts",
@@ -742,6 +742,12 @@
       "bytes": 3088,
       "sha256": "e1eae46e059c26ca70b9b127c8e4a26a123d3b911806b0033a73857c3b0a80c2",
       "gitBlobSha": "2927021b293560a2de68f917f092fa244ce0a0a3"
+    },
+    {
+      "path": "lib/pdf-object-streams.ts",
+      "bytes": 3958,
+      "sha256": "b1b3b3c5c48ff7bfc3d7dc07333b858b73502646de6ea00b660acf59c69df8d2",
+      "gitBlobSha": "4238f9ed7fc5d8f914d00a3050aca01f0c0fb659"
     },
     {
       "path": "lib/pdf-page-tree.ts",
@@ -1051,15 +1057,15 @@
     },
     {
       "path": "project/BACKLOG.md",
-      "bytes": 27006,
-      "sha256": "dba1cf67b9c1639c3996d33075602b5acda1d0ffc25532008dc444eabe1e35a0",
-      "gitBlobSha": "cac5d51aced6a5e13a57125a2592125e4836ce8d"
+      "bytes": 27945,
+      "sha256": "8410553273ee3cc9c7bfe769b16bf87dedcdbb22382ed2102d3fd438561f6d92",
+      "gitBlobSha": "edba29df76ebf7035a0b20fa9d26ba5c8043bc9c"
     },
     {
       "path": "project/BUILD_STATUS.md",
-      "bytes": 4325,
-      "sha256": "7d63000442fef92ebbb942027091f5b33f2d24cffa0bbab7803e2e6f62560cff",
-      "gitBlobSha": "11895f9f3a58877de201cb535548584fc8b838d4"
+      "bytes": 4676,
+      "sha256": "9bd89643119e8243cf5f3b4459b3451a43850dac02235c22b70f6e73cc573604",
+      "gitBlobSha": "362c50024752ef95a480b16f5c7e8a4b8605f450"
     },
     {
       "path": "project/DAILY_BUILD_PROTOCOL.md",
@@ -1069,9 +1075,9 @@
     },
     {
       "path": "project/DECISIONS.md",
-      "bytes": 27655,
-      "sha256": "b7dff6d33a5319566e71bf5eb38cb99eecbc208f1f279c3c3e444f3769fcc77c",
-      "gitBlobSha": "bd46b1cbf3d7070a0019cbafaba3ce23dcaf4584"
+      "bytes": 28141,
+      "sha256": "76b9e0b6ad99f700674282cc7c9a5d95c7d2486c2b64c31a028a73223fe80f5a",
+      "gitBlobSha": "5e2b64c69ba4539e9be59484e63948ee6d4970ec"
     },
     {
       "path": "project/DECISION_037.md",
@@ -1386,6 +1392,12 @@
       "gitBlobSha": "1191f87782e5d9561033e57d1f0146ce25a209dd"
     },
     {
+      "path": "project/DECISION_090.md",
+      "bytes": 2303,
+      "sha256": "0cc925349fb9575bfc55f1ca10d0542a1b413d1d99e115e981cbf20039b51aa9",
+      "gitBlobSha": "01abc02e5445904b19522abeb425af29ac6ea055"
+    },
+    {
       "path": "project/GITHUB_SYNC_2026-10-09.md",
       "bytes": 1323,
       "sha256": "0a4eb78100ff50792905e92786400972c988bc6ce8465812e0ee8ed5f9ecfbeb",
@@ -1642,6 +1654,12 @@
       "bytes": 4870,
       "sha256": "c98c8d4bd3e0c244533edb2faa544a6821dbe265db48c3f77ddf85545d218736",
       "gitBlobSha": "372486584396193381934245b544410890323025"
+    },
+    {
+      "path": "project/VALIDATED_2026-10-26.md",
+      "bytes": 1927,
+      "sha256": "781428bd289dd0cacf182538da191e9002008f92ad68bb1149429625edf69ba5",
+      "gitBlobSha": "cb66e340e1cedeb335d44bb182698dbb9d8e7c77"
     },
     {
       "path": "project/VALIDATION_2026-09-26.md",
@@ -2050,6 +2068,12 @@
       "bytes": 6314,
       "sha256": "1a7d427bbb3cce45abda9a7158b62510a28453040cc81a4cb8e326f3fce5fa47",
       "gitBlobSha": "31e6411f0166fa4233812b659ba9de50565f0d83"
+    },
+    {
+      "path": "tests/pdf-object-streams.test.mjs",
+      "bytes": 5968,
+      "sha256": "35a6db26202bb228b12de223bbc545e7142c9312f61146be55d46b2b68dd4b33",
+      "gitBlobSha": "523c8be1a9f3f9a30f88534d6c7d1c75829079c4"
     },
     {
       "path": "tests/pdf-png-predictor.test.mjs",

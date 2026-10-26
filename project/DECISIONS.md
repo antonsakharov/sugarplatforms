@@ -227,3 +227,6 @@ Accept standard `/RunLengthDecode` (`/RL`) page-content and selected-font CMap s
 
 ## ADR-089 — Stable same-millisecond SQLite audit ordering (2026-10-25)
 **Status:** Accepted. Local SQLite audit queries order by timestamp and insertion `rowid`, never random UUID, so a deletion request precedes its completion/failure receipt even when timestamps tie. Regression coverage forces equal timestamps and reverse UUID ordering. This does not certify managed PostgreSQL or live tenant isolation. See `project/DECISION_089.md`.
+
+## ADR-090 — Bounded Flate PDF object-stream expansion (2026-10-26)
+**Status:** Accepted for local/demo parsing. Expand only strictly indexed, direct-length Flate `/ObjStm` streams containing generation-zero dictionary objects, with hard encoded/decoded byte and object-count caps, duplicate-ID rejection and proven page-tree evidence. Unsupported or unprovable structures fail closed. See `project/DECISION_090.md`. This does not certify production PDF/OCR or live tenant security.

@@ -4,6 +4,7 @@ import { extractPdfText, MAX_PDF_DECODED_STREAM_BYTES } from "./pdf-text-operand
 import { orderedPdfPageRefs } from "./pdf-page-tree.ts";
 import { pdfPageFontMaps } from "./pdf-font-resources.ts";
 import { decodePdfStream } from "./pdf-stream-filters.ts";
+import { expandPdfObjectStreams } from "./pdf-object-streams.ts";
 
 export type ParserKind =
   | "text"
@@ -200,8 +201,12 @@ function parsePdf(name: string, bytes: Uint8Array, artifactId: string) {
   if (!raw.startsWith("%PDF-")) throw new Error(`Unable to parse ${name} as PDF: PDF header is missing.`);
   if (/\/Encrypt\b/.test(raw)) throw new Error(`Unable to parse ${name} as PDF: encrypted PDFs are not supported.`);
 
-  const objects = pdfObjects(raw);
+  const directObjects = pdfObjects(raw);
+  const objects = expandPdfObjectStreams(directObjects);
   const pageRefs = orderedPdfPageRefs(objects);
+  if (objects !== directObjects && pageRefs === null) {
+    throw new Error(`Unable to parse ${name} as PDF: object streams require a provable page tree.`);
+  }
   const segments: SourceSegment[] = [];
   let encounteredUnsupportedStream = false;
 

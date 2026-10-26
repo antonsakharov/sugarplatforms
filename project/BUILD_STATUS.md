@@ -52,3 +52,6 @@ Local focused checks: 99/99 pass; full suite: 200 pass, 24 fail (missing npm pac
 GitHub: `agent/canonical-baseline-gate-2026-10-15` created from the October 14 recovery branch; a reduced baseline checker and ADR-077 were published. Connected write-safety blocked publishing the full local implementation and creating a draft PR. Branch is incomplete and not merge-ready. No deployment.
 
 Next: restore the complete October 15 backup on a reviewable agent branch, regenerate the lockfile with real registry metadata, then certify npm ci, full build/type/lint/tests and live two-tenant isolation before resuming broader PDF font/OCR support.
+
+### 2026-10-26 — PAR-005b13 local PDF object-stream support
+Implemented and locally validated strict Flate `/ObjStm` dictionary expansion with verified page evidence (Decision 090). Focused PDF tests pass; full dependency-backed validation must be run in GitHub Actions. Live non-BYPASSRLS tenant isolation remains blocked. No deployment or merge.

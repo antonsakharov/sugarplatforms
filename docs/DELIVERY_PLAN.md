@@ -123,3 +123,6 @@ The native SQLite lockfile gap is resolved at the pinned metadata level using pu
 
 ### 2026-10-25 — Canonical recovery and dependency CI milestone
 A complete hash-verified source snapshot is published on draft PR #56, and networked GitHub Actions passed clean `npm ci`, TypeScript, lint, all **366 tests**, and Next.js production build. This resolves the canonical publication and dependency-backed CI blockers. Production deployment and merging remain prohibited until real authenticated non-`BYPASSRLS` two-tenant PostgreSQL/private storage/malware isolation and operational controls are certified. PDF production adapter coverage remains a separate feature gap.
+
+### 2026-10-26 — PAR-005 bounded object-stream slice
+Implemented a credential-free local PDF 1.5 Flate `/ObjStm` expansion path for page-tree and resource dictionaries before provenance validation. Scope remains one focused assessment, one primary entity, 10 artifacts, 25 MB per file, and 150 measurable pages. Full xref/incremental PDF, OCR/layout, managed tenant-isolation certification, and release security remain open. See Decision 090 and the dated validation record.
