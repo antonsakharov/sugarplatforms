@@ -230,3 +230,6 @@ Accept standard `/RunLengthDecode` (`/RL`) page-content and selected-font CMap s
 
 ## ADR-090 — Bounded Flate PDF object-stream expansion (2026-10-26)
 **Status:** Accepted for local/demo parsing. Expand only strictly indexed, direct-length Flate `/ObjStm` streams containing generation-zero dictionary objects, with hard encoded/decoded byte and object-count caps, duplicate-ID rejection and proven page-tree evidence. Unsupported or unprovable structures fail closed. See `project/DECISION_090.md`. This does not certify production PDF/OCR or live tenant security.
+
+## ADR-091 — Strict bounded PDF xref stream verification (2026-10-27)
+**Status:** Accepted for local/demo parsing. Require a unique final `startxref`, complete bounded Flate `/XRef` entries, exact physical offsets and compressed-object index parity, and a proven Root Catalog before accepting physical-page evidence. Reject hybrid/incremental revisions and unsupported tables/filters. No MVP scope expansion or production security certification. See `project/DECISION_091.md`.

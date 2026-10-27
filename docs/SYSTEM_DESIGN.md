@@ -333,3 +333,6 @@ The MVP is complete when a user can:
 
 ### 2026-10-26 — Bounded object-stream adapter
 The credential-free PDF parsing module may expand a strictly bounded Flate PDF 1.5 `/ObjStm` dictionary subset before existing page-tree/font resolution. Object IDs and byte offsets are validated; only Catalog/Pages/Kids-proven physical page coordinates become evidence. Unsupported xref revisions, object-stream variants, OCR, and layout reconstruction remain for the production PDF adapter. No new persistence schema, background job, UI or external service is required for this parsing slice.
+
+### PDF xref provenance gate (Decision 091, 2026-10-27)
+The bounded parser validates one complete Flate `/XRef` stream against raw direct-object byte offsets and `/ObjStm` indexes before traversing Catalog/Pages/Kids. Xref evidence never substitutes for page-tree verification. Unsupported or revisioned xrefs fail closed. This is local/demo coverage, not a production-grade PDF engine.

@@ -123,3 +123,6 @@ SQLite deletion audit receipts now use `(created_at, rowid)` order, not UUID ord
 
 ### PDF object-stream handling (2026-10-26)
 The local/demo parser expands only bounded, direct-length Flate `/ObjStm` dictionary objects with strict index/offset, duplicate-ID and aggregate caps; malformed, encrypted, nested, revisioned or unprovable structures fail closed. Verified page-tree references are required before emitting physical-page evidence. This does not replace a security-reviewed production PDF parser, malware scanning, tenant isolation, or upload restrictions. See Decision 090.
+
+### 2026-10-27 — PDF cross-reference trust boundary
+The local/demo PDF parser accepts only one bounded, complete, non-revisioned Flate xref stream. It verifies `startxref`, physical offsets, compressed object indexes, root Catalog, entry coverage, and byte budgets before attributing physical-page evidence. Unsupported classic/hybrid/incremental structures fail closed. This does not relax malware quarantine, tenant authorization, upload limits, prohibited-data scanning, or live production isolation requirements (Decision 091).

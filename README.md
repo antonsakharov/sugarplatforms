@@ -165,3 +165,6 @@ The complete approved application source is available for review on `agent/canon
 
 ### PDF parser increment — 2026-10-26
 The bounded local/demo PDF adapter now supports strictly indexed Flate PDF 1.5 object streams containing generation-zero dictionaries, preserving verified physical-page evidence for supported architecture documents. Complex PDF/xref revisions and OCR still require a production parser; see Decision 090. This is not production security certification.
+
+### 2026-10-27 — Bounded PDF cross-reference stream validation
+The local/demo parser verifies single, complete PDF 1.5 Flate xref streams against direct byte offsets and indexed compressed objects before trusting page evidence. Hybrid/incremental revisions, classic tables, arbitrary PDFs and OCR still require a production PDF adapter. See Decision 091; MVP upload and privacy limits are unchanged.

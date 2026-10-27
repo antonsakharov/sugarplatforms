@@ -280,3 +280,10 @@ A feature is complete only when the intended user action works, tests exist, bui
 - [-] PAR-005 Full PDF support remains in progress: xref/incremental revisions, complex object streams, inherited CMaps, OCR, and layout reconstruction require a production PDF adapter.
 - [!] SEC-LIVE Live authenticated non-BYPASSRLS PostgreSQL/private-storage/malware two-tenant certification remains unavailable.
 - [!] CI-20261026 Full dependency-backed CI must run on the new agent PR; the offline local runtime cannot fetch npm tarballs.
+
+### 2026-10-27 — PDF xref stream evidence integrity
+- [x] PAR-005b14 Verify a single complete Flate `/XRef` stream, `startxref` byte offset, type 0/1/2 entries, `/Root` Catalog, and compressed-object indexes before page evidence.
+- [x] PAR-005b14-TEST Add 10 adversarial/positive regression tests for offsets, indexes, revisions, unsupported parameters, and legacy demo compatibility.
+- [-] PAR-005 Production-grade PDF parsing remains in progress: classic xref tables, incremental revisions, complex fonts, OCR, and layout require further work.
+- [ ] PAR-005b15 Next: bounded classic xref-table integrity validation, with no inferred page evidence.
+- [!] SEC-LIVE Live non-BYPASSRLS two-tenant managed database/storage/scanner certification requires provisioned infrastructure.

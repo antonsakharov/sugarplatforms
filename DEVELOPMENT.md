@@ -235,3 +235,6 @@ Review draft PR #56 (`agent/canonical-recovery-lockfile-2026-10-25`) rather than
 
 ### Bounded PDF 1.5 object streams (2026-10-26)
 The local/demo PDF adapter now expands Flate-compressed `/ObjStm` dictionary objects before verifying page references. Run `node --experimental-strip-types --import ./scripts/register-test-loader.mjs --test tests/pdf-object-streams.test.mjs tests/parser.test.mjs` for dependency-light checks. This subset rejects malformed indexes, nested streams, unsupported filters and unprovable page trees; it does not support arbitrary xref revisions or OCR. See `project/DECISION_090.md` and `project/VALIDATED_2026-10-26.md`. Production release still requires green networked CI and live tenant-isolation certification.
+
+### PDF xref stream regression checks (2026-10-27)
+Run `node --experimental-strip-types --import ./scripts/register-test-loader.mjs --test tests/pdf-xref-stream.test.mjs tests/pdf-object-streams.test.mjs tests/parser.test.mjs tests/pdf-page-tree.test.mjs`. This verifies a bounded single-Flate PDF 1.5 xref stream, including compressed-object index parity and fail-closed revision handling. Then run `npm run baseline:check && npm run lint && npm run validate` on a networked host after `npm ci`. This local/demo subset does not support classic/hybrid/incremental xrefs or OCR.

@@ -225,3 +225,6 @@ See `project/VALIDATED_2026-10-24.md` for command-level results. The decoder add
 
 ### 2026-10-26 — PDF object-stream increment
 Decision 090 adds bounded Flate `/ObjStm` expansion and 11 adversarial/positive tests. Focused parser suites: 78/78 passed; baseline, lint and 19 JSON schema syntax checks passed. Offline full suite: 282 passed, 24 missing-dependency failures; full typecheck/build blocked by unavailable npm packages. See `project/VALIDATED_2026-10-26.md`. No production deployment or live tenant-isolation certification.
+
+### 2026-10-27 — PDF cross-reference stream integrity
+PAR-005b14 adds 10 xref regression cases and strict physical offset/compressed index verification (Decision 091). Focused PDF suites: 66/66 passed locally; baseline and lint passed. Full local tests remain dependency-blocked (24 module-resolution failures); npm offline install lacks the `zod` tarball, so typecheck/build and live tenant isolation remain unverified here. See `project/VALIDATED_2026-10-27.md`.

@@ -126,3 +126,6 @@ A complete hash-verified source snapshot is published on draft PR #56, and netwo
 
 ### 2026-10-26 — PAR-005 bounded object-stream slice
 Implemented a credential-free local PDF 1.5 Flate `/ObjStm` expansion path for page-tree and resource dictionaries before provenance validation. Scope remains one focused assessment, one primary entity, 10 artifacts, 25 MB per file, and 150 measurable pages. Full xref/incremental PDF, OCR/layout, managed tenant-isolation certification, and release security remain open. See Decision 090 and the dated validation record.
+
+### 2026-10-27 — PDF xref stream integrity
+Phase 3 now checks supported PDF 1.5 xref streams and compressed-object indexes before page-evidence extraction. Classic xref tables, hybrid/incremental revisions, arbitrary font/layout/OCR support, and live two-tenant production certification remain outstanding. The next unblocked parser slice is PAR-005b15 (bounded classic xref-table integrity).

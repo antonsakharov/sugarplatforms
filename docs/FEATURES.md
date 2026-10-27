@@ -151,3 +151,6 @@ GitHub Actions now reaches dependency-backed validation after a successful `npm 
 
 ### 2026-10-25 — Networked CI green
 GitHub Actions on the complete canonical recovery draft PR passed real `npm ci`, TypeScript, lint, **366/366 tests**, and Next.js build. Source parity is verified on the review branch. This is **not production security certification**: live authenticated tenant isolation, managed storage and malware scanning integration remain open, and the bounded local PDF parser does not cover arbitrary PDFs. PR #56 remains draft; no merge/deploy.
+
+### 2026-10-27 — PAR-005b14: PDF xref stream validation
+Status: **implemented for bounded local/demo parsing; production PDF parsing remains in progress**. A complete, single Flate PDF 1.5 xref stream is checked against direct object offsets and compressed `/ObjStm` indexes before physical-page evidence is accepted. Invalid or revisioned xrefs fail closed. The existing assessment → upload → extraction review → diagnostics → evidence → map → report journey and MVP limits are unchanged. See Decision 091.
