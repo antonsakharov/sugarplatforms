@@ -1,0 +1,26 @@
+Sugar Platform Diagnostic - GreenGeeks staging deployment
+Target: https://sugarplatforms.com/diagnostics
+Node: 20.20.2
+Application root: /home/sugarpla/sugarplatform
+Startup file: server.js
+
+1. Upload/extract this ZIP into /home/sugarpla/sugarplatform (do not create a second nested folder).
+2. In cPanel Node.js app environment variables set:
+   NODE_ENV=production
+   NEXT_PUBLIC_APP_URL=https://sugarplatforms.com/diagnostics
+   NEXT_PUBLIC_BASE_PATH=/diagnostics
+   AUTH_PROVIDER=local
+   PERSISTENCE_PROVIDER=sqlite
+   ARTIFACT_STORAGE_PROVIDER=local
+   NEXT_PUBLIC_DEMO_MODE=true
+   LOCAL_AUTH_ENABLED=true
+   ASSESSMENT_DB_PATH=.data/sugar-platform-diagnostic.sqlite
+   PRIVATE_ARTIFACT_ROOT=.data/private-artifacts
+3. Activate the Node virtual environment shown by cPanel and cd /home/sugarpla/sugarplatform.
+4. Run:
+   npm install
+   NEXT_PUBLIC_BASE_PATH=/diagnostics NEXT_PUBLIC_APP_URL=https://sugarplatforms.com/diagnostics npm run build
+5. In cPanel click Restart/Start App.
+6. Check https://sugarplatforms.com/diagnostics/api/health then /diagnostics/sample.
+
+This configuration is staging/demo only. Do not upload confidential customer data until managed auth/PostgreSQL/private storage and live tenant-isolation certification are complete.
