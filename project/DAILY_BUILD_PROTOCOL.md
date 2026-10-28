@@ -37,3 +37,7 @@ The Acme sample remains functional, but sample-only polish must not displace the
 - No silent merge of ambiguous architecture objects.
 - No completion claim when validation fails.
 - No production deployment from the daily task.
+
+## Canonical repository recovery note (2026-10-28)
+
+If required baseline files are missing from `main`, restore the last approved complete recovery snapshot on a dedicated review branch, preserve the default branch unchanged, and verify all published source hashes. A passing draft-branch CI workflow is not production tenant-isolation certification. Do not merge or deploy automatically.

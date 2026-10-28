@@ -238,3 +238,13 @@ The local/demo PDF adapter now expands Flate-compressed `/ObjStm` dictionary obj
 
 ### PDF xref stream regression checks (2026-10-27)
 Run `node --experimental-strip-types --import ./scripts/register-test-loader.mjs --test tests/pdf-xref-stream.test.mjs tests/pdf-object-streams.test.mjs tests/parser.test.mjs tests/pdf-page-tree.test.mjs`. This verifies a bounded single-Flate PDF 1.5 xref stream, including compressed-object index parity and fail-closed revision handling. Then run `npm run baseline:check && npm run lint && npm run validate` on a networked host after `npm ci`. This local/demo subset does not support classic/hybrid/incremental xrefs or OCR.
+
+## 2026-10-28 — Classic PDF xref table local regression
+
+The credential-free local/demo parser now validates complete classic PDF xref tables (Decision 092) as well as bounded PDF 1.5 xref streams. Run focused coverage with:
+
+```bash
+node --experimental-strip-types --import ./scripts/register-test-loader.mjs --test tests/pdf-xref-table.test.mjs tests/pdf-xref-stream.test.mjs tests/pdf-object-streams.test.mjs tests/parser.test.mjs tests/pdf-page-tree.test.mjs
+```
+
+Classic trailer support currently permits only `/Size` and `/Root`; metadata-heavy, hybrid, revisioned, encrypted, scanned, or complex-layout PDFs still require a security-reviewed production parser. Never bypass the existing upload readiness, malware quarantine, evidence review, or tenant isolation checks. Use `npm ci --no-audit --no-fund && npm run validate` in a networked Node 22 environment for release-branch certification; live two-tenant integration is not covered by local fixtures.

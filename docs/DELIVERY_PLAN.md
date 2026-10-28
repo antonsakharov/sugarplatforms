@@ -129,3 +129,7 @@ Implemented a credential-free local PDF 1.5 Flate `/ObjStm` expansion path for p
 
 ### 2026-10-27 — PDF xref stream integrity
 Phase 3 now checks supported PDF 1.5 xref streams and compressed-object indexes before page-evidence extraction. Classic xref tables, hybrid/incremental revisions, arbitrary font/layout/OCR support, and live two-tenant production certification remain outstanding. The next unblocked parser slice is PAR-005b15 (bounded classic xref-table integrity).
+
+### 2026-10-28 — PAR-005b15 bounded classic PDF xref tables
+
+Implemented in the local/demo parser with fixed-width xref entries, contiguous full table coverage, exact physical offsets, direct Catalog validation, and fail-closed hybrid/revision handling. Regression tests cover valid LF/CRLF tables and invalid offsets, generations, free entries, missing objects, trailers, and unproven page trees. No new API, database migration, UI, background job, or external provider is required; the existing upload-to-evidence flow benefits directly. Production-grade PDF/OCR and live authenticated tenant/storage/scanner certification remain separate release gates. Next parsing increment: PAR-005b16 trailer `/Info`/`/ID` compatibility.

@@ -77,7 +77,7 @@ test("type 2 xref entries verify compressed page-tree objects and page provenanc
 test("incorrect startxref, repeated revisions and classic xref tables fail closed", () => {
   reject(pdf({ startxref: 7 }), /startxref/);
   reject(pdf({ suffix: "startxref\n1\n%%EOF\n" }), /revisions/);
-  reject(Buffer.from("%PDF-1.5\nxref\n0 1\n0000000000 65535 f\nstartxref\n9\n%%EOF", "latin1"));
+  reject(Buffer.from("%PDF-1.5\nxref\n0 1\n0000000000 65535 f\nstartxref\n9\n%%EOF", "latin1"), /cross-reference table/);
 });
 
 test("hybrid and incremental xref pointers are rejected", () => {

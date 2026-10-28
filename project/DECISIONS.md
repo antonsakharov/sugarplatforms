@@ -233,3 +233,6 @@ Accept standard `/RunLengthDecode` (`/RL`) page-content and selected-font CMap s
 
 ## ADR-091 — Strict bounded PDF xref stream verification (2026-10-27)
 **Status:** Accepted for local/demo parsing. Require a unique final `startxref`, complete bounded Flate `/XRef` entries, exact physical offsets and compressed-object index parity, and a proven Root Catalog before accepting physical-page evidence. Reject hybrid/incremental revisions and unsupported tables/filters. No MVP scope expansion or production security certification. See `project/DECISION_091.md`.
+
+## ADR-092 — Bounded classic PDF cross-reference tables (2026-10-28)
+**Status:** Accepted for local/demo parsing. Accept a single complete classic xref table with exact `startxref` byte offset, fixed-width entries, generation-zero live objects, contiguous full object coverage, a direct Root Catalog, and 96 KiB/4,096-entry bounds. Reject hybrid/incremental revisions, compressed objects, ambiguous trailer metadata, and unsupported object generations. Physical-page evidence still requires a separately proven page tree. See `project/DECISION_092.md`.

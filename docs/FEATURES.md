@@ -154,3 +154,7 @@ GitHub Actions on the complete canonical recovery draft PR passed real `npm ci`,
 
 ### 2026-10-27 — PAR-005b14: PDF xref stream validation
 Status: **implemented for bounded local/demo parsing; production PDF parsing remains in progress**. A complete, single Flate PDF 1.5 xref stream is checked against direct object offsets and compressed `/ObjStm` indexes before physical-page evidence is accepted. Invalid or revisioned xrefs fail closed. The existing assessment → upload → extraction review → diagnostics → evidence → map → report journey and MVP limits are unchanged. See Decision 091.
+
+### 2026-10-28 — PAR-005b15: bounded classic PDF xref table validation
+
+Status: **implemented and regression-tested in the local/demo adapter; production PDF certification remains in progress**. Single complete classic `xref` tables with exact `startxref` physical offsets, fixed-width records, contiguous full coverage, and a direct Root Catalog are now validated before extracting physical-page evidence. Invalid offsets, orphaned objects, nonzero live generations, hybrid/incremental revisions, and unsupported trailer fields fail closed. Existing xref-stream support and xref-free legacy demo fixtures remain functional. No MVP scope, upload/privacy, tenancy, or evidence-policy expansion. See Decision 092.

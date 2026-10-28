@@ -6,6 +6,7 @@ import { pdfPageFontMaps } from "./pdf-font-resources.ts";
 import { decodePdfStream } from "./pdf-stream-filters.ts";
 import { expandPdfObjectStreams } from "./pdf-object-streams.ts";
 import { validatePdfXrefStream } from "./pdf-xref-stream.ts";
+import { validatePdfXrefTable } from "./pdf-xref-table.ts";
 
 export type ParserKind =
   | "text"
@@ -204,7 +205,9 @@ function parsePdf(name: string, bytes: Uint8Array, artifactId: string) {
 
   const directObjects = pdfObjects(raw);
   const objects = expandPdfObjectStreams(directObjects);
-  validatePdfXrefStream(raw, directObjects, objects);
+  if (!validatePdfXrefTable(raw, directObjects, objects)) {
+    validatePdfXrefStream(raw, directObjects, objects);
+  }
   const pageRefs = orderedPdfPageRefs(objects);
   if (objects !== directObjects && pageRefs === null) {
     throw new Error(`Unable to parse ${name} as PDF: object streams require a provable page tree.`);

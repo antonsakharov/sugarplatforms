@@ -168,3 +168,7 @@ The bounded local/demo PDF adapter now supports strictly indexed Flate PDF 1.5 o
 
 ### 2026-10-27 — Bounded PDF cross-reference stream validation
 The local/demo parser verifies single, complete PDF 1.5 Flate xref streams against direct byte offsets and indexed compressed objects before trusting page evidence. Hybrid/incremental revisions, classic tables, arbitrary PDFs and OCR still require a production PDF adapter. See Decision 091; MVP upload and privacy limits are unchanged.
+
+## Latest development increment (2026-10-28)
+
+PAR-005b15 adds bounded classic PDF cross-reference table integrity checks to the local/demo evidence parser. It verifies complete direct-object offsets and a Root Catalog before physical-page extraction, while preserving the existing PDF 1.5 xref-stream gate and rejecting ambiguous revisions (Decision 092). The full assessment-to-report flow remains available in the credential-free local adapter. Production PDF/OCR, live managed tenant/storage/scanner isolation, and confidential-data readiness remain open; no deployment is authorized by this increment.

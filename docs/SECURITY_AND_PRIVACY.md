@@ -126,3 +126,7 @@ The local/demo parser expands only bounded, direct-length Flate `/ObjStm` dictio
 
 ### 2026-10-27 — PDF cross-reference trust boundary
 The local/demo PDF parser accepts only one bounded, complete, non-revisioned Flate xref stream. It verifies `startxref`, physical offsets, compressed object indexes, root Catalog, entry coverage, and byte budgets before attributing physical-page evidence. Unsupported classic/hybrid/incremental structures fail closed. This does not relax malware quarantine, tenant authorization, upload limits, prohibited-data scanning, or live production isolation requirements (Decision 091).
+
+### 2026-10-28 — Classic PDF xref validation boundary
+
+The local/demo parser validates a single complete classic xref table against direct object offsets, a direct Root Catalog, and strict generation-zero/size limits before page evidence. It rejects incremental/hybrid revisions, compressed objects under a classic table, malformed trailers and unindexed objects. This reduces ambiguous evidence attribution but does not make the parser suitable for confidential production PDFs or replace malware quarantine, secret screening, authorization, tenant-scoped private storage, or live two-tenant certification. Existing 10-file/25-MB/150-page and architecture-metadata-only limits remain unchanged (Decision 092).

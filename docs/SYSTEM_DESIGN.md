@@ -336,3 +336,7 @@ The credential-free PDF parsing module may expand a strictly bounded Flate PDF 1
 
 ### PDF xref provenance gate (Decision 091, 2026-10-27)
 The bounded parser validates one complete Flate `/XRef` stream against raw direct-object byte offsets and `/ObjStm` indexes before traversing Catalog/Pages/Kids. Xref evidence never substitutes for page-tree verification. Unsupported or revisioned xrefs fail closed. This is local/demo coverage, not a production-grade PDF engine.
+
+### 2026-10-28 — Classic PDF cross-reference evidence gate
+
+The local PDF parsing adapter checks declared classic xref tables before page-tree traversal. One bounded complete table must prove physical byte offsets, generation-zero live objects, object coverage, and a direct Root Catalog. The existing xref-stream gate handles PDF 1.5 stream-based references. Unsupported revisions and hybrid structures fail closed; no new architecture object, page coordinate, or finding is inferred from an unverified reference. The upload, extraction-review, diagnostic, graph and report interfaces are unchanged (Decision 092).

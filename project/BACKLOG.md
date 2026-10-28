@@ -287,3 +287,10 @@ A feature is complete only when the intended user action works, tests exist, bui
 - [-] PAR-005 Production-grade PDF parsing remains in progress: classic xref tables, incremental revisions, complex fonts, OCR, and layout require further work.
 - [ ] PAR-005b15 Next: bounded classic xref-table integrity validation, with no inferred page evidence.
 - [!] SEC-LIVE Live non-BYPASSRLS two-tenant managed database/storage/scanner certification requires provisioned infrastructure.
+
+### 2026-10-28 — Classic PDF cross-reference integrity
+- [x] PAR-005b15 Validate a bounded complete classic `xref` table, physical `startxref` byte offset, live object offsets/generations, free entries, direct Root Catalog and contiguous subsections before accepting page evidence.
+- [x] Preserve PDF 1.5 xref-stream validation and legacy xref-free demo behavior; add malformed/revision/hybrid/CRLF/physical-page evidence regression coverage.
+- [-] PAR-005 Full production-grade PDF parsing remains in progress; OCR, layout, complex font mappings and broader xref/trailer/revision compatibility require further work.
+- [!] SEC-LIVE-TENANT Live authenticated non-bypass PostgreSQL/RLS, private-bucket, and malware-scanner isolation certification remains blocked on isolated infrastructure credentials.
+- [ ] PAR-005b16 Next: bounded classic xref trailer `/Info` and `/ID` metadata compatibility without weakening revision rejection or evidence provenance.
