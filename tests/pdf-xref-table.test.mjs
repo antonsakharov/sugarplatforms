@@ -12,6 +12,7 @@ function pdf(options = {}) {
   const objects = [
     [1, options.catalog ?? catalog], [2, pages], [3, page],
     [4, `<< /Length ${content.length} >> stream${eol}${content}${eol}endstream`],
+    ...(options.infoBody === undefined ? [] : [[5, options.infoBody]]),
   ];
   let raw = `%PDF-1.4${eol}`;
   const offsets = new Map();
@@ -108,4 +109,72 @@ test("a valid xref table never invents page evidence without a provable page tre
     () => parseArtifact("no-page-tree.pdf", pdf({ catalog: "<< /Type /Catalog >>" })),
     /catalog has no Pages reference/,
   );
+});
+
+
+const idPair = "/ID [<00112233445566778899AABBCCDDEEFF> <FFEEDDCCBBAA99887766554433221100>]";
+
+test("bounded ID metadata does not alter verified page evidence", () => {
+  for (const eol of ["\n", "\r\n"]) {
+    const result = parseArtifact("xref-with-id.pdf", pdf({ eol, trailerExtra: idPair }));
+    assert.equal(result.sourceSegments.length, 1);
+    assert.equal(result.sourceSegments[0].locator.page, 1);
+    assert.match(result.sourceSegments[0].content, /canonical Customer ID/);
+    assert.doesNotMatch(result.sourceSegments[0].content, /0011223344/);
+  }
+});
+
+test("Info metadata is a live generation-zero direct dictionary, not extracted evidence", () => {
+  const infoBody = "<< /Title (Internal design draft) /Producer (Sugar Diagnostic) >>";
+  for (const extra of [
+    "/Info 5 0 R " + idPair,
+    idPair + " /Info 5 0 R",
+    "/Info 5 0 R",
+  ]) {
+    const result = parseArtifact("xref-with-info.pdf", pdf({ infoBody, trailerExtra: extra }));
+    assert.equal(result.sourceSegments[0].locator.page, 1);
+    assert.doesNotMatch(result.sourceSegments[0].content, /Internal design draft|Sugar Diagnostic/);
+  }
+});
+
+test("Info must not point to free, missing, catalog, or content-stream objects", () => {
+  reject(pdf({ trailerExtra: "/Info 5 0 R" }), /Info trailer/);
+  reject(pdf({ trailerExtra: "/Info 1 0 R" }), /Info trailer/);
+  reject(pdf({ trailerExtra: "/Info 4 0 R" }), /Info trailer/);
+  reject(pdf({ infoBody: "<< /Title (metadata) >>", trailerExtra: "/Info 6 0 R" }), /Info trailer/);
+  reject(pdf({ infoBody: "<< /Type /Page >>", trailerExtra: "/Info 5 0 R" }), /Info trailer/);
+  reject(pdf({ infoBody: "<< /Title (metadata) >>", trailerExtra: "/Info 5 1 R" }), /Info trailer/);
+});
+
+test("malformed, duplicated, oversized and non-hex ID values fail closed", () => {
+  for (const extra of [
+    "/ID [<ABCD> <ABCD>]",
+    "/ID [<00112233445566778899AABBCCDDEEF> <00112233445566778899AABBCCDDEEFF>]",
+    "/ID [<00112233445566778899AABBCCDDEEFG> <00112233445566778899AABBCCDDEEFF>]",
+    "/ID [<" + "A".repeat(130) + "> <" + "B".repeat(130) + ">]",
+    "/ID [<00112233445566778899AABBCCDDEEFF>]",
+    idPair + " " + idPair,
+    idPair + " /ID [<00112233445566778899AABBCCDDEEFF> <00112233445566778899AABBCCDDEEFF>]",
+  ]) reject(pdf({ trailerExtra: extra }), /trailer/);
+});
+
+test("duplicate and unsupported trailer keys never bypass the strict parser", () => {
+  for (const extra of [
+    "/Info 5 0 R /Info 5 0 R",
+    "/Size 6",
+    "/Root 1 0 R",
+    "/Custom 123",
+    "/Info 5 0 R /Metadata 4 0 R",
+    "/ID []",
+  ]) reject(pdf({ infoBody: "<< /Title (metadata) >>", trailerExtra: extra }), /trailer/);
+});
+
+test("Info and ID compatibility never enables incremental, hybrid or encrypted PDFs", () => {
+  const infoBody = "<< /Title (metadata) >>";
+  for (const trailerExtra of [
+    "/Info 5 0 R " + idPair + " /Prev 12",
+    "/Info 5 0 R " + idPair + " /XRefStm 10",
+    "/Info 5 0 R " + idPair + " /Encrypt 4 0 R",
+  ]) reject(pdf({ infoBody, trailerExtra }), /incremental|encrypted/);
+  reject(pdf({ infoBody, trailerExtra: "/Info 5 0 R " + idPair, suffix: "startxref\n5\n%%EOF\n" }), /incremental/);
 });

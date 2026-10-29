@@ -130,3 +130,7 @@ The local/demo PDF parser accepts only one bounded, complete, non-revisioned Fla
 ### 2026-10-28 — Classic PDF xref validation boundary
 
 The local/demo parser validates a single complete classic xref table against direct object offsets, a direct Root Catalog, and strict generation-zero/size limits before page evidence. It rejects incremental/hybrid revisions, compressed objects under a classic table, malformed trailers and unindexed objects. This reduces ambiguous evidence attribution but does not make the parser suitable for confidential production PDFs or replace malware quarantine, secret screening, authorization, tenant-scoped private storage, or live two-tenant certification. Existing 10-file/25-MB/150-page and architecture-metadata-only limits remain unchanged (Decision 092).
+
+### 2026-10-29 — PDF trailer metadata safety
+
+The local PDF adapter checks classic `/Info` and `/ID` metadata only for structural validity. It does not copy titles, producers, document identifiers, or other trailer metadata into extracted objects, evidence, logs, findings, or reports. `/Info` must resolve to an indexed live direct dictionary, not a page, stream, or Catalog; `/ID` is two bounded hex strings, not a credential or identity token. Unknown keys, duplicate fields, malformed references, encryption, hybrid xrefs, and incremental revisions fail closed. Existing upload malware/secret scanning and MVP restrictions still apply; this is not production PDF/OCR or live tenant security certification.

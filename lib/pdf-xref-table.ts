@@ -10,11 +10,45 @@ function invalid(reason: string): never {
   throw new Error(`PDF cross-reference table is invalid or unsupported: ${reason}; use the production PDF adapter.`);
 }
 
-function uniqueInteger(dictionary: string, key: string): number | null {
-  const matches = [...dictionary.matchAll(new RegExp(`/${key}\\b\\s+(\\d+)(?=\\s|/|$)`, "g"))];
-  if (matches.length !== 1) return null;
-  const value = Number(matches[0][1]);
-  return Number.isSafeInteger(value) ? value : null;
+type ClassicTrailer = { size: number; root: string; info: string | null };
+
+/** Parse only a small, explicit trailer grammar; never extract or log metadata. */
+function parseClassicTrailer(body: string): ClassicTrailer {
+  const patterns: Record<string, RegExp> = {
+    Size: /^\/Size\s+(\d+)(?=\s|\/|$)/,
+    Root: /^\/Root\s+(\d+)\s+(\d+)\s+R(?=\s|\/|$)/,
+    Info: /^\/Info\s+(\d+)\s+(\d+)\s+R(?=\s|\/|$)/,
+    // Strict bounded hexadecimal byte strings (16–64 bytes each). Never
+    // interpret these identifiers as authentication or evidence material.
+    ID: /^\/ID\s*\[\s*<([0-9A-Fa-f]{32,128})>\s*<([0-9A-Fa-f]{32,128})>\s*\](?=\s|\/|$)/,
+  };
+  const fields = new Map<string, RegExpExecArray>();
+  let rest = body.trim();
+  while (rest.length > 0) {
+    const key = /^\/([A-Za-z]+)(?=\s|\/|\[|$)/.exec(rest)?.[1];
+    if (!key || !Object.hasOwn(patterns, key)) invalid("unsupported trailer dictionary fields");
+    if (fields.has(key)) invalid("duplicate trailer dictionary fields");
+    const match = patterns[key].exec(rest);
+    if (!match) invalid("malformed " + key + " trailer field");
+    fields.set(key, match);
+    rest = rest.slice(match[0].length).trimStart();
+  }
+  const sizeRaw = fields.get("Size")?.[1];
+  const rootMatch = fields.get("Root");
+  const size = sizeRaw === undefined ? NaN : Number(sizeRaw);
+  if (!Number.isSafeInteger(size) || size < 2 || size > MAX_XREF_ENTRIES ||
+      !rootMatch || rootMatch[2] !== "0" || !Number.isSafeInteger(Number(rootMatch[1])) || Number(rootMatch[1]) < 1) {
+    invalid("invalid Size or Root reference");
+  }
+  const infoMatch = fields.get("Info");
+  if (infoMatch && (infoMatch[2] !== "0" || !Number.isSafeInteger(Number(infoMatch[1])) || Number(infoMatch[1]) < 1)) {
+    invalid("invalid Info trailer reference");
+  }
+  return {
+    size,
+    root: rootMatch[1] + " 0",
+    info: infoMatch ? infoMatch[1] + " 0" : null,
+  };
 }
 
 function directOffsets(raw: string): Map<string, number> {
@@ -64,16 +98,7 @@ export function validatePdfXrefTable(
   const trailer = section.slice(trailerMatch.index).replace(/^\r?\n/, "");
   const trailerBody = /^trailer\r?\n\s*<<([\s\S]*?)>>\s*$/.exec(trailer)?.[1];
   if (trailerBody === undefined) invalid("malformed or repeated trailer dictionary");
-  const size = uniqueInteger(trailerBody, "Size");
-  const rootMatches = [...trailerBody.matchAll(/\/Root\s+(\d+)\s+(\d+)\s+R\b/g)];
-  if (size === null || size < 2 || size > MAX_XREF_ENTRIES || rootMatches.length !== 1 || rootMatches[0][2] !== "0") {
-    invalid("invalid Size or Root reference");
-  }
-  // A deliberately small trailer subset. Unknown metadata is not interpreted
-  // as trusted cross-reference data by the demo parser.
-  const otherTrailer = trailerBody.replace(/\/Size\s+\d+\b/, "").replace(/\/Root\s+\d+\s+0\s+R\b/, "").trim();
-  if (otherTrailer) invalid("unsupported trailer dictionary fields");
-  const root = `${rootMatches[0][1]} 0`;
+  const { size, root, info } = parseClassicTrailer(trailerBody);
   if (!/\/Type\s*\/Catalog\b/.test(directObjects.get(root)?.split(/\bstream\r?\n/, 1)[0] ?? "")) {
     invalid("unproven Root catalog");
   }
@@ -115,6 +140,14 @@ export function validatePdfXrefTable(
   }
   if (nextId !== size || live.size !== directObjects.size || !live.has(root)) {
     invalid("unindexed, missing, or orphaned objects");
+  }
+  if (info) {
+    const metadata = directObjects.get(info);
+    if (info === root || !live.has(info) || !metadata ||
+        !/^\s*<<[\s\S]*>>\s*$/.test(metadata) ||
+        /\bstream\b|\/Type\s*\/(?:Catalog|Pages|Page|XRef|ObjStm)\b/.test(metadata)) {
+      invalid("Info trailer must reference a live direct metadata dictionary");
+    }
   }
   return true;
 }

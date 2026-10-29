@@ -248,3 +248,7 @@ node --experimental-strip-types --import ./scripts/register-test-loader.mjs --te
 ```
 
 Classic trailer support currently permits only `/Size` and `/Root`; metadata-heavy, hybrid, revisioned, encrypted, scanned, or complex-layout PDFs still require a security-reviewed production parser. Never bypass the existing upload readiness, malware quarantine, evidence review, or tenant isolation checks. Use `npm ci --no-audit --no-fund && npm run validate` in a networked Node 22 environment for release-branch certification; live two-tenant integration is not covered by local fixtures.
+
+### 2026-10-29 — Classic PDF trailer metadata regression
+
+Run `node --experimental-strip-types --import ./scripts/register-test-loader.mjs --test tests/pdf-xref-table.test.mjs tests/pdf-xref-stream.test.mjs tests/pdf-object-streams.test.mjs tests/parser.test.mjs tests/pdf-page-tree.test.mjs` for bounded classic `/Info` and `/ID` validation and page-evidence regressions. This parser accepts only a single verified classic xref table, direct Info dictionary, and bounded hex ID pair. Metadata values are never extracted as evidence. Keep full `npm ci && npm run validate` and live authenticated two-tenant database/storage/scanner isolation as independent release gates. Do not merge or deploy from an incomplete draft branch.

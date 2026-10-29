@@ -294,3 +294,10 @@ A feature is complete only when the intended user action works, tests exist, bui
 - [-] PAR-005 Full production-grade PDF parsing remains in progress; OCR, layout, complex font mappings and broader xref/trailer/revision compatibility require further work.
 - [!] SEC-LIVE-TENANT Live authenticated non-bypass PostgreSQL/RLS, private-bucket, and malware-scanner isolation certification remains blocked on isolated infrastructure credentials.
 - [ ] PAR-005b16 Next: bounded classic xref trailer `/Info` and `/ID` metadata compatibility without weakening revision rejection or evidence provenance.
+
+### 2026-10-29 — Bounded classic trailer metadata compatibility
+- [x] PAR-005b16 Accept optional strictly bounded classic xref `/Info` and `/ID` metadata with unique keys, live generation-zero direct Info dictionary and 16–64-byte hexadecimal IDs.
+- [x] PAR-005b16-TEST Add six regression tests for evidence preservation, metadata non-extraction, invalid/free Info refs, malformed/duplicate IDs, unknown fields, and revision/encryption rejection.
+- [-] PAR-005/006 remain in progress: production PDF/OCR, complex fonts/layout, and additional structural compatibility remain unsupported.
+- [!] SEC-LIVE-TENANT Authenticated non-bypass PostgreSQL/RLS, private-bucket, and malware-scanner isolation certification requires provisioned services and credentials.
+- [ ] PAR-005b17 Next: validate bounded PDF trailer dictionaries with direct whitespace/comments while rejecting duplicate keys, untrusted nested metadata, and revisioned structures.

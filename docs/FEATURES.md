@@ -158,3 +158,7 @@ Status: **implemented for bounded local/demo parsing; production PDF parsing rem
 ### 2026-10-28 — PAR-005b15: bounded classic PDF xref table validation
 
 Status: **implemented and regression-tested in the local/demo adapter; production PDF certification remains in progress**. Single complete classic `xref` tables with exact `startxref` physical offsets, fixed-width records, contiguous full coverage, and a direct Root Catalog are now validated before extracting physical-page evidence. Invalid offsets, orphaned objects, nonzero live generations, hybrid/incremental revisions, and unsupported trailer fields fail closed. Existing xref-stream support and xref-free legacy demo fixtures remain functional. No MVP scope, upload/privacy, tenancy, or evidence-policy expansion. See Decision 092.
+
+### 2026-10-29 — PAR-005b16: Classic PDF trailer `/Info` and `/ID`
+
+Status: **implemented and locally regression-tested for the bounded PDF adapter; production PDF parsing remains in progress**. Valid single-revision classic xref PDFs may carry a direct, live, generation-zero `/Info` dictionary and two bounded hexadecimal `/ID` byte strings. The parser never promotes trailer metadata to evidence or a finding. Invalid, duplicated, unsupported, hybrid, encrypted, and incremental trailer constructs fail closed. Physical-page locators still require independently proven page-tree references. No MVP scope expansion; see Decision 093.

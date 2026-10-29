@@ -133,3 +133,7 @@ Phase 3 now checks supported PDF 1.5 xref streams and compressed-object indexes 
 ### 2026-10-28 — PAR-005b15 bounded classic PDF xref tables
 
 Implemented in the local/demo parser with fixed-width xref entries, contiguous full table coverage, exact physical offsets, direct Catalog validation, and fail-closed hybrid/revision handling. Regression tests cover valid LF/CRLF tables and invalid offsets, generations, free entries, missing objects, trailers, and unproven page trees. No new API, database migration, UI, background job, or external provider is required; the existing upload-to-evidence flow benefits directly. Production-grade PDF/OCR and live authenticated tenant/storage/scanner certification remain separate release gates. Next parsing increment: PAR-005b16 trailer `/Info`/`/ID` compatibility.
+
+### 2026-10-29 — Classic PDF trailer metadata
+
+PAR-005b16 extends the bounded local/demo parser to accept structurally verified `/Info` and `/ID` classic trailer fields without extracting their values or relaxing revision/evidence checks. The assessment-to-report workflow, scope limits, and server-side authorization are unchanged. Production-grade PDF/OCR and live authenticated non-bypass PostgreSQL/RLS, private storage, and malware-scanner certification remain separate release gates.

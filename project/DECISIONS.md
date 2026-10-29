@@ -236,3 +236,6 @@ Accept standard `/RunLengthDecode` (`/RL`) page-content and selected-font CMap s
 
 ## ADR-092 — Bounded classic PDF cross-reference tables (2026-10-28)
 **Status:** Accepted for local/demo parsing. Accept a single complete classic xref table with exact `startxref` byte offset, fixed-width entries, generation-zero live objects, contiguous full object coverage, a direct Root Catalog, and 96 KiB/4,096-entry bounds. Reject hybrid/incremental revisions, compressed objects, ambiguous trailer metadata, and unsupported object generations. Physical-page evidence still requires a separately proven page tree. See `project/DECISION_092.md`.
+
+## ADR-093 — Bounded classic PDF trailer metadata (2026-10-29)
+**Status:** Accepted for local/demo parsing. Permit optional unique `/Info` and `/ID` fields alongside `/Size` and `/Root` in a single verified classic xref trailer. `/Info` references a live generation-zero direct metadata dictionary; `/ID` contains exactly two 16–64-byte hexadecimal strings. Neither is architecture evidence. Unknown/duplicate fields, bad refs, hybrid/incremental revisions, and encryption still fail closed. See `project/DECISION_093.md`.

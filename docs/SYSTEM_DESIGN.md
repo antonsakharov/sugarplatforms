@@ -340,3 +340,7 @@ The bounded parser validates one complete Flate `/XRef` stream against raw direc
 ### 2026-10-28 — Classic PDF cross-reference evidence gate
 
 The local PDF parsing adapter checks declared classic xref tables before page-tree traversal. One bounded complete table must prove physical byte offsets, generation-zero live objects, object coverage, and a direct Root Catalog. The existing xref-stream gate handles PDF 1.5 stream-based references. Unsupported revisions and hybrid structures fail closed; no new architecture object, page coordinate, or finding is inferred from an unverified reference. The upload, extraction-review, diagnostic, graph and report interfaces are unchanged (Decision 092).
+
+### 2026-10-29 — Classic trailer metadata compatibility
+
+The bounded local/demo PDF xref-table validator accepts optional `/Info` and `/ID` trailer fields in addition to `/Size` and `/Root`. `/Info` must reference a live generation-zero direct metadata dictionary; `/ID` contains two strictly bounded 16–64-byte hexadecimal strings. Neither field becomes extracted architecture evidence. Duplicate, unknown, malformed, hybrid, encrypted, and incremental trailer constructs still fail closed. Page coordinates require the independent Catalog/Page-tree/Contents proof (Decision 093). No schema, UI, job, or external-service changes.
