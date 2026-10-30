@@ -344,3 +344,6 @@ The local PDF parsing adapter checks declared classic xref tables before page-tr
 ### 2026-10-29 — Classic trailer metadata compatibility
 
 The bounded local/demo PDF xref-table validator accepts optional `/Info` and `/ID` trailer fields in addition to `/Size` and `/Root`. `/Info` must reference a live generation-zero direct metadata dictionary; `/ID` contains two strictly bounded 16–64-byte hexadecimal strings. Neither field becomes extracted architecture evidence. Duplicate, unknown, malformed, hybrid, encrypted, and incremental trailer constructs still fail closed. Page coordinates require the independent Catalog/Page-tree/Contents proof (Decision 093). No schema, UI, job, or external-service changes.
+
+### 2026-10-30 — PDF trailer lexical compatibility (Decision 094)
+The classic xref validator normalizes PDF lexical whitespace/comments only in its bounded trailer and final `startxref` grammar; physical object offsets and fixed-width xref rows remain byte-faithful. The parser still requires a unique single-revision xref table, a live Root Catalog, and independent page-tree evidence. Metadata/comments never become extracted architecture claims. No schema, UI, job, or adapter interface changes; the local/demo subset is not a production PDF engine.

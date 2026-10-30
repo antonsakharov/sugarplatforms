@@ -301,3 +301,10 @@ A feature is complete only when the intended user action works, tests exist, bui
 - [-] PAR-005/006 remain in progress: production PDF/OCR, complex fonts/layout, and additional structural compatibility remain unsupported.
 - [!] SEC-LIVE-TENANT Authenticated non-bypass PostgreSQL/RLS, private-bucket, and malware-scanner isolation certification requires provisioned services and credentials.
 - [ ] PAR-005b17 Next: validate bounded PDF trailer dictionaries with direct whitespace/comments while rejecting duplicate keys, untrusted nested metadata, and revisioned structures.
+
+### 2026-10-30 — Bounded classic PDF trailer lexical compatibility
+- [x] PAR-005b17 Accept PDF lexical whitespace and `%` comments around classic trailer fields and `startxref` without changing raw object offsets or source evidence.
+- [x] PAR-005b17-TEST Add eight positive/adversarial regressions for comments, CRLF/form-feed/NUL, metadata non-extraction, malformed hex/key splits, duplicate/revision fields, excessive terminal data, and physical offset integrity.
+- [-] PAR-005/006 remain in progress: production-grade PDF/OCR, layout reconstruction, complex fonts and additional xref variants are not certified.
+- [!] SEC-LIVE-TENANT Live authenticated non-bypass PostgreSQL/RLS, private storage and malware-scanner isolation remain blocked on provisioned services.
+- [ ] PAR-005b18 Next: bounded PDF 1.5 xref-stream `/Info` and `/ID` trailer metadata compatibility, with strict object-index and page-evidence integrity.

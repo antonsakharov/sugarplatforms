@@ -5,12 +5,57 @@
  */
 const MAX_XREF_ENTRIES = 4096;
 const MAX_XREF_SECTION_BYTES = 96 * 1024;
+const MAX_STARTXREF_TRAILER_BYTES = 4096;
 
 function invalid(reason: string): never {
   throw new Error(`PDF cross-reference table is invalid or unsupported: ${reason}; use the production PDF adapter.`);
 }
 
 type ClassicTrailer = { size: number; root: string; info: string | null };
+
+/**
+ * PDF comments are lexical separators, not metadata. Normalize only the
+ * bounded trailer/startxref grammar, never the xref rows or PDF object bytes:
+ * their physical offsets and fixed-width records must remain unchanged.
+ *
+ * PDF whitespace is exactly NUL, HT, LF, FF, CR, and space. Hexadecimal ID
+ * strings are kept intact so a comment marker inside one cannot be repaired
+ * into a valid identifier. A comment ends at CR or LF, never at an EOF token.
+ */
+function normalizeTrailerTokens(source: string): string {
+  let normalized = "";
+  let inHex = false;
+  for (let index = 0; index < source.length; index += 1) {
+    const char = source[index];
+    if (!inHex && char === "%") {
+      while (index < source.length && source[index] !== "\r" && source[index] !== "\n") index += 1;
+      normalized += " ";
+      index -= 1;
+    } else if (!inHex && char === "<" && source[index + 1] !== "<") {
+      inHex = true;
+      normalized += char;
+    } else if (inHex && char === ">") {
+      inHex = false;
+      normalized += char;
+    } else if (/[\x00\x09\x0A\x0C\x0D\x20]/.test(char)) {
+      normalized += " ";
+    } else {
+      if (char.charCodeAt(0) < 0x21 || char.charCodeAt(0) > 0x7e) {
+        invalid("non-PDF whitespace or binary trailer token");
+      }
+      normalized += char;
+      if (!inHex && char === "<" && source[index + 1] === "<") {
+        normalized += "<";
+        index += 1;
+      } else if (!inHex && char === ">" && source[index + 1] === ">") {
+        normalized += ">";
+        index += 1;
+      }
+    }
+  }
+  if (inHex) invalid("unterminated hexadecimal trailer value");
+  return normalized;
+}
 
 /** Parse only a small, explicit trailer grammar; never extract or log metadata. */
 function parseClassicTrailer(body: string): ClassicTrailer {
@@ -26,6 +71,9 @@ function parseClassicTrailer(body: string): ClassicTrailer {
   let rest = body.trim();
   while (rest.length > 0) {
     const key = /^\/([A-Za-z]+)(?=\s|\/|\[|$)/.exec(rest)?.[1];
+    if (key === "Prev" || key === "XRefStm" || key === "Encrypt") {
+      invalid("incremental, hybrid, or encrypted trailer fields are unsupported");
+    }
     if (!key || !Object.hasOwn(patterns, key)) invalid("unsupported trailer dictionary fields");
     if (fields.has(key)) invalid("duplicate trailer dictionary fields");
     const match = patterns[key].exec(rest);
@@ -74,29 +122,39 @@ export function validatePdfXrefTable(
 ): boolean {
   const tableMarkers = [...raw.matchAll(/(?:^|[\r\n])xref(?=\r?\n)/g)];
   if (tableMarkers.length === 0) return false;
-  if (tableMarkers.length !== 1 ||
-      (raw.match(/\bstartxref\b/g) ?? []).length !== 1 ||
-      (raw.match(/%%EOF/g) ?? []).length !== 1 ||
-      /\/(?:Prev|XRefStm|Encrypt)\b/.test(raw) ||
+  const startMarkers = [...raw.matchAll(/(?:^|[\r\n])startxref(?=[\x00\x09\x0A\x0C\x0D\x20%])/g)];
+  const eofMarkers = [...raw.matchAll(/(?:^|[\r\n])%%EOF(?=[\x00\x09\x0A\x0C\x0D\x20]|$)/g)];
+  if (tableMarkers.length !== 1 || startMarkers.length !== 1 || eofMarkers.length !== 1 ||
       [...directObjects.values()].some((body) => /\/Type\s*\/(?:XRef|ObjStm)\b/.test(body.split(/\bstream\r?\n/, 1)[0])) ||
       expandedObjects.size !== directObjects.size) {
     invalid("hybrid, incremental, encrypted, or object-stream revisions are unsupported");
   }
 
-  const final = /(?:^|[\r\n])startxref\s+(\d+)\s+%%EOF\s*$/.exec(raw);
-  if (!final) invalid("missing or malformed final startxref/EOF");
-  const start = Number(final[1]);
-  if (!Number.isSafeInteger(start) || start < 0 || start >= final.index!) invalid("invalid startxref offset");
+  const startMarker = startMarkers[0];
+  const startIndex = startMarker.index! + startMarker[0].lastIndexOf("startxref");
+  const eofMarker = eofMarkers[0];
+  const eofIndex = eofMarker.index! + eofMarker[0].lastIndexOf("%%EOF");
+  if (startIndex >= eofIndex || !/^[\x00\x09\x0A\x0C\x0D\x20]*$/.test(raw.slice(eofIndex + 5))) {
+    invalid("missing or malformed final startxref/EOF");
+  }
+  if (eofIndex - startIndex > MAX_STARTXREF_TRAILER_BYTES) invalid("startxref trailer exceeds byte budget");
+  const final = normalizeTrailerTokens(raw.slice(startIndex, eofIndex)).trim();
+  const finalMatch = /^startxref +(\d+)$/.exec(final);
+  if (!finalMatch) invalid("missing or malformed final startxref/EOF");
+  const start = Number(finalMatch[1]);
+  if (!Number.isSafeInteger(start) || start < 0 || start >= startIndex) invalid("invalid startxref offset");
   const marker = tableMarkers[0];
   const markerOffset = marker.index! + (marker[0].startsWith("xref") ? 0 : marker[0].length - 4);
   if (start !== markerOffset) invalid("startxref does not point to the physical xref table");
-  const section = raw.slice(start, final.index);
+  const section = raw.slice(start, startIndex);
   if (section.length > MAX_XREF_SECTION_BYTES) invalid("xref table exceeds byte budget");
-  const trailerMatch = /(?:^|\r?\n)trailer\r?\n/.exec(section);
-  if (!trailerMatch) invalid("missing trailer dictionary");
-  const table = section.slice(0, trailerMatch.index);
-  const trailer = section.slice(trailerMatch.index).replace(/^\r?\n/, "");
-  const trailerBody = /^trailer\r?\n\s*<<([\s\S]*?)>>\s*$/.exec(trailer)?.[1];
+  const trailerMatch = /(?:^|\r?\n)trailer(?=[\x00\x09\x0A\x0C\x0D\x20%<])/g;
+  const trailers = [...section.matchAll(trailerMatch)];
+  if (trailers.length !== 1) invalid("missing or repeated trailer dictionary");
+  const trailerStart = trailers[0].index! + trailers[0][0].lastIndexOf("trailer");
+  const table = section.slice(0, trailers[0].index);
+  const trailer = normalizeTrailerTokens(section.slice(trailerStart)).trim();
+  const trailerBody = /^trailer *<<([\s\S]*?)>>$/.exec(trailer)?.[1];
   if (trailerBody === undefined) invalid("malformed or repeated trailer dictionary");
   const { size, root, info } = parseClassicTrailer(trailerBody);
   if (!/\/Type\s*\/Catalog\b/.test(directObjects.get(root)?.split(/\bstream\r?\n/, 1)[0] ?? "")) {

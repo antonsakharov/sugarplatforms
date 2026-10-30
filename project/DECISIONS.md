@@ -239,3 +239,6 @@ Accept standard `/RunLengthDecode` (`/RL`) page-content and selected-font CMap s
 
 ## ADR-093 — Bounded classic PDF trailer metadata (2026-10-29)
 **Status:** Accepted for local/demo parsing. Permit optional unique `/Info` and `/ID` fields alongside `/Size` and `/Root` in a single verified classic xref trailer. `/Info` references a live generation-zero direct metadata dictionary; `/ID` contains exactly two 16–64-byte hexadecimal strings. Neither is architecture evidence. Unknown/duplicate fields, bad refs, hybrid/incremental revisions, and encryption still fail closed. See `project/DECISION_093.md`.
+
+## ADR-094 — Bounded classic PDF trailer whitespace and comments (2026-10-30)
+**Status:** Accepted for local/demo parsing. Normalize only bounded trailer and terminal `startxref` PDF whitespace and `%` comments, never object bytes or fixed-width xref rows. Reject malformed/duplicate/unknown/revision/encryption fields and non-PDF whitespace; preserve independent physical-page provenance. See `project/DECISION_094.md`.

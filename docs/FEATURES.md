@@ -162,3 +162,6 @@ Status: **implemented and regression-tested in the local/demo adapter; productio
 ### 2026-10-29 — PAR-005b16: Classic PDF trailer `/Info` and `/ID`
 
 Status: **implemented and locally regression-tested for the bounded PDF adapter; production PDF parsing remains in progress**. Valid single-revision classic xref PDFs may carry a direct, live, generation-zero `/Info` dictionary and two bounded hexadecimal `/ID` byte strings. The parser never promotes trailer metadata to evidence or a finding. Invalid, duplicated, unsupported, hybrid, encrypted, and incremental trailer constructs fail closed. Physical-page locators still require independently proven page-tree references. No MVP scope expansion; see Decision 093.
+
+### 2026-10-30 — Classic PDF trailer whitespace/comment compatibility
+PAR-005b17 is implemented in the credential-free local/demo parser. Bounded PDF whitespace and `%` comments are accepted only around the classic trailer and terminal `startxref` grammar. Object bytes, xref rows, page-tree proof, metadata non-extraction, revision/encryption rejection, upload limits, and server authorization remain unchanged. Eight new adversarial/positive tests cover the feature. Production PDF/OCR and live two-tenant isolation remain outstanding (Decision 094).

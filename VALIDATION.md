@@ -228,3 +228,6 @@ Decision 090 adds bounded Flate `/ObjStm` expansion and 11 adversarial/positive 
 
 ### 2026-10-27 — PDF cross-reference stream integrity
 PAR-005b14 adds 10 xref regression cases and strict physical offset/compressed index verification (Decision 091). Focused PDF suites: 66/66 passed locally; baseline and lint passed. Full local tests remain dependency-blocked (24 module-resolution failures); npm offline install lacks the `zod` tarball, so typecheck/build and live tenant isolation remain unverified here. See `project/VALIDATED_2026-10-27.md`.
+
+### 2026-10-30 — Classic trailer whitespace/comments
+PAR-005b17 adds eight regression cases for PDF whitespace/comments around classic xref trailer and `startxref`, preserving metadata non-extraction and physical offsets (Decision 094). Local classic xref: 24/24; focused PDF: 90/90; baseline/lint/schema syntax pass. The full local suite is dependency-blocked (316 pass, 24 module-resolution failures), as are TypeScript and Next.js build. See `project/VALIDATED_2026-10-30.md`. Dependency-backed GitHub CI and live non-bypass two-tenant security certification must be verified separately.

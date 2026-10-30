@@ -172,3 +172,6 @@ The local/demo parser verifies single, complete PDF 1.5 Flate xref streams again
 ## Latest development increment (2026-10-28)
 
 PAR-005b15 adds bounded classic PDF cross-reference table integrity checks to the local/demo evidence parser. It verifies complete direct-object offsets and a Root Catalog before physical-page extraction, while preserving the existing PDF 1.5 xref-stream gate and rejecting ambiguous revisions (Decision 092). The full assessment-to-report flow remains available in the credential-free local adapter. Production PDF/OCR, live managed tenant/storage/scanner isolation, and confidential-data readiness remain open; no deployment is authorized by this increment.
+
+### 2026-10-30 — Classic PDF trailer lexical compatibility
+The bounded local/demo PDF parser accepts PDF whitespace and `%` line comments around classic xref trailer fields and terminal `startxref`, preserving raw object offsets and verified page evidence. Metadata and comments are not architecture evidence; ambiguous revisions and invalid fields fail closed. See Decision 094. Production-grade PDF/OCR, live tenant/storage/scanner certification and a human-reviewed merge remain outstanding.

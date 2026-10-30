@@ -137,3 +137,6 @@ Implemented in the local/demo parser with fixed-width xref entries, contiguous f
 ### 2026-10-29 — Classic PDF trailer metadata
 
 PAR-005b16 extends the bounded local/demo parser to accept structurally verified `/Info` and `/ID` classic trailer fields without extracting their values or relaxing revision/evidence checks. The assessment-to-report workflow, scope limits, and server-side authorization are unchanged. Production-grade PDF/OCR and live authenticated non-bypass PostgreSQL/RLS, private storage, and malware-scanner certification remain separate release gates.
+
+### 2026-10-30 — PAR-005b17 bounded classic trailer lexical slice
+Added strict PDF whitespace and `%` comment support around classic trailer fields and `startxref`, without altering raw xref rows or evidence provenance. Eight new regression tests and Decision 094 document the scope. The assessment-to-report journey is unchanged. Next parser slice: PAR-005b18, bounded xref-stream `/Info` and `/ID` metadata. Release still requires networked dependency-backed CI and live authenticated non-bypass two-tenant database/storage/scanner certification.

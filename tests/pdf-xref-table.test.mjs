@@ -178,3 +178,96 @@ test("Info and ID compatibility never enables incremental, hybrid or encrypted P
   ]) reject(pdf({ infoBody, trailerExtra }), /incremental|encrypted/);
   reject(pdf({ infoBody, trailerExtra: "/Info 5 0 R " + idPair, suffix: "startxref\n5\n%%EOF\n" }), /incremental/);
 });
+
+function rewriteTrailer(input, rewrite) {
+  const original = input.toString("latin1");
+  const result = rewrite(original);
+  assert.notEqual(result, original, "test must rewrite the trailer, not object bytes");
+  assert.equal(result.slice(0, original.indexOf("xref\n")), original.slice(0, original.indexOf("xref\n")));
+  return Buffer.from(result, "latin1");
+}
+
+test("PDF whitespace and bounded comments between trailer tokens preserve page evidence", () => {
+  const input = pdf({ infoBody: "<< /Title (not architecture evidence) >>", trailerExtra: idPair + " /Info 5 0 R" });
+  const modified = rewriteTrailer(input, (raw) => raw.replace(
+    `trailer\n<< /Size 6 /Root 1 0 R ${idPair} /Info 5 0 R >>\n`,
+    `trailer\t% optional trailer comment with >> /Prev 9\r\n` +
+    `\f<<\0/Size\t% count\n6\r\n/Root\t1\t0\tR\n` +
+    `/ID [<00112233445566778899AABBCCDDEEFF> % two IDs\r\n` +
+    `<FFEEDDCCBBAA99887766554433221100>]\n/Info 5 0 R >> % harmless trailer tail\r\n`,
+  ));
+  const result = parseArtifact("comments.pdf", modified);
+  assert.equal(result.sourceSegments.length, 1);
+  assert.equal(result.sourceSegments[0].locator.page, 1);
+  assert.match(result.sourceSegments[0].content, /canonical Customer ID/);
+  assert.doesNotMatch(result.sourceSegments[0].content, /not architecture evidence|00112233|Prev/);
+});
+
+test("startxref accepts bounded PDF whitespace/comments without changing physical offsets", () => {
+  const modified = rewriteTrailer(pdf(), (raw) => raw.replace(
+    /(startxref)\n(\d+)\n%%EOF\n$/,
+    (_whole, marker, offset) => `${marker}\t% note: startxref and %%EOF are just comment text\r\n\f${offset}\t% offset is physical\r\n%%EOF\n`,
+  ));
+  assert.equal(parseArtifact("comments.pdf", modified).sourceSegments[0].locator.page, 1);
+});
+
+test("comment text containing dictionary delimiters cannot terminate trailer early", () => {
+  const modified = rewriteTrailer(pdf(), (raw) => raw.replace(
+    "/Root 1 0 R  >>", "/Root 1 0 R % >> << /Info 5 0 R\n >>",
+  ));
+  assert.equal(parseArtifact("comments.pdf", modified).sourceSegments[0].locator.page, 1);
+});
+
+test("comment splitting a key or hexadecimal ID never repairs invalid syntax", () => {
+  const keySplit = rewriteTrailer(pdf(), (raw) => raw.replace("/Size 6", "/Si% interrupted key\nze 6"));
+  reject(keySplit, /trailer/);
+  const idSplit = rewriteTrailer(pdf({ trailerExtra: idPair }), (raw) => raw.replace(
+    "00112233445566778899AABBCCDDEEFF", "00112233% not valid inside a hex string\n445566778899AABBCCDDEEFF",
+  ));
+  reject(idSplit, /trailer/);
+});
+
+test("comments cannot conceal duplicate, unknown, revision or encryption fields", () => {
+  const inputs = [
+    ["/Size 6", "/Size 6 % comment\n/Size 6"],
+    ["/Root 1 0 R", "/Root 1 0 R % comment\n/Root 1 0 R"],
+    ["/Size 6", "/Size 6 % comment\n/Custom 1"],
+    ["/Size 6", "/Size 6 % comment\n/Prev 5"],
+    ["/Size 6", "/Size 6 % comment\n/XRefStm 5"],
+    ["/Size 6", "/Size 6 % comment\n/Encrypt 5 0 R"],
+  ];
+  for (const [before, after] of inputs) {
+    const modified = rewriteTrailer(pdf(), (raw) => raw.replace(before, after));
+    reject(modified, /trailer|incremental|encrypted/);
+  }
+});
+
+test("comments do not permit malformed startxref, extra EOF, or unbounded trailing data", () => {
+  const malformed = rewriteTrailer(pdf(), (raw) => raw.replace(/startxref\n(\d+)\n/, "startxref\n% offset omitted\n"));
+  reject(malformed, /startxref/);
+  const extraEof = rewriteTrailer(pdf(), (raw) => raw.replace("%%EOF\n", "%%EOF\n%%EOF\n"));
+  reject(extraEof, /incremental/);
+  const trailingJunk = rewriteTrailer(pdf(), (raw) => raw.replace("%%EOF\n", "%%EOF\n% unexpected trailing comment\n"));
+  reject(trailingJunk, /startxref|EOF/);
+});
+
+test("xref rows and physical offsets remain strict despite trailer whitespace compatibility", () => {
+  const badEntry = rewriteTrailer(pdf({ overrideEntry: { 4: [1, 0, "n"] } }), (raw) => raw.replace(
+    "trailer\n", "trailer\n% harmless note\n",
+  ));
+  reject(badEntry, /offset/);
+  const badStart = rewriteTrailer(pdf({ startxref: 9 }), (raw) => raw.replace(
+    "trailer\n", "trailer\n% harmless note\n",
+  ));
+  reject(badStart, /startxref/);
+});
+
+test("non-PDF whitespace and excessive terminal comments are rejected", () => {
+  const nonPdfWhitespace = rewriteTrailer(pdf(), (raw) => raw.replace("/Size 6", "/Size\xA06"));
+  reject(nonPdfWhitespace, /whitespace|trailer/);
+  const hugeComment = rewriteTrailer(pdf(), (raw) => raw.replace(
+    /startxref\n(\d+)\n/,
+    (_whole, offset) => `startxref\n${offset}\n% ${"x".repeat(4100)}\n`,
+  ));
+  reject(hugeComment, /byte budget/);
+});
