@@ -63,6 +63,8 @@ Single application boundary for:
 - redaction hooks;
 - usage tracking.
 
+The extraction provider interface isolates the domain pipeline from a specific model vendor. Demo mode uses a deterministic local extractor that emits only directly supported architecture facts. A production OpenAI Responses adapter is available behind the same interface, uses schema-constrained output, and remains disabled in the demo route until production privacy and tenancy controls are ready.
+
 ### Job runner
 
 Processes:
@@ -123,6 +125,8 @@ Produces structured:
 - owners;
 - authority claims;
 - evidence.
+
+Every emitted candidate object requires direct source-segment evidence. Extraction output is schema validated before it can proceed to human review. Duplicate direct claims may reconcile by normalized kind/name while retaining all evidence references; ambiguous records are not silently merged.
 
 ### Review module
 
@@ -326,3 +330,20 @@ The MVP is complete when a user can:
 5. inspect evidence-backed findings;
 6. view an entity/ID map;
 7. generate an executive report.
+
+### 2026-10-26 — Bounded object-stream adapter
+The credential-free PDF parsing module may expand a strictly bounded Flate PDF 1.5 `/ObjStm` dictionary subset before existing page-tree/font resolution. Object IDs and byte offsets are validated; only Catalog/Pages/Kids-proven physical page coordinates become evidence. Unsupported xref revisions, object-stream variants, OCR, and layout reconstruction remain for the production PDF adapter. No new persistence schema, background job, UI or external service is required for this parsing slice.
+
+### PDF xref provenance gate (Decision 091, 2026-10-27)
+The bounded parser validates one complete Flate `/XRef` stream against raw direct-object byte offsets and `/ObjStm` indexes before traversing Catalog/Pages/Kids. Xref evidence never substitutes for page-tree verification. Unsupported or revisioned xrefs fail closed. This is local/demo coverage, not a production-grade PDF engine.
+
+### 2026-10-28 — Classic PDF cross-reference evidence gate
+
+The local PDF parsing adapter checks declared classic xref tables before page-tree traversal. One bounded complete table must prove physical byte offsets, generation-zero live objects, object coverage, and a direct Root Catalog. The existing xref-stream gate handles PDF 1.5 stream-based references. Unsupported revisions and hybrid structures fail closed; no new architecture object, page coordinate, or finding is inferred from an unverified reference. The upload, extraction-review, diagnostic, graph and report interfaces are unchanged (Decision 092).
+
+### 2026-10-29 — Classic trailer metadata compatibility
+
+The bounded local/demo PDF xref-table validator accepts optional `/Info` and `/ID` trailer fields in addition to `/Size` and `/Root`. `/Info` must reference a live generation-zero direct metadata dictionary; `/ID` contains two strictly bounded 16–64-byte hexadecimal strings. Neither field becomes extracted architecture evidence. Duplicate, unknown, malformed, hybrid, encrypted, and incremental trailer constructs still fail closed. Page coordinates require the independent Catalog/Page-tree/Contents proof (Decision 093). No schema, UI, job, or external-service changes.
+
+### 2026-10-30 — PDF trailer lexical compatibility (Decision 094)
+The classic xref validator normalizes PDF lexical whitespace/comments only in its bounded trailer and final `startxref` grammar; physical object offsets and fixed-width xref rows remain byte-faithful. The parser still requires a unique single-revision xref table, a live Root Catalog, and independent page-tree evidence. Metadata/comments never become extracted architecture claims. No schema, UI, job, or adapter interface changes; the local/demo subset is not a production PDF engine.

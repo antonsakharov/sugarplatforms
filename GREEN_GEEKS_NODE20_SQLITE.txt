@@ -1,0 +1,17 @@
+Sugar Platform Diagnostic - GreenGeeks Node 20 compatibility
+
+This package replaces Node 22's built-in node:sqlite usage with better-sqlite3 12.10.1,
+which supports Node 20.x. The application code uses lib/sqlite.ts as a compatibility shim.
+
+GreenGeeks install/build sequence:
+1. Activate the app environment and cd to /home/sugarpla/sugarplatform.
+2. Install/update dependencies, including dev dependencies:
+   npm install --include=dev
+3. Verify better-sqlite3 loads:
+   node -e "const DB=require('better-sqlite3'); const db=new DB(':memory:'); console.log(db.prepare('select 1 as ok').get()); db.close();"
+4. Clean/build:
+   rm -rf .next
+   npm run build
+
+Do not run npm audit fix --force.
+This deployment remains demo/local-mode and is not approved for confidential customer data.
