@@ -20,6 +20,67 @@ function integer(dictionary: string, key: string): number | null {
   return Number.isSafeInteger(number) ? number : null;
 }
 
+type XrefDictionary = {
+  size: number;
+  length: number;
+  root: string;
+  widths: [number, number, number];
+  info: string | null;
+};
+
+/**
+ * An xref stream's dictionary is deliberately a flat, bounded grammar. In
+ * particular, optional document metadata is never parsed as architecture
+ * evidence and cannot introduce a nested or duplicate dictionary field.
+ */
+function parseXrefDictionary(header: string): XrefDictionary {
+  if (header.length > 4096 || !/^<<[\s\S]*>>$/.test(header.trim())) invalid("malformed xref stream dictionary");
+  const patterns: Record<string, RegExp> = {
+    Type: /^\/Type\s+\/XRef(?=\s|\/|$)/,
+    Size: /^\/Size\s+(\d+)(?=\s|\/|$)/,
+    Root: /^\/Root\s+(\d+)\s+(\d+)\s+R(?=\s|\/|$)/,
+    W: /^\/W\s*\[\s*(\d+)\s+(\d+)\s+(\d+)\s*\](?=\s|\/|$)/,
+    Index: /^\/Index\s*\[\s*(\d+)\s+(\d+)\s*\](?=\s|\/|$)/,
+    Length: /^\/Length\s+(\d+)(?=\s|\/|$)/,
+    Filter: /^\/Filter\s+\/FlateDecode(?=\s|\/|$)/,
+    Info: /^\/Info\s+(\d+)\s+(\d+)\s+R(?=\s|\/|$)/,
+    // 16–64 bytes per ID; no literal strings, odd hex lengths, or nesting.
+    ID: /^\/ID\s*\[\s*<([0-9a-fA-F]{32,128})>\s*<([0-9a-fA-F]{32,128})>\s*\](?=\s|\/|$)/,
+  };
+  const fields = new Map<string, RegExpExecArray>();
+  let rest = header.trim().slice(2, -2).trim();
+  while (rest) {
+    const key = /^\/([A-Za-z]+)(?=\s|\/|\[|$)/.exec(rest)?.[1];
+    if (key === "Prev" || key === "XRefStm" || key === "Encrypt") invalid("incremental, hybrid, or encrypted revisions are unsupported");
+    if (!key || !Object.hasOwn(patterns, key)) invalid("unsupported xref stream dictionary field");
+    if (fields.has(key)) invalid("duplicate " + key + " dictionary field");
+    const match = patterns[key].exec(rest);
+    if (!match) invalid("malformed " + key + " dictionary field");
+    fields.set(key, match);
+    rest = rest.slice(match[0].length).trimStart();
+  }
+  if (!fields.has("Type") || !fields.has("Filter")) invalid("unsupported xref stream dictionary");
+  const size = Number(fields.get("Size")?.[1]);
+  const length = Number(fields.get("Length")?.[1]);
+  if (!Number.isSafeInteger(size) || size < 2 || size > MAX_XREF_OBJECTS ||
+      !Number.isSafeInteger(length) || length < 1 || length > MAX_XREF_BYTES) invalid("invalid Size or Length");
+  const widths = fields.get("W")?.slice(1).map(Number);
+  if (!widths || widths.length !== 3 || widths.some((value) => !Number.isInteger(value) || value < 1 || value > 4)) invalid("unsupported W widths");
+  const root = fields.get("Root");
+  if (!root || root[2] !== "0" || !Number.isSafeInteger(Number(root[1])) || Number(root[1]) < 1 || Number(root[1]) >= size) invalid("invalid Root reference");
+  const info = fields.get("Info");
+  if (info && (info[2] !== "0" || !Number.isSafeInteger(Number(info[1])) || Number(info[1]) < 1 || Number(info[1]) >= size)) invalid("invalid Info reference");
+  const index = fields.get("Index");
+  if (index && (Number(index[1]) !== 0 || Number(index[2]) !== size)) invalid("only complete Index [0 Size] is supported");
+  return {
+    size,
+    length,
+    root: root[1] + " 0",
+    widths: widths as [number, number, number],
+    info: info ? info[1] + " 0" : null,
+  };
+}
+
 function exactObjectOffsets(raw: string): Map<string, number> {
   const offsets = new Map<string, number>();
   for (const match of raw.matchAll(/(?:^|[\r\n])\s*(\d+)\s+(\d+)\s+obj\b/g)) {
@@ -81,22 +142,8 @@ export function validatePdfXrefStream(
   const offsets = exactObjectOffsets(raw);
   if (offsets.size !== directObjects.size || offsets.get(xrefRef) !== Number(trailer[1])) invalid("startxref does not point to the xref object");
   const header = xrefBody.split(/\bstream\r?\n/, 1)[0];
-  if ((header.match(/\/Type\b/g) ?? []).length !== 1 ||
-      (header.match(/\/Filter\b/g) ?? []).length !== 1 ||
-      !/\/Filter\s*\/FlateDecode(?=\s|>>)/.test(header) ||
-      /\/(?:DecodeParms|DP|Encrypt|Extends)\b/.test(header)) invalid("unsupported xref stream dictionary");
-  const size = integer(header, "Size");
-  const length = integer(header, "Length");
-  if (size === null || size < 2 || size > MAX_XREF_OBJECTS || length === null || length < 1 || length > MAX_XREF_BYTES) invalid("invalid Size or Length");
-  const widths = [...header.matchAll(/\/W\s*\[\s*(\d+)\s+(\d+)\s+(\d+)\s*\]/g)];
-  if (widths.length !== 1 || (header.match(/\/W\b/g) ?? []).length !== 1) invalid("missing or ambiguous W widths");
-  const w = widths[0].slice(1).map(Number);
-  if (w.some((value) => !Number.isInteger(value) || value < 0 || value > 4) || w[0] < 1 || w[1] < 1 || w[2] < 1) invalid("unsupported W widths");
-  const indexes = [...header.matchAll(/\/Index\s*\[([^\]]*)\]/g)];
-  if (indexes.length > 1 || (indexes.length === 1 && indexes[0][1].trim() !== `0 ${size}`)) invalid("only complete Index [0 Size] is supported");
-  if (/\/Index\b/.test(header) && indexes.length !== 1) invalid("malformed Index");
-  const roots = [...header.matchAll(/\/Root\s+(\d+)\s+(\d+)\s+R\b/g)];
-  if (roots.length !== 1 || roots[0][2] !== "0" || !/\/Type\s*\/Catalog\b/.test(expandedObjects.get(`${roots[0][1]} 0`) ?? "")) invalid("unproven Root catalog");
+  const { size, length, root, widths: w, info } = parseXrefDictionary(header);
+  if (!/\/Type\s*\/Catalog\b/.test(expandedObjects.get(root) ?? "")) invalid("unproven Root catalog");
   const stream = /\bstream\r?\n([\s\S]*?)\r?\nendstream\b/.exec(xrefBody);
   if (!stream || Buffer.byteLength(stream[1], "latin1") !== length) invalid("encoded xref Length mismatch");
   const decoded = decodePdfStream(xrefBody, MAX_XREF_BYTES);
@@ -134,4 +181,14 @@ export function validatePdfXrefStream(
   }
   if (referencedDirect.size !== directObjects.size ||
       referencedCompressed.size + referencedDirect.size !== expandedObjects.size) invalid("unindexed or missing objects");
+  if (info) {
+    const metadata = directObjects.get(info);
+    // /Info cannot be compressed, free, an xref, a page-tree object or a
+    // stream. Its contents are never returned as source evidence.
+    if (info === root || !referencedDirect.has(info) || !metadata ||
+        !/^\s*<<[\s\S]*>>\s*$/.test(metadata) ||
+        /\bstream\b|\/Type\s*\/(?:Catalog|Pages|Page|XRef|ObjStm)\b/.test(metadata)) {
+      invalid("Info must reference a live direct metadata dictionary");
+    }
+  }
 }
