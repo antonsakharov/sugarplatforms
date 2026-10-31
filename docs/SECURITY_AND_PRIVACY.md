@@ -137,3 +137,6 @@ The local PDF adapter checks classic `/Info` and `/ID` metadata only for structu
 
 ### 2026-10-30 — Trailer comment trust boundary
 PDF `%` comments are ignored only in the bounded classic trailer/startxref lexical grammar, never in evidence-bearing page streams or object offsets. The parser rejects non-PDF whitespace, comments embedded in hex IDs, duplicate/unknown keys, revisions, encryption, extra EOF markers and oversized terminal sections. Comments and `/Info`/`/ID` values are not diagnostic evidence. Existing malware quarantine, prohibited-content checks, private storage, tenant scoping, and 10-file/25-MB/150-page limits remain mandatory. This is not live production isolation certification (Decision 094).
+
+### 2026-10-31 — Xref-stream metadata trust boundary
+Optional PDF 1.5 `/Info` and `/ID` xref-stream values are checked for structure only; they are never source evidence, architecture objects, findings, or report content. `/Info` must be a live indexed direct dictionary, not a page, compressed object, stream or Catalog; `/ID` is two 16–64-byte hex strings. Reject unknown/duplicate/revision/encryption fields and oversized dictionaries. Upload malware quarantine, secret scanning, tenant scoping and MVP limits remain mandatory. Live production security is not certified (Decision 095).

@@ -255,3 +255,6 @@ Run `node --experimental-strip-types --import ./scripts/register-test-loader.mjs
 
 ### 2026-10-30 — Trailer whitespace/comment regression
 Run `node --experimental-strip-types --import ./scripts/register-test-loader.mjs --test tests/pdf-xref-table.test.mjs tests/pdf-xref-stream.test.mjs tests/pdf-object-streams.test.mjs tests/parser.test.mjs tests/pdf-page-tree.test.mjs`. This covers bounded classic trailer lexical comments/whitespace without modifying physical xref offsets or metadata/evidence safeguards. Run `npm ci --no-audit --no-fund && npm run validate` on a networked Node 22 runner for complete certification. Production use additionally requires live authenticated two-tenant database/storage/malware isolation. See Decision 094.
+
+### 2026-10-31 — PDF xref-stream metadata development note
+Run `node --experimental-strip-types --import ./scripts/register-test-loader.mjs --test tests/pdf-xref-stream.test.mjs` for bounded `/Info`/`/ID` regressions. Run `npm ci && npm run validate` in a networked Node >=20.20.2 environment for full dependency-backed validation. The local adapter rejects unsupported PDF variants and does not replace managed tenant/storage/scanner certification (Decision 095).

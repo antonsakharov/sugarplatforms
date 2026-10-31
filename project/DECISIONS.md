@@ -242,3 +242,6 @@ Accept standard `/RunLengthDecode` (`/RL`) page-content and selected-font CMap s
 
 ## ADR-094 — Bounded classic PDF trailer whitespace and comments (2026-10-30)
 **Status:** Accepted for local/demo parsing. Normalize only bounded trailer and terminal `startxref` PDF whitespace and `%` comments, never object bytes or fixed-width xref rows. Reject malformed/duplicate/unknown/revision/encryption fields and non-PDF whitespace; preserve independent physical-page provenance. See `project/DECISION_094.md`.
+
+## ADR-095 — Bounded PDF xref-stream metadata (2026-10-31)
+**Status:** Accepted for local/demo parsing. A flat bounded PDF 1.5 Flate xref-stream dictionary may contain optional unique `/Info` (live indexed generation-zero direct metadata dictionary) and `/ID` (two 16–64-byte hex strings). Metadata is never architecture evidence; duplicate/unknown/revision/encryption fields fail closed, and object-index/physical-page provenance checks remain mandatory. See `project/DECISION_095.md`. Production PDF/OCR and live tenant security remain uncertified.

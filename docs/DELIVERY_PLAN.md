@@ -140,3 +140,6 @@ PAR-005b16 extends the bounded local/demo parser to accept structurally verified
 
 ### 2026-10-30 — PAR-005b17 bounded classic trailer lexical slice
 Added strict PDF whitespace and `%` comment support around classic trailer fields and `startxref`, without altering raw xref rows or evidence provenance. Eight new regression tests and Decision 094 document the scope. The assessment-to-report journey is unchanged. Next parser slice: PAR-005b18, bounded xref-stream `/Info` and `/ID` metadata. Release still requires networked dependency-backed CI and live authenticated non-bypass two-tenant database/storage/scanner certification.
+
+### 2026-10-31 — PAR-005b18 xref-stream metadata
+The credential-free local/demo PDF adapter validates optional `/Info` and `/ID` xref-stream fields without extracting metadata or weakening evidence provenance. Seven new tests and Decision 095 cover the slice. Production-grade PDF/OCR, dependency-backed CI and live authenticated two-tenant managed database/private storage/malware-scanner certification remain independent release gates. Next: PAR-005b19 bounded xref-stream lexical whitespace/comment handling.

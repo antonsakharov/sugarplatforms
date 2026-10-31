@@ -165,3 +165,6 @@ Status: **implemented and locally regression-tested for the bounded PDF adapter;
 
 ### 2026-10-30 — Classic PDF trailer whitespace/comment compatibility
 PAR-005b17 is implemented in the credential-free local/demo parser. Bounded PDF whitespace and `%` comments are accepted only around the classic trailer and terminal `startxref` grammar. Object bytes, xref rows, page-tree proof, metadata non-extraction, revision/encryption rejection, upload limits, and server authorization remain unchanged. Eight new adversarial/positive tests cover the feature. Production PDF/OCR and live two-tenant isolation remain outstanding (Decision 094).
+
+### 2026-10-31 — PAR-005b18: PDF xref-stream metadata
+Status: **implemented and regression-tested in the bounded local/demo PDF parser; production PDF parsing remains in progress**. Optional `/Info` and `/ID` are structurally validated but never promoted to architecture evidence. Duplicate/unknown/malformed fields, bad metadata references, encrypted or revisioned structures, invalid object indexes and unproven physical-page locators fail closed. Seven new regression cases; no MVP scope expansion (Decision 095).

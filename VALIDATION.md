@@ -231,3 +231,6 @@ PAR-005b14 adds 10 xref regression cases and strict physical offset/compressed i
 
 ### 2026-10-30 — Classic trailer whitespace/comments
 PAR-005b17 adds eight regression cases for PDF whitespace/comments around classic xref trailer and `startxref`, preserving metadata non-extraction and physical offsets (Decision 094). Local classic xref: 24/24; focused PDF: 90/90; baseline/lint/schema syntax pass. The full local suite is dependency-blocked (316 pass, 24 module-resolution failures), as are TypeScript and Next.js build. See `project/VALIDATED_2026-10-30.md`. Dependency-backed GitHub CI and live non-bypass two-tenant security certification must be verified separately.
+
+### 2026-10-31 — Xref-stream metadata slice
+Decision 095 adds seven regression tests for bounded PDF 1.5 `/Info` and `/ID`. Locally, 17/17 xref tests and 147/147 focused parser/upload/graph tests pass; full suite has 24 missing-dependency failures, and offline `npm ci` could not complete. Check CI on the published draft branch before claiming full build/type/test success; live production tenant isolation remains unverified. See `project/VALIDATED_2026-10-31.md`.

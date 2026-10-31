@@ -347,3 +347,6 @@ The bounded local/demo PDF xref-table validator accepts optional `/Info` and `/I
 
 ### 2026-10-30 — PDF trailer lexical compatibility (Decision 094)
 The classic xref validator normalizes PDF lexical whitespace/comments only in its bounded trailer and final `startxref` grammar; physical object offsets and fixed-width xref rows remain byte-faithful. The parser still requires a unique single-revision xref table, a live Root Catalog, and independent page-tree evidence. Metadata/comments never become extracted architecture claims. No schema, UI, job, or adapter interface changes; the local/demo subset is not a production PDF engine.
+
+### 2026-10-31 — Bounded xref-stream metadata (Decision 095)
+The existing parser boundary now validates optional `/Info` (indexed, live generation-zero direct metadata dictionary) and `/ID` (two bounded hexadecimal byte strings) in a single PDF 1.5 Flate xref stream. A flat 4-KiB dictionary grammar rejects unknown/duplicate fields; direct-offset, compressed-index and physical-page provenance checks are unchanged. No schema, UI, job, or external adapter changes.

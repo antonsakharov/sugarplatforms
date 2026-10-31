@@ -59,3 +59,6 @@ Implemented and locally validated strict Flate `/ObjStm` dictionary expansion wi
 ### 2026-10-29 — PAR-005b16
 
 Bounded classic PDF trailer `/Info` and `/ID` compatibility is implemented with six new regression cases and no change to upload limits or report evidence policy. Main remains design-only; publish the full manifest-verified application to a dedicated draft PR. Networked CI and live managed two-tenant isolation remain separate release checks.
+
+### 2026-10-31 — PAR-005b18
+Bounded xref-stream `/Info` and `/ID` validation implemented with seven regression tests (17/17 xref tests, 147/147 focused parser/upload/graph tests locally). Local full suite: 323 pass, 24 missing-dependency failures; npm registry unavailable. GitHub CI and live managed two-tenant isolation remain separate release gates. No production deployment or merge.

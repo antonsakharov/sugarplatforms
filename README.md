@@ -175,3 +175,6 @@ PAR-005b15 adds bounded classic PDF cross-reference table integrity checks to th
 
 ### 2026-10-30 — Classic PDF trailer lexical compatibility
 The bounded local/demo PDF parser accepts PDF whitespace and `%` line comments around classic xref trailer fields and terminal `startxref`, preserving raw object offsets and verified page evidence. Metadata and comments are not architecture evidence; ambiguous revisions and invalid fields fail closed. See Decision 094. Production-grade PDF/OCR, live tenant/storage/scanner certification and a human-reviewed merge remain outstanding.
+
+### 2026-10-31 — PDF xref-stream metadata compatibility
+The bounded local/demo PDF 1.5 xref-stream validator now accepts structurally verified optional `/Info` and `/ID` fields, while rejecting duplicates, unknown keys, invalid references, hybrid revisions, and unproven page evidence (Decision 095). Document metadata is never diagnostic evidence. This does not certify arbitrary PDF/OCR, live tenant isolation, or production deployment.

@@ -308,3 +308,10 @@ A feature is complete only when the intended user action works, tests exist, bui
 - [-] PAR-005/006 remain in progress: production-grade PDF/OCR, layout reconstruction, complex fonts and additional xref variants are not certified.
 - [!] SEC-LIVE-TENANT Live authenticated non-bypass PostgreSQL/RLS, private storage and malware-scanner isolation remain blocked on provisioned services.
 - [ ] PAR-005b18 Next: bounded PDF 1.5 xref-stream `/Info` and `/ID` trailer metadata compatibility, with strict object-index and page-evidence integrity.
+
+### 2026-10-31 — PDF 1.5 xref-stream metadata
+- [x] PAR-005b18 Accept strictly bounded optional `/Info` and `/ID` in single-revision Flate xref-stream dictionaries, without metadata-to-evidence promotion.
+- [x] PAR-005b18-TEST Add seven positive/adversarial tests for live direct Info references, ID bounds, compressed page trees, duplicate/unknown fields, revisions, offsets, and oversized dictionaries.
+- [-] PAR-005/006 Production-grade PDF/OCR, complex layout/font coverage and additional lexical variants remain in progress.
+- [!] SEC-LIVE-TENANT Live authenticated non-bypass PostgreSQL/RLS, private storage and malware-scanner isolation require provisioned services.
+- [ ] PAR-005b19 Next: bounded PDF xref-stream whitespace/comment compatibility without altering physical offsets or evidence provenance.
