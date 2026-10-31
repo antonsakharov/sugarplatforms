@@ -25,6 +25,7 @@ function pdf(options = {}) {
   const objects = compressed
     ? [[4, `<< /Length ${content.length} >> stream\n${content}\nendstream`], [9, objstm()]]
     : [[1, catalog], [2, pages], [3, page], [4, `<< /Length ${content.length} >> stream\n${content}\nendstream`]];
+  if (options.infoBody !== undefined) objects.push([8, options.infoBody]);
   let raw = "%PDF-1.5\n";
   const offsets = new Map();
   for (const [id, body] of objects) {
@@ -107,7 +108,7 @@ test("xref stream rejects unsupported widths, partial Index, invalid Size and Ro
 test("xref stream rejects unsupported filters, wrong Length and duplicate xref declaration", () => {
   reject(pdf({ filter: "/LZWDecode" }), /dictionary/);
   reject(pdf({ length: 1 }), /Length/);
-  reject(pdf({ headerExtra: "/W [1 4 2]" }), /W widths/);
+  reject(pdf({ headerExtra: "/W [1 4 2]" }), /duplicate W/);
 });
 
 test("xref stream rejects unknown entry types and unindexed compressed objects", () => {
@@ -118,4 +119,66 @@ test("xref stream rejects unknown entry types and unindexed compressed objects",
 test("minimal legacy demo PDFs without xref remain supported", () => {
   const legacy = Buffer.from(`%PDF-1.5\n1 0 obj ${catalog} endobj\n2 0 obj ${pages} endobj\n3 0 obj ${page} endobj\n4 0 obj << >> stream\n${content}\nendstream endobj\n%%EOF`, "latin1");
   assert.equal(parseArtifact("legacy.pdf", legacy).sourceSegments[0].locator.page, 1);
+});
+
+const validIds = "/ID [<" + "ab".repeat(16) + "> <" + "CD".repeat(16) + ">]";
+const safeInfo = "<< /Producer (Internal architecture tool) /Title (DO NOT EXTRACT DOCUMENT METADATA) >>";
+
+test("xref stream accepts bounded Info and ID without promoting metadata to evidence", () => {
+  const result = parseArtifact("metadata.pdf", pdf({
+    infoBody: safeInfo, headerExtra: "/Info 8 0 R " + validIds,
+  }));
+  assert.equal(result.sourceSegments.length, 1);
+  assert.equal(result.sourceSegments[0].locator.page, 1);
+  assert.match(result.sourceSegments[0].content, /canonical Customer ID/);
+  assert.doesNotMatch(JSON.stringify(result.sourceSegments), /DO NOT EXTRACT|Internal architecture tool|abababab/);
+});
+
+test("xref stream ID-only metadata remains compatible with physical page evidence", () => {
+  const result = parseArtifact("id-only.pdf", pdf({ headerExtra: validIds }));
+  assert.equal(result.sourceSegments[0].locator.type, "pdf-page");
+});
+
+test("xref stream validates Info as a live direct dictionary, including compressed page trees", () => {
+  const result = parseArtifact("compressed-metadata.pdf", pdf({
+    compressed: true, infoBody: safeInfo, headerExtra: "/Info 8 0 R " + validIds,
+  }));
+  assert.match(result.sourceSegments[0].content, /CRM owns/);
+  reject(pdf({ headerExtra: "/Info 8 0 R" }), /Info must reference/);
+  reject(pdf({ compressed: true, headerExtra: "/Info 1 0 R" }), /Info must reference/);
+  reject(pdf({ infoBody: safeInfo, headerExtra: "/Info 8 1 R" }), /invalid Info/);
+  reject(pdf({ infoBody: safeInfo, headerExtra: "/Info 1 0 R" }), /Info must reference/);
+});
+
+test("xref stream rejects Info references to pages, streams and cross-reference objects", () => {
+  reject(pdf({ headerExtra: "/Info 3 0 R" }), /Info must reference/);
+  reject(pdf({ headerExtra: "/Info 4 0 R" }), /Info must reference/);
+  reject(pdf({ headerExtra: "/Info 10 0 R" }), /Info must reference/);
+  reject(pdf({ infoBody: "<< /Type /Catalog >>", headerExtra: "/Info 8 0 R" }), /Info must reference/);
+  reject(pdf({ infoBody: "not a dictionary", headerExtra: "/Info 8 0 R" }), /Info must reference/);
+});
+
+test("xref stream rejects duplicate, malformed and unsupported metadata fields", () => {
+  reject(pdf({ infoBody: safeInfo, headerExtra: "/Info 8 0 R /Info 8 0 R" }), /duplicate Info/);
+  reject(pdf({ headerExtra: validIds + " " + validIds }), /duplicate ID/);
+  reject(pdf({ headerExtra: "/ID [(literal) (literal)]" }), /malformed ID/);
+  reject(pdf({ headerExtra: "/ID [<abc> <def>]" }), /malformed ID/);
+  reject(pdf({ headerExtra: "/ID [<" + "ab".repeat(65) + "> <" + "cd".repeat(16) + ">]" }), /malformed ID/);
+  reject(pdf({ headerExtra: "/Info [8 0 R]" }), /malformed Info/);
+  reject(pdf({ headerExtra: "/Metadata 8 0 R" }), /unsupported/);
+});
+
+test("xref stream preserves fail-closed revision, encryption and object-index checks with metadata", () => {
+  reject(pdf({ headerExtra: validIds + " /Encrypt 8 0 R" }), /encrypted|revisions/);
+  reject(pdf({ headerExtra: validIds + " /Prev 20" }), /revisions/);
+  reject(pdf({ headerExtra: validIds + " /XRefStm 20" }), /revisions/);
+  reject(pdf({ infoBody: safeInfo, headerExtra: "/Info 8 0 R " + validIds, overrideEntry: { 8: [1, 1, 0] } }), /offset/);
+  reject(pdf({ infoBody: safeInfo, headerExtra: "/Info 8 0 R " + validIds, overrideEntry: { 8: [0, 0, 0] } }), /free entry/);
+});
+
+test("xref stream rejects nested, ambiguous or oversized dictionary content", () => {
+  reject(pdf({ headerExtra: "/Root 1 0 R" }), /duplicate Root/);
+  reject(pdf({ headerExtra: "/Filter /FlateDecode" }), /duplicate Filter/);
+  reject(pdf({ headerExtra: validIds + " /Unknown << /Info 8 0 R >>" }), /unsupported/);
+  reject(pdf({ headerExtra: validIds + " " + " ".repeat(5000) }), /dictionary/);
 });
