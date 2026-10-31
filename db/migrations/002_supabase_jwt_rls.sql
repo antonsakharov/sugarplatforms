@@ -1,0 +1,16 @@
+BEGIN;
+CREATE OR REPLACE FUNCTION app_supabase_user_id() RETURNS text LANGUAGE sql STABLE AS $$ SELECT auth.uid()::text; $$;
+CREATE OR REPLACE FUNCTION app_supabase_has_membership(target_org text, target_workspace text, required_roles text[] DEFAULT NULL) RETURNS boolean LANGUAGE sql STABLE SECURITY DEFINER SET search_path = public, pg_temp AS $$ SELECT EXISTS (SELECT 1 FROM memberships m WHERE m.user_id = app_supabase_user_id() AND m.organization_id = target_org AND m.workspace_id = target_workspace AND (required_roles IS NULL OR m.role = ANY(required_roles))); $$;
+REVOKE ALL ON FUNCTION app_supabase_has_membership(text,text,text[]) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION app_supabase_has_membership(text,text,text[]) TO authenticated;
+DROP POLICY IF EXISTS organizations_supabase_member_read ON organizations;
+CREATE POLICY organizations_supabase_member_read ON organizations FOR SELECT TO authenticated USING (EXISTS (SELECT 1 FROM memberships m WHERE m.user_id = app_supabase_user_id() AND m.organization_id = organizations.id));
+DROP POLICY IF EXISTS workspaces_supabase_member_read ON workspaces;
+CREATE POLICY workspaces_supabase_member_read ON workspaces FOR SELECT TO authenticated USING (app_supabase_has_membership(workspaces.organization_id, workspaces.id, NULL));
+DROP POLICY IF EXISTS memberships_supabase_self_read ON memberships;
+CREATE POLICY memberships_supabase_self_read ON memberships FOR SELECT TO authenticated USING (user_id = app_supabase_user_id());
+DROP POLICY IF EXISTS assessments_supabase_member_read ON assessments;
+CREATE POLICY assessments_supabase_member_read ON assessments FOR SELECT TO authenticated USING (app_supabase_has_membership(assessments.organization_id, assessments.workspace_id, NULL));
+DROP POLICY IF EXISTS assessments_supabase_editor_insert ON assessments;
+CREATE POLICY assessments_supabase_editor_insert ON assessments FOR INSERT TO authenticated WITH CHECK (app_supabase_has_membership(assessments.organization_id, assessments.workspace_id, ARRAY['editor','admin']));
+COMMIT;
