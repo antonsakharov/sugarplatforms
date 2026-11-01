@@ -178,3 +178,6 @@ The bounded local/demo PDF parser accepts PDF whitespace and `%` line comments a
 
 ### 2026-10-31 — PDF xref-stream metadata compatibility
 The bounded local/demo PDF 1.5 xref-stream validator now accepts structurally verified optional `/Info` and `/ID` fields, while rejecting duplicates, unknown keys, invalid references, hybrid revisions, and unproven page evidence (Decision 095). Document metadata is never diagnostic evidence. This does not certify arbitrary PDF/OCR, live tenant isolation, or production deployment.
+
+### 2026-11-01 — PDF xref-stream lexical compatibility
+PAR-005b19 accepts bounded PDF whitespace and `%` line comments in a verified PDF 1.5 xref-stream dictionary and final `startxref`. The decoder uses a temporary normalized dictionary only; raw stream bytes, physical object offsets and page evidence remain unchanged. Comments and `/Info`/`/ID` never become findings. Unsupported revisions and production PDF/OCR or live tenant certification remain open (Decision 096).

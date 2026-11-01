@@ -52,8 +52,10 @@ function pdf(options = {}) {
   const encoded = deflateSync(decoded);
   const extras = options.headerExtra ?? "";
   const header = `<< /Type /XRef /Size ${options.size ?? size} /Root ${options.root ?? "1 0 R"} /W ${options.w ?? "[1 4 2]"} ${options.index ?? ""} /Length ${options.length ?? encoded.length} /Filter ${options.filter ?? "/FlateDecode"} ${extras} >>`;
-  raw += `10 0 obj\n${header} stream\n${encoded.toString("latin1")}\nendstream\nendobj\n`;
-  raw += `startxref\n${options.startxref ?? xrefOffset}\n%%EOF\n`;
+  const finalHeader = options.headerTransform ? options.headerTransform(header) : header;
+  raw += `10 0 obj\n${finalHeader} stream\n${encoded.toString("latin1")}\nendstream\nendobj\n`;
+  const trailer = `startxref\n${options.startxref ?? xrefOffset}\n%%EOF\n`;
+  raw += options.trailerTransform ? options.trailerTransform(trailer) : trailer;
   if (options.suffix) raw += options.suffix;
   return Buffer.from(raw, "latin1");
 }
@@ -181,4 +183,77 @@ test("xref stream rejects nested, ambiguous or oversized dictionary content", ()
   reject(pdf({ headerExtra: "/Filter /FlateDecode" }), /duplicate Filter/);
   reject(pdf({ headerExtra: validIds + " /Unknown << /Info 8 0 R >>" }), /unsupported/);
   reject(pdf({ headerExtra: validIds + " " + " ".repeat(5000) }), /dictionary/);
+});
+
+// Decision 096: bounded xref-stream lexical compatibility. These tests use
+// physical byte offsets from the unmodified object prefix, not reconstructed
+// offsets, and assert that comments never become evidence.
+test("xref dictionary accepts CRLF and LF comments around Type, Filter and W", () => {
+  const result = parseArtifact("commented-xref.pdf", pdf({
+    headerTransform: (header) => header
+      .replace("/Type /XRef", "/Type% harmless generator note\r\n/XRef")
+      .replace("/W [1 4 2]", "/W% width comment\n[1 4 2]")
+      .replace("/Filter /FlateDecode", "/Filter% encoding comment\r/FlateDecode"),
+  }));
+  assert.equal(result.sourceSegments[0].locator.page, 1);
+  assert.match(result.sourceSegments[0].content, /canonical Customer ID/);
+  assert.doesNotMatch(JSON.stringify(result.sourceSegments), /harmless generator|width comment|encoding comment/);
+});
+
+test("xref dictionary permits PDF NUL, HT and form-feed token separators", () => {
+  const result = parseArtifact("pdf-whitespace.pdf", pdf({
+    headerTransform: (header) => header
+      .replace("/Type /XRef", "/Type\0/XRef")
+      .replace("/Size 11", "/Size\f11")
+      .replace("/Filter /FlateDecode", "/Filter\t/FlateDecode"),
+  }));
+  assert.equal(result.sourceSegments[0].locator.type, "pdf-page");
+});
+
+test("xref metadata comments stay outside hex IDs and never become evidence", () => {
+  const result = parseArtifact("xref-id-comments.pdf", pdf({
+    infoBody: safeInfo,
+    headerExtra: "/Info 8 0 R " + validIds,
+    headerTransform: (header) => header
+      .replace("/Info 8 0 R", "/Info% metadata field\n8 0 R")
+      .replace("/ID [", "/ID% identifier field\n[")
+      .replace("> <", ">% identifier separator\n<"),
+  }));
+  assert.match(result.sourceSegments[0].content, /canonical Customer ID/);
+  assert.doesNotMatch(JSON.stringify(result.sourceSegments), /metadata field|identifier field|identifier separator|DO NOT EXTRACT/);
+});
+
+test("terminal startxref permits bounded PDF whitespace and comments", () => {
+  const result = parseArtifact("xref-terminal.pdf", pdf({
+    trailerTransform: (trailer) => trailer.replace("startxref\n", "startxref% offset note\r\n\f\0")
+      .replace("\n%%EOF", "% final offset comment\r\n%%EOF"),
+  }));
+  assert.equal(result.sourceSegments[0].locator.page, 1);
+});
+
+test("comments cannot repair malformed offsets, object generations or compressed indexes", () => {
+  reject(pdf({ headerTransform: (header) => header.replace("/Type /XRef", "/Type% note\n/XRef"), startxref: 7 }), /startxref/);
+  reject(pdf({ headerTransform: (header) => header.replace("/Filter /FlateDecode", "/Filter% note\n/FlateDecode"), overrideEntry: { 4: [1, 1, 0] } }), /offset/);
+  reject(pdf({ compressed: true, headerTransform: (header) => header.replace("/W [1 4 2]", "/W% note\n[1 4 2]"), overrideEntry: { 2: [2, 9, 0] } }), /compressed object stream\/index/);
+});
+
+test("xref comments do not permit duplicate, unknown, revision or encrypted fields", () => {
+  reject(pdf({ headerExtra: "/Root% note\n1 0 R" }), /duplicate Root/);
+  reject(pdf({ headerExtra: "/Unexpected% note\n8" }), /unsupported/);
+  reject(pdf({ headerExtra: "/Prev% note\n1" }), /revisions/);
+  reject(pdf({ headerExtra: "/Encrypt% note\n8 0 R" }), /encrypted|revisions/);
+});
+
+test("xref lexical parsing rejects invalid whitespace, comments in hex and oversized headers", () => {
+  reject(pdf({ headerTransform: (header) => header.replace("/Size 11", "/Size\v11") }), /non-PDF whitespace/);
+  reject(pdf({ headerTransform: (header) => header.replace("/Size 11", "/Size\u00a011") }), /non-PDF whitespace/);
+  reject(pdf({ headerExtra: "/ID [<" + "ab".repeat(8) + "% comment\n" + "ab".repeat(8) + "> <" + "cd".repeat(16) + ">]" }), /malformed ID/);
+  reject(pdf({ headerExtra: "%" + "x".repeat(4100) + "\n" }), /dictionary|byte budget/);
+});
+
+test("terminal comments cannot hide a revision, suffix or malformed EOF", () => {
+  reject(pdf({ suffix: "startxref\n1\n%%EOF\n" }), /revisions/);
+  reject(pdf({ trailerTransform: (trailer) => trailer.replace("\n%%EOF", "\n% missing EOF\n") }), /revisions|startxref|EOF/);
+  reject(pdf({ trailerTransform: (trailer) => trailer.replace("\n%%EOF", "\n% comment\n%%EOF") + "unexpected" }), /startxref|EOF/);
+  reject(pdf({ trailerTransform: (trailer) => trailer.replace("startxref\n", "startxref%" + "x".repeat(4100) + "\n") }), /byte budget/);
 });

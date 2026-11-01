@@ -350,3 +350,6 @@ The classic xref validator normalizes PDF lexical whitespace/comments only in it
 
 ### 2026-10-31 — Bounded xref-stream metadata (Decision 095)
 The existing parser boundary now validates optional `/Info` (indexed, live generation-zero direct metadata dictionary) and `/ID` (two bounded hexadecimal byte strings) in a single PDF 1.5 Flate xref stream. A flat 4-KiB dictionary grammar rejects unknown/duplicate fields; direct-offset, compressed-index and physical-page provenance checks are unchanged. No schema, UI, job, or external adapter changes.
+
+### 2026-11-01 — PDF xref-stream lexical boundary (Decision 096)
+Normalize at most 4 KiB of xref-stream dictionary and terminal `startxref` PDF whitespace/comments for strict grammar and Flate filter selection. Decode a temporary normalized dictionary with the original encoded bytes; never rewrite source objects, stream payloads, physical offsets or evidence. Single-revision, indexed-object, Root Catalog and independently verified page-tree checks remain mandatory. No API, UI, job, schema or external-provider changes.

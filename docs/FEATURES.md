@@ -168,3 +168,6 @@ PAR-005b17 is implemented in the credential-free local/demo parser. Bounded PDF 
 
 ### 2026-10-31 — PAR-005b18: PDF xref-stream metadata
 Status: **implemented and regression-tested in the bounded local/demo PDF parser; production PDF parsing remains in progress**. Optional `/Info` and `/ID` are structurally validated but never promoted to architecture evidence. Duplicate/unknown/malformed fields, bad metadata references, encrypted or revisioned structures, invalid object indexes and unproven physical-page locators fail closed. Seven new regression cases; no MVP scope expansion (Decision 095).
+
+### 2026-11-01 — PAR-005b19: PDF xref-stream whitespace and comments
+Status: **implemented and locally regression-tested in the bounded local/demo adapter; production PDF remains in progress**. PDF whitespace and `%` comments are accepted only in a capped xref dictionary and terminal `startxref`. Eight tests cover metadata/evidence separation, valid offsets, compressed-index checks and malformed revisions. Existing MVP limits and tenant protections remain unchanged. See Decision 096.

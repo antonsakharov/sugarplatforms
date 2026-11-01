@@ -245,3 +245,6 @@ Accept standard `/RunLengthDecode` (`/RL`) page-content and selected-font CMap s
 
 ## ADR-095 — Bounded PDF xref-stream metadata (2026-10-31)
 **Status:** Accepted for local/demo parsing. A flat bounded PDF 1.5 Flate xref-stream dictionary may contain optional unique `/Info` (live indexed generation-zero direct metadata dictionary) and `/ID` (two 16–64-byte hex strings). Metadata is never architecture evidence; duplicate/unknown/revision/encryption fields fail closed, and object-index/physical-page provenance checks remain mandatory. See `project/DECISION_095.md`. Production PDF/OCR and live tenant security remain uncertified.
+
+## ADR-096 — Bounded PDF xref-stream whitespace and comments (2026-11-01)
+**Status:** Accepted for local/demo parsing. Normalize only the 4-KiB xref dictionary and final `startxref` lexical grammar; decode using a temporary normalized header and original compressed bytes. Reject malformed comments, non-PDF whitespace, duplicate/unknown fields, revision/encryption markers, wrong offsets and unproven page references. Comments/metadata are not architecture evidence. See `project/DECISION_096.md`. No production PDF or live tenant certification.

@@ -140,3 +140,6 @@ PDF `%` comments are ignored only in the bounded classic trailer/startxref lexic
 
 ### 2026-10-31 — Xref-stream metadata trust boundary
 Optional PDF 1.5 `/Info` and `/ID` xref-stream values are checked for structure only; they are never source evidence, architecture objects, findings, or report content. `/Info` must be a live indexed direct dictionary, not a page, compressed object, stream or Catalog; `/ID` is two 16–64-byte hex strings. Reject unknown/duplicate/revision/encryption fields and oversized dictionaries. Upload malware quarantine, secret scanning, tenant scoping and MVP limits remain mandatory. Live production security is not certified (Decision 095).
+
+### 2026-11-01 — Xref-stream comment trust boundary
+Only bounded xref dictionary and terminal offset lexical regions accept PDF whitespace and `%` line comments. Hex IDs are opaque; comments inside IDs, non-PDF whitespace, duplicate/unknown keys, oversized regions, bad offsets, hybrid/incremental revisions and encryption fail closed. Comments and document metadata are never evidence. Malware quarantine, secret screening, tenant scoping, architecture-only limits and live two-tenant certification requirements remain unchanged (Decision 096).

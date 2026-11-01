@@ -234,3 +234,6 @@ PAR-005b17 adds eight regression cases for PDF whitespace/comments around classi
 
 ### 2026-10-31 — Xref-stream metadata slice
 Decision 095 adds seven regression tests for bounded PDF 1.5 `/Info` and `/ID`. Locally, 17/17 xref tests and 147/147 focused parser/upload/graph tests pass; full suite has 24 missing-dependency failures, and offline `npm ci` could not complete. Check CI on the published draft branch before claiming full build/type/test success; live production tenant isolation remains unverified. See `project/VALIDATED_2026-10-31.md`.
+
+### 2026-11-01 — Xref-stream lexical compatibility
+Decision 096 adds eight regression tests. Local xref stream: 25/25 passed; focused PDF/upload/graph: 164/164 passed; source lint passed. Full local suite: 331 passed, 24 failed from missing installed modules; `npm ci` failed in the restricted runner, so local typecheck/build remain blocked. Check new branch CI independently; live two-tenant production security certification remains open. See `project/VALIDATED_2026-11-01.md`.

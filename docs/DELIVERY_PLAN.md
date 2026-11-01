@@ -143,3 +143,6 @@ Added strict PDF whitespace and `%` comment support around classic trailer field
 
 ### 2026-10-31 — PAR-005b18 xref-stream metadata
 The credential-free local/demo PDF adapter validates optional `/Info` and `/ID` xref-stream fields without extracting metadata or weakening evidence provenance. Seven new tests and Decision 095 cover the slice. Production-grade PDF/OCR, dependency-backed CI and live authenticated two-tenant managed database/private storage/malware-scanner certification remain independent release gates. Next: PAR-005b19 bounded xref-stream lexical whitespace/comment handling.
+
+### 2026-11-01 — PAR-005b19 xref-stream lexical slice
+Added bounded PDF 1.5 xref-stream dictionary/startxref whitespace and comment compatibility with eight positive/adversarial tests (Decision 096). Physical object offsets, compressed indexes, metadata non-extraction and page provenance are unchanged. Next: PAR-005b20 bounded xref-stream zero-width `/W` default-field support. Production PDF/OCR and live non-bypass PostgreSQL/private-storage/malware certification remain release blockers.

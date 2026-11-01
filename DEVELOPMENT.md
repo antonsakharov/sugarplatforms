@@ -258,3 +258,6 @@ Run `node --experimental-strip-types --import ./scripts/register-test-loader.mjs
 
 ### 2026-10-31 — PDF xref-stream metadata development note
 Run `node --experimental-strip-types --import ./scripts/register-test-loader.mjs --test tests/pdf-xref-stream.test.mjs` for bounded `/Info`/`/ID` regressions. Run `npm ci && npm run validate` in a networked Node >=20.20.2 environment for full dependency-backed validation. The local adapter rejects unsupported PDF variants and does not replace managed tenant/storage/scanner certification (Decision 095).
+
+### 2026-11-01 — Xref-stream lexical validation
+Run `node --experimental-strip-types --test tests/pdf-xref-stream.test.mjs` for Decision 096 regressions, then `npm run lint`, `npm test`, `npm run typecheck`, and `npm run build` after a clean `npm ci` on Node 22. The parser accepts only bounded PDF xref-stream comments/whitespace, not general PDF/OCR. Live non-bypass two-tenant database/storage/scanner validation is still required before production.

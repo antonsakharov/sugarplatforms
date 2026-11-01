@@ -8,6 +8,7 @@ import { decodePdfStream } from "./pdf-stream-filters.ts";
 const MAX_XREF_OBJECTS = 4096;
 const MAX_XREF_BYTES = 64 * 1024;
 const MAX_OBJSTM_INDEX_BYTES = 1024 * 1024;
+const MAX_XREF_LEXICAL_BYTES = 4096;
 
 function invalid(reason: string): never {
   throw new Error(`PDF cross-reference stream is invalid or unsupported: ${reason}; use the production PDF adapter.`);
@@ -18,6 +19,46 @@ function integer(dictionary: string, key: string): number | null {
   if (matches.length !== 1) return null;
   const number = Number(matches[0][1]);
   return Number.isSafeInteger(number) ? number : null;
+}
+
+/**
+ * Normalize only a bounded xref dictionary or terminal startxref lexical
+ * region. The original PDF, physical offsets, encoded stream, and page
+ * evidence are never modified. PDF whitespace is NUL/HT/LF/FF/CR/space;
+ * a % comment ends only at a real CR or LF. Hexadecimal IDs are opaque and
+ * cannot have comments repaired into valid hexadecimal bytes.
+ */
+function normalizeXrefLexical(source: string): string {
+  if (source.length > MAX_XREF_LEXICAL_BYTES) invalid("xref dictionary or trailer lexical region exceeds byte budget");
+  let normalized = "";
+  let inHex = false;
+  for (let index = 0; index < source.length; index += 1) {
+    const char = source[index];
+    if (!inHex && char === "%") {
+      while (index < source.length && source[index] !== "\r" && source[index] !== "\n") index += 1;
+      if (index === source.length) invalid("unterminated xref comment");
+      normalized += " ";
+      index -= 1;
+    } else if (!inHex && (source.slice(index, index + 2) === "<<" || source.slice(index, index + 2) === ">>")) {
+      normalized += source.slice(index, index + 2);
+      index += 1;
+    } else if (!inHex && char === "<") {
+      inHex = true;
+      normalized += char;
+    } else if (inHex && char === ">") {
+      inHex = false;
+      normalized += char;
+    } else if (/[\x00\x09\x0A\x0C\x0D\x20]/.test(char)) {
+      normalized += " ";
+    } else {
+      if (char.charCodeAt(0) < 0x21 || char.charCodeAt(0) > 0x7e) {
+        invalid("non-PDF whitespace or binary xref token");
+      }
+      normalized += char;
+    }
+  }
+  if (inHex) invalid("unterminated hexadecimal xref value");
+  return normalized;
 }
 
 type XrefDictionary = {
@@ -34,7 +75,7 @@ type XrefDictionary = {
  * evidence and cannot introduce a nested or duplicate dictionary field.
  */
 function parseXrefDictionary(header: string): XrefDictionary {
-  if (header.length > 4096 || !/^<<[\s\S]*>>$/.test(header.trim())) invalid("malformed xref stream dictionary");
+  if (header.length > MAX_XREF_LEXICAL_BYTES || !/^<<[\s\S]*>>$/.test(header.trim())) invalid("malformed xref stream dictionary");
   const patterns: Record<string, RegExp> = {
     Type: /^\/Type\s+\/XRef(?=\s|\/|$)/,
     Size: /^\/Size\s+(\d+)(?=\s|\/|$)/,
@@ -124,7 +165,10 @@ export function validatePdfXrefStream(
   directObjects: ReadonlyMap<string, string>,
   expandedObjects: ReadonlyMap<string, string>,
 ): void {
-  const xrefs = [...directObjects.entries()].filter(([, body]) => /\/Type\s*\/XRef\b/.test(body.split(/\bstream\r?\n/, 1)[0]));
+  const xrefs = [...directObjects.entries()].filter(([, body]) => {
+    const header = body.split(/\bstream\r?\n/, 1)[0];
+    return /\/XRef\b/.test(header) && /\/Type\s*\/XRef\b/.test(normalizeXrefLexical(header));
+  });
   const hasTrailer = /\bstartxref\b/.test(raw);
   if (xrefs.length === 0 && !hasTrailer) {
     if ((raw.match(/%%EOF/g) ?? []).length > 1 || /\/(?:Prev|XRefStm)\b/.test(raw) ||
@@ -136,17 +180,33 @@ export function validatePdfXrefStream(
       /(?:^|[\r\n])\s*xref\s*(?:[\r\n]|$)/.test(raw) || /\/(?:Prev|XRefStm)\b/.test(raw)) {
     invalid("incremental, hybrid, or table-based revisions are unsupported");
   }
-  const trailer = /\bstartxref\s+(\d+)\s+%%EOF\s*$/.exec(raw);
-  if (!trailer) invalid("missing or malformed final startxref/EOF");
+  // Validate the physical trailer before lexical normalization. In
+  // particular %%EOF must start a real line, not occur inside a comment.
+  const startMarkers = [...raw.matchAll(/(?:^|[\r\n])startxref(?=[\x00\x09\x0A\x0C\x0D\x20%])/g)];
+  const eofMarkers = [...raw.matchAll(/(?:^|[\r\n])%%EOF(?=[\x00\x09\x0A\x0C\x0D\x20]|$)/g)];
+  if (startMarkers.length !== 1 || eofMarkers.length !== 1) invalid("incremental or malformed xref revisions");
+  const startMarker = startMarkers[0];
+  const startIndex = startMarker.index! + startMarker[0].lastIndexOf("startxref");
+  const eofMarker = eofMarkers[0];
+  const eofIndex = eofMarker.index! + eofMarker[0].lastIndexOf("%%EOF");
+  if (startIndex >= eofIndex || !/^[\x00\x09\x0A\x0C\x0D\x20]*$/.test(raw.slice(eofIndex + 5))) {
+    invalid("missing or malformed final startxref/EOF");
+  }
+  const trailer = /^startxref +(\d+)$/.exec(normalizeXrefLexical(raw.slice(startIndex, eofIndex)).trim());
+  if (!trailer || !Number.isSafeInteger(Number(trailer[1]))) invalid("missing or malformed final startxref/EOF");
   const [xrefRef, xrefBody] = xrefs[0];
   const offsets = exactObjectOffsets(raw);
   if (offsets.size !== directObjects.size || offsets.get(xrefRef) !== Number(trailer[1])) invalid("startxref does not point to the xref object");
   const header = xrefBody.split(/\bstream\r?\n/, 1)[0];
-  const { size, length, root, widths: w, info } = parseXrefDictionary(header);
+  const normalizedHeader = normalizeXrefLexical(header);
+  const { size, length, root, widths: w, info } = parseXrefDictionary(normalizedHeader);
   if (!/\/Type\s*\/Catalog\b/.test(expandedObjects.get(root) ?? "")) invalid("unproven Root catalog");
   const stream = /\bstream\r?\n([\s\S]*?)\r?\nendstream\b/.exec(xrefBody);
   if (!stream || Buffer.byteLength(stream[1], "latin1") !== length) invalid("encoded xref Length mismatch");
-  const decoded = decodePdfStream(xrefBody, MAX_XREF_BYTES);
+  // Decode with a temporary normalized dictionary so legal comments between
+  // /Filter and /FlateDecode cannot confuse the shared stream-filter parser.
+  // The encoded stream and all source bytes remain untouched.
+  const decoded = decodePdfStream(normalizedHeader + xrefBody.slice(header.length), MAX_XREF_BYTES);
   const stride = w[0] + w[1] + w[2];
   if (decoded === null || decoded.length !== size * stride) invalid("xref entry count or decoded length mismatch");
   const bytes = Buffer.from(decoded, "latin1");

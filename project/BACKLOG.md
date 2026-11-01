@@ -314,4 +314,10 @@ A feature is complete only when the intended user action works, tests exist, bui
 - [x] PAR-005b18-TEST Add seven positive/adversarial tests for live direct Info references, ID bounds, compressed page trees, duplicate/unknown fields, revisions, offsets, and oversized dictionaries.
 - [-] PAR-005/006 Production-grade PDF/OCR, complex layout/font coverage and additional lexical variants remain in progress.
 - [!] SEC-LIVE-TENANT Live authenticated non-bypass PostgreSQL/RLS, private storage and malware-scanner isolation require provisioned services.
-- [ ] PAR-005b19 Next: bounded PDF xref-stream whitespace/comment compatibility without altering physical offsets or evidence provenance.
+- [x] PAR-005b19 Accept bounded PDF xref-stream whitespace/comments without altering physical offsets or evidence provenance.
+
+### 2026-11-01 — PDF 1.5 xref-stream lexical compatibility
+- [x] PAR-005b19-TEST Add eight positive/adversarial cases for comments, PDF whitespace, metadata non-extraction, physical offsets, compressed indexes, revisions and malformed lexical regions.
+- [-] PAR-005/006 Production-grade PDF/OCR and complex layout/font support remain in progress.
+- [!] SEC-LIVE-TENANT Live authenticated non-bypass PostgreSQL/RLS, private bucket and malware-scanner isolation remain blocked on provisioned services.
+- [ ] PAR-005b20 Next: bounded PDF xref-stream zero-width `/W` default-field compatibility with exact indexed object verification.
