@@ -1,0 +1,23 @@
+import { z } from "zod";
+import { storedGeneratedReportSchema, type GeneratedReportMetadataStore, type StoredGeneratedReport } from "./generated-report-storage.ts";
+import type { TenantScope } from "./tenancy.ts";
+
+export type SupabaseGeneratedReportMetadataConfig = { projectUrl: string; publishableKey: string; timeoutMs: number };
+type FetchLike = typeof fetch;
+const rowSchema = z.object({ report_id: z.string(), assessment_id: z.string(), version: z.number().int().positive(), storage_key: z.string(), checksum_sha256: z.string(), media_type: z.literal("application/pdf"), size_bytes: z.number().int().positive(), page_count: z.number().int().positive(), created_at: z.string() });
+export class SupabaseGeneratedReportMetadataError extends Error { constructor(message = "Managed generated-report metadata is unavailable.") { super(message); this.name = "SupabaseGeneratedReportMetadataError"; } }
+function restUrl(config: SupabaseGeneratedReportMetadataConfig, path: string) { return `${config.projectUrl.replace(/\/$/, "")}/rest/v1/${path}`; }
+async function request(fetchImpl: FetchLike, config: SupabaseGeneratedReportMetadataConfig, accessToken: string | undefined, path: string, init: RequestInit = {}) {
+  if (!accessToken?.trim()) throw new SupabaseGeneratedReportMetadataError("A verified Supabase access token is required for managed generated-report metadata.");
+  const controller = new AbortController(); const timer = setTimeout(() => controller.abort(), config.timeoutMs);
+  try { const response = await fetchImpl(restUrl(config, path), { ...init, cache: "no-store", signal: controller.signal, headers: { apikey: config.publishableKey, Authorization: `Bearer ${accessToken}`, Accept: "application/json", ...(init.body ? { "Content-Type": "application/json" } : {}), ...(init.headers ?? {}) } }); if (!response.ok) throw new SupabaseGeneratedReportMetadataError(`Managed generated-report metadata request failed with status ${response.status}.`); return response; }
+  catch (error) { if (error instanceof SupabaseGeneratedReportMetadataError) throw error; throw new SupabaseGeneratedReportMetadataError(error instanceof Error && error.name === "AbortError" ? "Managed generated-report metadata request timed out." : undefined); }
+  finally { clearTimeout(timer); }
+}
+function fromRow(row: z.infer<typeof rowSchema>): StoredGeneratedReport { return storedGeneratedReportSchema.parse({ reportId: row.report_id, assessmentId: row.assessment_id, version: row.version, storageKey: row.storage_key, checksumSha256: row.checksum_sha256, mediaType: row.media_type, size: row.size_bytes, pageCount: row.page_count, createdAt: row.created_at }); }
+export class SupabaseGeneratedReportMetadataStore implements GeneratedReportMetadataStore {
+  private readonly config: SupabaseGeneratedReportMetadataConfig; private readonly fetchImpl: FetchLike;
+  constructor(config: SupabaseGeneratedReportMetadataConfig, fetchImpl: FetchLike = fetch) { this.config = config; this.fetchImpl = fetchImpl; }
+  async find(scope: TenantScope, assessmentId: string, reportId: string, accessToken?: string): Promise<StoredGeneratedReport | null> { const path = `generated_report_objects?select=report_id,assessment_id,version,storage_key,checksum_sha256,media_type,size_bytes,page_count,created_at&organization_id=eq.${encodeURIComponent(scope.organizationId)}&workspace_id=eq.${encodeURIComponent(scope.workspaceId)}&assessment_id=eq.${encodeURIComponent(assessmentId)}&report_id=eq.${encodeURIComponent(reportId)}&limit=1`; const response = await request(this.fetchImpl, this.config, accessToken, path); const rows = z.array(rowSchema).parse(await response.json()); return rows.length ? fromRow(rows[0]) : null; }
+  async save(scope: TenantScope, value: StoredGeneratedReport, accessToken?: string): Promise<StoredGeneratedReport> { const parsed = storedGeneratedReportSchema.parse(value); const response = await request(this.fetchImpl, this.config, accessToken, "generated_report_objects", { method: "POST", headers: { Prefer: "return=representation" }, body: JSON.stringify({ organization_id: scope.organizationId, workspace_id: scope.workspaceId, assessment_id: parsed.assessmentId, report_id: parsed.reportId, version: parsed.version, storage_key: parsed.storageKey, checksum_sha256: parsed.checksumSha256, media_type: parsed.mediaType, size_bytes: parsed.size, page_count: parsed.pageCount, created_at: parsed.createdAt }) }); const rows = z.array(rowSchema).parse(await response.json()); if (rows.length !== 1) throw new SupabaseGeneratedReportMetadataError("Managed generated-report metadata insert returned an unexpected result."); return fromRow(rows[0]); }
+}
