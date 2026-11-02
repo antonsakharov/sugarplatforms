@@ -171,3 +171,6 @@ Status: **implemented and regression-tested in the bounded local/demo PDF parser
 
 ### 2026-11-01 — PAR-005b19: PDF xref-stream whitespace and comments
 Status: **implemented and locally regression-tested in the bounded local/demo adapter; production PDF remains in progress**. PDF whitespace and `%` comments are accepted only in a capped xref dictionary and terminal `startxref`. Eight tests cover metadata/evidence separation, valid offsets, compressed-index checks and malformed revisions. Existing MVP limits and tenant protections remain unchanged. See Decision 096.
+
+### 2026-11-02 — PAR-005b20: PDF xref-stream zero-width `/W` fields
+Status: **implemented and locally regression-tested in the bounded demo parser; production PDF parsing remains in progress**. Zero-width type fields default to in-use and zero-width offset/generation/index fields default to zero, but only documents with exact physical object references, complete decoded xref entries and verified page-tree provenance pass. Eight tests cover direct page evidence, metadata separation, lexical comments, invalid object zero, absent offsets, all-zero widths, compressed index collisions and stride mismatch. No MVP or privacy expansion (Decision 097).

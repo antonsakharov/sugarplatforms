@@ -146,3 +146,6 @@ The credential-free local/demo PDF adapter validates optional `/Info` and `/ID` 
 
 ### 2026-11-01 — PAR-005b19 xref-stream lexical slice
 Added bounded PDF 1.5 xref-stream dictionary/startxref whitespace and comment compatibility with eight positive/adversarial tests (Decision 096). Physical object offsets, compressed indexes, metadata non-extraction and page provenance are unchanged. Next: PAR-005b20 bounded xref-stream zero-width `/W` default-field support. Production PDF/OCR and live non-bypass PostgreSQL/private-storage/malware certification remain release blockers.
+
+### 2026-11-02 — PAR-005b20 xref-stream omitted-field defaults
+Added bounded zero-width `/W` default-field compatibility to the local/demo PDF 1.5 validator, with eight new positive/adversarial regression cases (Decision 097). Direct offsets, compressed indexes, physical page references, metadata non-extraction, and MVP limits remain enforced. Next: PAR-005b21, bounded PDF xref-stream sparse `/Index` ranges with complete live-object proof. Production PDF/OCR and live authenticated two-tenant database, private storage, and malware-scanner certification remain separate release gates.

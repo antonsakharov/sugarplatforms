@@ -321,3 +321,10 @@ A feature is complete only when the intended user action works, tests exist, bui
 - [-] PAR-005/006 Production-grade PDF/OCR and complex layout/font support remain in progress.
 - [!] SEC-LIVE-TENANT Live authenticated non-bypass PostgreSQL/RLS, private bucket and malware-scanner isolation remain blocked on provisioned services.
 - [ ] PAR-005b20 Next: bounded PDF xref-stream zero-width `/W` default-field compatibility with exact indexed object verification.
+
+### 2026-11-02 — PDF 1.5 zero-width cross-reference fields
+- [x] PAR-005b20 Accept PDF-defined zero-width `/W` defaults only when complete indexed-object verification and physical-page provenance succeed.
+- [x] PAR-005b20-TEST Add eight positive/adversarial cases for defaults, metadata non-extraction, offsets, compressed indexes, object zero, widths and decoded stride.
+- [-] PAR-005/006 Production-grade PDF/OCR and complex layout/font coverage remain in progress.
+- [!] SEC-LIVE-TENANT Live authenticated non-bypass PostgreSQL/RLS, private bucket and malware-scanner isolation require provisioned services.
+- [ ] PAR-005b21 Next: bounded sparse PDF xref-stream `/Index` ranges with complete live-object proof and fail-closed ambiguity handling.

@@ -181,3 +181,6 @@ The bounded local/demo PDF 1.5 xref-stream validator now accepts structurally ve
 
 ### 2026-11-01 — PDF xref-stream lexical compatibility
 PAR-005b19 accepts bounded PDF whitespace and `%` line comments in a verified PDF 1.5 xref-stream dictionary and final `startxref`. The decoder uses a temporary normalized dictionary only; raw stream bytes, physical object offsets and page evidence remain unchanged. Comments and `/Info`/`/ID` never become findings. Unsupported revisions and production PDF/OCR or live tenant certification remain open (Decision 096).
+
+### 2026-11-02 — PDF xref-stream omitted-field defaults
+PAR-005b20 supports bounded PDF 1.5 `/W` zero-width field defaults in the local/demo evidence parser (Decision 097). Missing type defaults to in-use, and missing offset/generation/index defaults to zero, but every live direct offset and compressed index must still match the actual source bytes. Complete-index documents that cannot prove object-zero and all referenced objects fail closed. Production PDF/OCR and live tenant/storage/scanner certification remain outstanding.

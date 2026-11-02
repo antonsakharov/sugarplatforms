@@ -353,3 +353,6 @@ The existing parser boundary now validates optional `/Info` (indexed, live gener
 
 ### 2026-11-01 — PDF xref-stream lexical boundary (Decision 096)
 Normalize at most 4 KiB of xref-stream dictionary and terminal `startxref` PDF whitespace/comments for strict grammar and Flate filter selection. Decode a temporary normalized dictionary with the original encoded bytes; never rewrite source objects, stream payloads, physical offsets or evidence. Single-revision, indexed-object, Root Catalog and independently verified page-tree checks remain mandatory. No API, UI, job, schema or external-provider changes.
+
+### 2026-11-02 — Xref-stream `/W` omitted fields
+The bounded PDF 1.5 local/demo validator accepts zero-width `/W` fields only under the PDF default values (type 1; other fields 0). It rejects all-zero strides, widths above four bytes, absent or incorrect direct offsets, invalid object-zero entries, conflicting compressed indexes, and any missing or extra indexed objects. Exact decoded entry length and page-tree evidence remain mandatory; the raw PDF is never normalized to create evidence (Decision 097).

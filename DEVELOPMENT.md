@@ -261,3 +261,6 @@ Run `node --experimental-strip-types --import ./scripts/register-test-loader.mjs
 
 ### 2026-11-01 — Xref-stream lexical validation
 Run `node --experimental-strip-types --test tests/pdf-xref-stream.test.mjs` for Decision 096 regressions, then `npm run lint`, `npm test`, `npm run typecheck`, and `npm run build` after a clean `npm ci` on Node 22. The parser accepts only bounded PDF xref-stream comments/whitespace, not general PDF/OCR. Live non-bypass two-tenant database/storage/scanner validation is still required before production.
+
+### 2026-11-02 — PDF xref-stream default-field regression
+Run `node --experimental-strip-types --test tests/pdf-xref-stream.test.mjs` to exercise PAR-005b20 zero-width `/W` defaults and adversarial offset/index checks. Run `npm run baseline:check`, `npm run typecheck`, `npm run lint`, `npm test`, `npm run build`, and `npm run recovery:verify` before approving a recovery PR. This parser remains a bounded local/demo adapter; do not upload confidential records or enable live production access. See Decision 097 and `project/VALIDATED_2026-11-02.md`.

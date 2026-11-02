@@ -42,10 +42,15 @@ function pdf(options = {}) {
       : compressed && id <= 3 ? [2, 9, id - 1]
       : offsets.has(id) ? [1, offsets.get(id), 0] : [0, 0, 0]);
     const [type, offset, gen] = entry;
-    const bytes = Buffer.alloc(7);
-    bytes.writeUInt8(type, 0);
-    bytes.writeUInt32BE(offset, 1);
-    bytes.writeUInt16BE(gen, 5);
+    const widths = options.entryWidths ?? [1, 4, 2];
+    const bytes = Buffer.alloc(widths.reduce((sum, width) => sum + width, 0));
+    let position = 0;
+    for (const [value, width] of [[type, widths[0]], [offset, widths[1]], [gen, widths[2]]]) {
+      for (let byte = width - 1; byte >= 0; byte -= 1) {
+        bytes[position + byte] = Math.floor(value / (256 ** (width - byte - 1))) % 256;
+      }
+      position += width;
+    }
     entries.push(bytes);
   }
   const decoded = Buffer.concat(entries);
@@ -101,7 +106,7 @@ test("xref stream rejects invalid compressed index and wrong object-stream refer
 });
 
 test("xref stream rejects unsupported widths, partial Index, invalid Size and Root", () => {
-  reject(pdf({ w: "[0 4 2]" }), /W widths/);
+  reject(pdf({ w: "[0 4 2]" }), /decoded length/);
   reject(pdf({ index: "/Index [1 10]" }), /Index/);
   reject(pdf({ size: 5000 }), /Size/);
   reject(pdf({ root: "8 0 R" }), /Root/);
@@ -256,4 +261,49 @@ test("terminal comments cannot hide a revision, suffix or malformed EOF", () => 
   reject(pdf({ trailerTransform: (trailer) => trailer.replace("\n%%EOF", "\n% missing EOF\n") }), /revisions|startxref|EOF/);
   reject(pdf({ trailerTransform: (trailer) => trailer.replace("\n%%EOF", "\n% comment\n%%EOF") + "unexpected" }), /startxref|EOF/);
   reject(pdf({ trailerTransform: (trailer) => trailer.replace("startxref\n", "startxref%" + "x".repeat(4100) + "\n") }), /byte budget/);
+});
+
+// Decision 097: omitted /W fields use PDF-defined defaults, never guessed
+// object offsets, compressed indexes, or physical page coordinates.
+test("zero-width generation field defaults to zero for direct objects", () => {
+  const result = parseArtifact("xref-default-generation.pdf", pdf({ w: "[1 4 0]", entryWidths: [1, 4, 0] }));
+  assert.equal(result.sourceSegments[0].locator.page, 1);
+  assert.match(result.sourceSegments[0].content, /canonical Customer ID/);
+});
+
+test("zero-width generation retains metadata separation and comment compatibility", () => {
+  const result = parseArtifact("xref-default-metadata.pdf", pdf({
+    w: "[1 4 0]", entryWidths: [1, 4, 0], infoBody: safeInfo,
+    headerExtra: "/Info 8 0 R " + validIds,
+    headerTransform: (header) => header.replace("/W [1 4 0]", "/W% omitted generation\n[1 4 0]"),
+  }));
+  assert.equal(result.sourceSegments[0].locator.type, "pdf-page");
+  assert.doesNotMatch(JSON.stringify(result.sourceSegments), /DO NOT EXTRACT|omitted generation/);
+});
+
+test("zero-width type defaults to in-use and cannot disguise a free object zero", () => {
+  reject(pdf({ w: "[0 4 2]", entryWidths: [0, 4, 2] }), /offset|free entry|unindexed/);
+});
+
+test("zero-width offset defaults to zero and cannot invent physical positions", () => {
+  reject(pdf({ w: "[1 0 2]", entryWidths: [1, 0, 2] }), /offset/);
+});
+
+test("all-zero widths and excessive widths fail closed", () => {
+  reject(pdf({ w: "[0 0 0]", entryWidths: [0, 0, 0] }), /W widths/);
+  reject(pdf({ w: "[1 5 0]" }), /W widths/);
+});
+
+test("omitted compressed index cannot masquerade as distinct object indexes", () => {
+  reject(pdf({ compressed: true, w: "[1 4 0]", entryWidths: [1, 4, 0] }), /compressed object stream\/index|duplicate compressed index/);
+});
+
+test("default generation cannot bypass direct object offset validation", () => {
+  reject(pdf({ w: "[1 4 0]", entryWidths: [1, 4, 0], overrideEntry: { 4: [1, 1, 0] } }), /offset/);
+  reject(pdf({ w: "[1 4 0]", entryWidths: [1, 4, 0], overrideEntry: { 4: [0, 0, 0] } }), /free entry/);
+});
+
+test("declared widths must match exact decompressed entry stride", () => {
+  reject(pdf({ w: "[1 4 0]" }), /decoded length/);
+  reject(pdf({ w: "[1 4 2]", entryWidths: [1, 4, 0] }), /decoded length/);
 });

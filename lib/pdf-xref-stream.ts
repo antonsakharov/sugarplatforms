@@ -106,7 +106,7 @@ function parseXrefDictionary(header: string): XrefDictionary {
   if (!Number.isSafeInteger(size) || size < 2 || size > MAX_XREF_OBJECTS ||
       !Number.isSafeInteger(length) || length < 1 || length > MAX_XREF_BYTES) invalid("invalid Size or Length");
   const widths = fields.get("W")?.slice(1).map(Number);
-  if (!widths || widths.length !== 3 || widths.some((value) => !Number.isInteger(value) || value < 1 || value > 4)) invalid("unsupported W widths");
+  if (!widths || widths.length !== 3 || widths.some((value) => !Number.isInteger(value) || value < 0 || value > 4) || widths.every((value) => value === 0)) invalid("unsupported W widths");
   const root = fields.get("Root");
   if (!root || root[2] !== "0" || !Number.isSafeInteger(Number(root[1])) || Number(root[1]) < 1 || Number(root[1]) >= size) invalid("invalid Root reference");
   const info = fields.get("Info");
@@ -216,12 +216,14 @@ export function validatePdfXrefStream(
   const compressedIndexCache = new Map<string, number[]>();
   for (let id = 0; id < size; id += 1) {
     const base = id * stride;
-    const kind = readField(bytes, base, w[0]);
+    // PDF xref streams default an omitted type field to 1 (in-use),
+    // and omitted offset/generation/index fields to zero.
+    const kind = w[0] === 0 ? 1 : readField(bytes, base, w[0]);
     const value = readField(bytes, base + w[0], w[1]);
     const generationOrIndex = readField(bytes, base + w[0] + w[1], w[2]);
     const ref = `${id} 0`;
     if (kind === 0) {
-      if (directObjects.has(ref) || expandedObjects.has(ref) || (id === 0 && generationOrIndex !== 65535)) invalid("free entry conflicts with a live object");
+      if (directObjects.has(ref) || expandedObjects.has(ref) || (id === 0 && generationOrIndex !== (w[2] === 0 ? 0 : 65535))) invalid("free entry conflicts with a live object");
     } else if (kind === 1) {
       if (generationOrIndex !== 0 || offsets.get(ref) !== value || !directObjects.has(ref)) invalid("direct object offset or generation mismatch");
       referencedDirect.add(ref);

@@ -143,3 +143,6 @@ Optional PDF 1.5 `/Info` and `/ID` xref-stream values are checked for structure 
 
 ### 2026-11-01 — Xref-stream comment trust boundary
 Only bounded xref dictionary and terminal offset lexical regions accept PDF whitespace and `%` line comments. Hex IDs are opaque; comments inside IDs, non-PDF whitespace, duplicate/unknown keys, oversized regions, bad offsets, hybrid/incremental revisions and encryption fail closed. Comments and document metadata are never evidence. Malware quarantine, secret screening, tenant scoping, architecture-only limits and live two-tenant certification requirements remain unchanged (Decision 096).
+
+### 2026-11-02 — Zero-width PDF cross-reference field boundary
+Omitted `/W` fields in PDF 1.5 xref streams are interpreted only as specification-defined defaults: type 1, offset 0, generation/index 0. A zero-width field cannot bypass exact physical direct-object offsets, unique compressed indexes, the object-zero free-entry check, decoded-length limits, the single-revision requirement, or evidence provenance. Unsupported layouts fail closed. Document metadata remains excluded from architecture findings; upload limits and architecture-only policy are unchanged. Live tenant/storage/malware isolation remains uncertified (Decision 097).
