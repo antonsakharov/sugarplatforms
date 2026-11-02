@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sugarplatform.dev/schemas/authenticated-context.schema.json",
+  "title": "AuthenticatedContext",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["user", "membership", "tenant", "authMethod", "productionReady"],
+  "properties": {
+    "user": {
+      "type": "object", "additionalProperties": false,
+      "required": ["id", "email", "displayName", "createdAt"],
+      "properties": {
+        "id": {"type": "string", "minLength": 2, "maxLength": 80},
+        "email": {"type": "string", "format": "email"},
+        "displayName": {"type": "string", "minLength": 2, "maxLength": 120},
+        "createdAt": {"type": "string", "format": "date-time"}
+      }
+    },
+    "membership": {
+      "type": "object", "additionalProperties": false,
+      "required": ["userId", "organizationId", "workspaceId", "role", "createdAt"],
+      "properties": {
+        "userId": {"type": "string"}, "organizationId": {"type": "string"}, "workspaceId": {"type": "string"},
+        "role": {"enum": ["viewer", "editor", "admin"]}, "createdAt": {"type": "string", "format": "date-time"}
+      }
+    },
+    "tenant": {"$ref": "tenant-context.schema.json"},
+    "authMethod": {"const": "local-dev"},
+    "productionReady": {"const": false}
+  }
+}
