@@ -1,0 +1,86 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sugarplatforms.dev/schemas/ai-finding-candidate.schema.json",
+  "title": "AiFindingEnvelope",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "assessmentId",
+    "generatedAt",
+    "extractionApprovedAt",
+    "diagnosticGeneratedAt",
+    "provider",
+    "promptVersion",
+    "candidates",
+    "warnings",
+    "stats"
+  ],
+  "properties": {
+    "schemaVersion": { "const": "1.0" },
+    "assessmentId": { "type": "string", "minLength": 1 },
+    "generatedAt": { "type": "string", "minLength": 1 },
+    "extractionApprovedAt": { "type": "string", "minLength": 1 },
+    "diagnosticGeneratedAt": { "type": "string", "minLength": 1 },
+    "provider": { "type": "string", "minLength": 1 },
+    "promptVersion": { "type": "string", "minLength": 1 },
+    "candidates": {
+      "type": "array",
+      "maxItems": 20,
+      "items": {
+        "type": "object",
+        "required": [
+          "id", "ruleId", "ruleVersion", "category", "severity", "confidence", "factStatus", "title", "description", "businessImpact", "technicalImpact", "affectedObjectIds", "evidence", "recommendation", "validationQuestions", "reviewStatus", "origin", "provider", "promptVersion", "candidateStatus"
+        ],
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "ruleId": { "type": "string", "pattern": "^ai-candidate:" },
+          "ruleVersion": { "type": "string", "minLength": 1 },
+          "category": { "enum": ["entity_identity", "ownership", "platform_capability", "integration_risk"] },
+          "severity": { "enum": ["low", "medium", "high"] },
+          "confidence": { "type": "number", "minimum": 0, "maximum": 0.8 },
+          "factStatus": { "const": "derived" },
+          "title": { "type": "string", "minLength": 1 },
+          "description": { "type": "string", "minLength": 1 },
+          "businessImpact": { "type": "string", "minLength": 1 },
+          "technicalImpact": { "type": "string", "minLength": 1 },
+          "affectedObjectIds": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 } },
+          "evidence": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["segmentId", "artifactId", "artifactName", "locator", "evidenceType"],
+              "properties": {
+                "segmentId": { "type": "string" },
+                "artifactId": { "type": "string" },
+                "artifactName": { "type": "string" },
+                "locator": { "type": "string" },
+                "evidenceType": { "const": "direct" }
+              }
+            }
+          },
+          "recommendation": { "type": "string", "minLength": 1 },
+          "validationQuestions": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+          "reviewStatus": { "const": "pending" },
+          "origin": { "const": "ai-assisted" },
+          "provider": { "type": "string", "minLength": 1 },
+          "promptVersion": { "type": "string", "minLength": 1 },
+          "candidateStatus": { "const": "candidate" }
+        },
+        "additionalProperties": false
+      }
+    },
+    "warnings": { "type": "array", "items": { "type": "string" } },
+    "stats": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["candidateCount", "evidenceReferenceCount"],
+      "properties": {
+        "candidateCount": { "type": "integer", "minimum": 0 },
+        "evidenceReferenceCount": { "type": "integer", "minimum": 0 }
+      }
+    }
+  }
+}

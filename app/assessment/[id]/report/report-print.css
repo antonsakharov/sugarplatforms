@@ -1,0 +1,32 @@
+.report-route{max-width:1040px;margin:0 auto}.report-route .panel{max-width:none}.report-route .metrics{max-width:1040px}.report-route h2{margin-bottom:22px}.report-route .inspection-row{break-inside:avoid}.report-route code{overflow-wrap:anywhere}.report-route details summary{cursor:pointer}
+
+@media print{
+  @page{size:A4;margin:14mm 13mm 16mm}
+  html,body{background:#fff!important;color:#111!important;font-family:Arial,Helvetica,sans-serif;font-size:10.5pt;line-height:1.45;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .site-header,.site-footer,.report-route .form-actions{display:none!important}
+  .page-shell{padding:0!important}
+  .report-route{max-width:none!important;margin:0!important;color:#111!important}
+  .report-route .eyebrow{margin:0 0 4mm;color:#555!important;font-size:8.5pt;letter-spacing:.12em}
+  .report-route h1{max-width:none!important;margin:0 0 5mm!important;font-size:27pt!important;line-height:1.05!important;letter-spacing:-.025em!important}
+  .report-route .lede{max-width:none!important;margin:0 0 8mm!important;color:#444!important;font-size:11pt!important;line-height:1.4!important}
+  .report-route h2{margin:0 0 4mm!important;font-size:18pt!important;line-height:1.15!important;letter-spacing:-.02em!important;break-after:avoid-page}
+  .report-route h3{margin:4mm 0 2mm!important;font-size:12.5pt!important;line-height:1.2!important;break-after:avoid-page}
+  .report-route p,.report-route li{orphans:3;widows:3}
+  .report-route ul{margin:2mm 0 0;padding-left:6mm}
+  .report-route .panel{max-width:none!important;margin:0 0 7mm!important;padding:0!important;border:0!important;border-radius:0!important;background:#fff!important;box-shadow:none!important;break-before:auto;break-inside:auto}
+  .report-route .metrics{display:grid!important;grid-template-columns:repeat(4,1fr)!important;gap:3mm!important;margin:0 0 8mm!important}
+  .report-route .metrics article{padding:4mm!important;border:1px solid #bdbdbd!important;border-radius:0!important;background:#fff!important;break-inside:avoid}
+  .report-route .metrics strong{font-size:19pt!important;line-height:1!important}
+  .report-route .metrics span{font-size:8.5pt!important;color:#555!important}
+  .report-route .artifact-list{gap:3mm!important}
+  .report-route .inspection-row{display:block!important;margin:0 0 4mm!important;padding:4mm!important;border:1px solid #cfcfcf!important;border-radius:0!important;background:#fff!important;break-inside:avoid-page}
+  .report-route .artifact-row{padding:2.5mm 0!important;border-bottom:1px solid #ddd!important;break-inside:avoid}
+  .report-route .status-pill{display:inline-block!important;margin:0 0 2mm!important;padding:1.5mm 2.5mm!important;border:1px solid #aaa!important;border-radius:999px!important;background:#fff!important;color:#222!important;font-size:8pt!important}
+  .report-route details{display:block!important}
+  .report-route details>summary{font-weight:700;list-style:none}
+  .report-route details>summary::-webkit-details-marker{display:none}
+  .report-route details:not([open])>:not(summary){display:block!important}
+  .report-route code{font-size:8pt!important;white-space:normal!important;overflow-wrap:anywhere}
+  .report-route a{color:#111!important;text-decoration:none!important}
+  .report-route button{display:none!important}
+}

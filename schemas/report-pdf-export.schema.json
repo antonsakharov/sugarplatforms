@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sugarplatforms.local/schemas/report-pdf-export.schema.json",
+  "title": "Sugar Platform Diagnostic PDF Export Manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "exportFormat", "filename", "mediaType", "pageCount", "sha256", "generatedFromDiagnosticAt"],
+  "properties": {
+    "schemaVersion": { "const": "1.0" },
+    "exportFormat": { "const": "sugar-platform-diagnostic-report-pdf" },
+    "filename": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]*-v[1-9][0-9]*\\.pdf$" },
+    "mediaType": { "const": "application/pdf" },
+    "pageCount": { "type": "integer", "minimum": 1 },
+    "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "generatedFromDiagnosticAt": { "type": "string", "format": "date-time" }
+  }
+}
