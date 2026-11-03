@@ -328,3 +328,11 @@ A feature is complete only when the intended user action works, tests exist, bui
 - [-] PAR-005/006 Production-grade PDF/OCR and complex layout/font coverage remain in progress.
 - [!] SEC-LIVE-TENANT Live authenticated non-bypass PostgreSQL/RLS, private bucket and malware-scanner isolation require provisioned services.
 - [ ] PAR-005b21 Next: bounded sparse PDF xref-stream `/Index` ranges with complete live-object proof and fail-closed ambiguity handling.
+
+### 2026-11-03 — Sparse PDF xref-stream indexes
+
+- [x] PAR-005b21 Support bounded ascending, disjoint `/Index` ranges, explicit free object zero and complete proof of all live direct/compressed objects.
+- [x] PAR-005b21-TEST Add nine regression tests for sparse page evidence, compressed indexes, metadata separation, lexical comments, missing live objects, malformed ranges, byte counts and physical offsets.
+- [-] PAR-005/006 Production-grade PDF/OCR, complex font/layout support and broader structural compatibility remain in progress.
+- [!] SEC-LIVE-TENANT Real authenticated non-`BYPASSRLS` PostgreSQL/RLS, private storage and malware-scanner two-tenant certification requires provisioned infrastructure.
+- [ ] PAR-005b22 Next: assess bounded indirect xref-stream dictionary references and nonzero object-generation compatibility without weakening object identity or evidence provenance.

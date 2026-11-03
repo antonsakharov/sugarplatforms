@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
   "algorithm": "sha256+git-blob-sha1",
-  "fileCount": 395,
-  "totalBytes": 1492236,
-  "treeSha256": "29162c8c52e9cbb431c8722aa5bd997aab3cca4bb67d30305d6431aeff6db68e",
+  "fileCount": 397,
+  "totalBytes": 1507210,
+  "treeSha256": "bafc785c4f564aad4698c02901a916ecc97e2b872848983ad06ebec876476716",
   "files": [
     {
       "path": ".env.example",
@@ -19,9 +19,9 @@
     },
     {
       "path": "DEVELOPMENT.md",
-      "bytes": 31649,
-      "sha256": "5818a3476fb42103495ae27d27de30d7055d1f9f247a8f45824fc6bfb0dddcbc",
-      "gitBlobSha": "6f4a4205827b4041179c13af083421fa5c411670"
+      "bytes": 32339,
+      "sha256": "db1853e8f419bd33b1031a64e9890b9cb57a31fffe1144cddc66612151b84e25",
+      "gitBlobSha": "59050668591b140a4a6832a1a0c1c160093d7843"
     },
     {
       "path": "Dockerfile",
@@ -43,15 +43,15 @@
     },
     {
       "path": "README.md",
-      "bytes": 15917,
-      "sha256": "73f4c6da011fc277c0a71fce998f05d8c34a078899beebdf8f15753678f511fc",
-      "gitBlobSha": "32d8f216bbf650aa6da8a7d40e0d6fccbf459664"
+      "bytes": 16477,
+      "sha256": "0dc1f72291d55b6a082f63504dd99b195faea1b1e414ad7091433af7cc773a1a",
+      "gitBlobSha": "ec5524d25b725a4b7e0e3ef548caaf005143abae"
     },
     {
       "path": "VALIDATION.md",
-      "bytes": 28825,
-      "sha256": "36e3b47dbc2cc155e8f6190da2d9074ae879d5d0e1d104df46191591cf098bac",
-      "gitBlobSha": "192615e05c745497a93f58633ad09e719b8af0ae"
+      "bytes": 29597,
+      "sha256": "e5f07da127a1277a8c8cc3f5096e17a31614c87e1fae3d2fc92456532ce1546c",
+      "gitBlobSha": "9fd09bc6384d09045ce3d7d4b1cebfa1d87af7ba"
     },
     {
       "path": "app/api/admin/deletion-jobs/reconcile/route.ts",
@@ -355,9 +355,9 @@
     },
     {
       "path": "docs/DELIVERY_PLAN.md",
-      "bytes": 15057,
-      "sha256": "658a3e597dbe455d0df58f627a0b42478b25e52f62fa7fba0a5806861d20b4cc",
-      "gitBlobSha": "07827e98fbd2da773bb684b1ba57e92d9f7785ca"
+      "bytes": 15660,
+      "sha256": "275d7e1bf62f2ce691c2125a3a278f311325f8698026edc78801c20532f6d52a",
+      "gitBlobSha": "3e7760bc91d2967446d518e6de3089a7ab1c4db7"
     },
     {
       "path": "docs/DEMO_SCENARIO.md",
@@ -391,9 +391,9 @@
     },
     {
       "path": "docs/FEATURES.md",
-      "bytes": 27933,
-      "sha256": "88863b76829142285f0bafc4eed778e27615dbe38cea40b371be9b10c9eca070",
-      "gitBlobSha": "6555fd910a4aa262dfaf1948b05193f513ca69c1"
+      "bytes": 28584,
+      "sha256": "5844f10b400c9f2ca15dc31735d58246c4e45ed276de0500cb20ffc0e675d198",
+      "gitBlobSha": "43d17b1d88ce51dc2cbdd5f09497ef51460ccfb5"
     },
     {
       "path": "docs/FINDING_REVIEW_PERSISTENCE.md",
@@ -541,15 +541,15 @@
     },
     {
       "path": "docs/SECURITY_AND_PRIVACY.md",
-      "bytes": 16608,
-      "sha256": "8d11b5bc532c4dac2373790259c28c3178ff522e6cc1f01cb4ee1db8183a3085",
-      "gitBlobSha": "4cb40772d605f763b1506a84ce6312c6132196ff"
+      "bytes": 17359,
+      "sha256": "084b35af969f4ff273381ac20e546a38359f721c3d6476b155a1d9ca032451de",
+      "gitBlobSha": "7b4c4b4940468f7c195cda2b56e58f443ac894f1"
     },
     {
       "path": "docs/SYSTEM_DESIGN.md",
-      "bytes": 11529,
-      "sha256": "6b641ff6996a6491fb41e4e67ce74da598521fc04c46bae645b052fa986e792f",
-      "gitBlobSha": "510da17ef060f964820bf940e573fd0f46730fd7"
+      "bytes": 12159,
+      "sha256": "c3520a251eb14da07d4b828362dff97b57da258737393ec32a9a5d43d35a86c4",
+      "gitBlobSha": "523e4f549ca4ab3a2ec0ee71507e9c93eb36c009"
     },
     {
       "path": "docs/TENANCY.md",
@@ -793,9 +793,9 @@
     },
     {
       "path": "lib/pdf-xref-stream.ts",
-      "bytes": 13529,
-      "sha256": "94db96dde556e787d6bf48c45869f6a0c26eaadec263836a0adbc3b0ae4decc0",
-      "gitBlobSha": "6425b0426c62c50e00f57ffa723abde2c814c5d0"
+      "bytes": 14690,
+      "sha256": "1935d8b784804c548021a9e661aaa7464abe555564492915af18c5ec5fcf6294",
+      "gitBlobSha": "84a2e2d87970658f36b078a44471e61107943501"
     },
     {
       "path": "lib/pdf-xref-table.ts",
@@ -1069,9 +1069,9 @@
     },
     {
       "path": "project/BACKLOG.md",
-      "bytes": 33746,
-      "sha256": "ad8c956d7a999441adca30db284027a83346a58c883f6651f2ae06d561509ad7",
-      "gitBlobSha": "ceb9631817c3e0699edd854937e1fab454775e5b"
+      "bytes": 34642,
+      "sha256": "9a8f808752164b8c5079d573a1d4eb059f5fa5798dc9573dfe42833f6c24f1c7",
+      "gitBlobSha": "9c53c59eebd26bc9f9038bd90a32055d084032d4"
     },
     {
       "path": "project/BUILD_STATUS.md",
@@ -1087,9 +1087,9 @@
     },
     {
       "path": "project/DECISIONS.md",
-      "bytes": 32062,
-      "sha256": "fc9c1cab7c42d9fc84448a6a666b60a09f509f272d9da7916963b197e28ca511",
-      "gitBlobSha": "bf8909d8b3652eeab42d83709fbd826d13e786cb"
+      "bytes": 32776,
+      "sha256": "ec07e54cac5f86f8d0e39e5884a9186323517e584e7f53155b3ce7be26ebdad8",
+      "gitBlobSha": "045dcf2979ab91976b5464ebf90fbc6641843aad"
     },
     {
       "path": "project/DECISION_037.md",
@@ -1452,6 +1452,12 @@
       "gitBlobSha": "f7ba590f283e7a8408b263f0bb5bb902d64fc75c"
     },
     {
+      "path": "project/DECISION_098.md",
+      "bytes": 2392,
+      "sha256": "9d09293778db7e1a913db7d599fb3c7e8461838f3cf62a043fef5aff0f8d4fe6",
+      "gitBlobSha": "b9a7f0d2b5c057239fb383fc378bd50fd502cb68"
+    },
+    {
       "path": "project/GITHUB_SYNC_2026-10-09.md",
       "bytes": 1323,
       "sha256": "0a4eb78100ff50792905e92786400972c988bc6ce8465812e0ee8ed5f9ecfbeb",
@@ -1756,6 +1762,12 @@
       "bytes": 1653,
       "sha256": "6549f3632e0e31b198a1f4e4aa71229e07242b7a51a41048776a09ad28f1ffb4",
       "gitBlobSha": "c898a8366bbbd9ab30270bf8a2d9c91793fab532"
+    },
+    {
+      "path": "project/VALIDATED_2026-11-03.md",
+      "bytes": 1669,
+      "sha256": "68842737df37f2086755c442641fe2a0150921855d63ac5466f243012907b47d",
+      "gitBlobSha": "f4f14c59a2b4f28375e95cc9f0391f26ddabc250"
     },
     {
       "path": "project/VALIDATION_2026-09-26.md",
@@ -2203,9 +2215,9 @@
     },
     {
       "path": "tests/pdf-xref-stream.test.mjs",
-      "bytes": 16718,
-      "sha256": "96b684bb9f8e38f1b3cbceb5c3fe83493a246d53a8ca9073b4ddefe3766f8807",
-      "gitBlobSha": "f3d18f8a3c701dd01a0f122f15b8f48b096193aa"
+      "bytes": 20203,
+      "sha256": "8624eeb16535530a22826428d411cfec51e1e27013d0efbcd00e2f3729fca6c5",
+      "gitBlobSha": "e89b2c66a8474987cd38dfcd2ad5afd10e3c3786"
     },
     {
       "path": "tests/pdf-xref-table.test.mjs",

@@ -149,3 +149,7 @@ Added bounded PDF 1.5 xref-stream dictionary/startxref whitespace and comment co
 
 ### 2026-11-02 — PAR-005b20 xref-stream omitted-field defaults
 Added bounded zero-width `/W` default-field compatibility to the local/demo PDF 1.5 validator, with eight new positive/adversarial regression cases (Decision 097). Direct offsets, compressed indexes, physical page references, metadata non-extraction, and MVP limits remain enforced. Next: PAR-005b21, bounded PDF xref-stream sparse `/Index` ranges with complete live-object proof. Production PDF/OCR and live authenticated two-tenant database, private storage, and malware-scanner certification remain separate release gates.
+
+### 2026-11-03 — PAR-005b21 local/demo PDF parsing increment
+
+Implement bounded sparse PDF 1.5 `/Index` ranges with exact live-object coverage and evidence provenance (Decision 098). Validate with focused xref/parser/upload tests, source lint, baseline, schemas and the dependency-backed GitHub CI pipeline. Maintain the existing assessment-to-report journey and MVP restrictions. Do not merge/deploy until live authenticated two-tenant PostgreSQL/RLS, private storage and malware-scanner isolation are certified. Next: PAR-005b22 xref-stream indirect references/generation compatibility assessment.

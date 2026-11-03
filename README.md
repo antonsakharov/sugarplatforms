@@ -184,3 +184,7 @@ PAR-005b19 accepts bounded PDF whitespace and `%` line comments in a verified PD
 
 ### 2026-11-02 — PDF xref-stream omitted-field defaults
 PAR-005b20 supports bounded PDF 1.5 `/W` zero-width field defaults in the local/demo evidence parser (Decision 097). Missing type defaults to in-use, and missing offset/generation/index defaults to zero, but every live direct offset and compressed index must still match the actual source bytes. Complete-index documents that cannot prove object-zero and all referenced objects fail closed. Production PDF/OCR and live tenant/storage/scanner certification remain outstanding.
+
+### November 3, 2026 — Bounded sparse PDF cross-reference indexes
+
+PAR-005b21 adds strictly increasing, disjoint PDF 1.5 `/Index` ranges to the local/demo xref-stream validator. Every declared live object must match its physical offset or compressed-object index, and object zero must be explicitly free. Omitted ranges are treated only as free, never inferred as architecture evidence. The guided assessment-to-report journey and server-enforced limits remain unchanged. This is not production PDF/OCR or live tenant security certification (Decision 098).

@@ -237,3 +237,7 @@ Decision 095 adds seven regression tests for bounded PDF 1.5 `/Info` and `/ID`. 
 
 ### 2026-11-01 — Xref-stream lexical compatibility
 Decision 096 adds eight regression tests. Local xref stream: 25/25 passed; focused PDF/upload/graph: 164/164 passed; source lint passed. Full local suite: 331 passed, 24 failed from missing installed modules; `npm ci` failed in the restricted runner, so local typecheck/build remain blocked. Check new branch CI independently; live two-tenant production security certification remains open. See `project/VALIDATED_2026-11-01.md`.
+
+### 2026-11-03 — PAR-005b21 sparse PDF cross-reference ranges
+
+Added nine positive/adversarial tests for sparse `/Index` parsing, direct/compressed object coverage, page provenance, Info metadata non-extraction, comments, invalid range ordering/bounds, missing live objects, malformed arrays, decoded-length mismatches, and object-zero free state. Run `node --experimental-strip-types --import ./scripts/register-test-loader.mjs --test tests/pdf-xref-stream.test.mjs` for focused checks; `npm run lint`, `npm run baseline:check`, `npm test`, `npm run typecheck`, `npm run build`, and `npm run recovery:verify` are the full local gates where dependencies exist. Live tenant/storage/scanner isolation is a separate release blocker. See `project/VALIDATED_2026-11-03.md`.

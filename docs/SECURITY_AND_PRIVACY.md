@@ -146,3 +146,7 @@ Only bounded xref dictionary and terminal offset lexical regions accept PDF whit
 
 ### 2026-11-02 — Zero-width PDF cross-reference field boundary
 Omitted `/W` fields in PDF 1.5 xref streams are interpreted only as specification-defined defaults: type 1, offset 0, generation/index 0. A zero-width field cannot bypass exact physical direct-object offsets, unique compressed indexes, the object-zero free-entry check, decoded-length limits, the single-revision requirement, or evidence provenance. Unsupported layouts fail closed. Document metadata remains excluded from architecture findings; upload limits and architecture-only policy are unchanged. Live tenant/storage/malware isolation remains uncertified (Decision 097).
+
+### 2026-11-03 — Sparse xref stream evidence boundary
+
+A bounded sparse `/Index` may omit only objects that are genuinely absent. The local/demo validator rejects overlapping, descending, empty, out-of-bounds, oversized or missing-object-zero ranges; rejects orphan live objects, invalid offsets and compressed indexes; and requires exact decompressed entry counts. No omitted range is used to infer architecture evidence, and `/Info`/`/ID` remain non-evidence metadata. Existing malware/secret scanning, tenant authorization, 10-file/25-MB/150-page limits and the prohibition on customer records and credentials remain unchanged. Live non-`BYPASSRLS` PostgreSQL, private storage and malware-scanner certification is still required (Decision 098).

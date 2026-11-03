@@ -356,3 +356,7 @@ Normalize at most 4 KiB of xref-stream dictionary and terminal `startxref` PDF w
 
 ### 2026-11-02 — Xref-stream `/W` omitted fields
 The bounded PDF 1.5 local/demo validator accepts zero-width `/W` fields only under the PDF default values (type 1; other fields 0). It rejects all-zero strides, widths above four bytes, absent or incorrect direct offsets, invalid object-zero entries, conflicting compressed indexes, and any missing or extra indexed objects. Exact decoded entry length and page-tree evidence remain mandatory; the raw PDF is never normalized to create evidence (Decision 097).
+
+### Bounded sparse PDF xref-stream indexes (2026-11-03)
+
+The local/demo PDF adapter accepts a single Flate `/XRef` stream with optional bounded `/Index` pairs. Ranges must be nonempty, strictly increasing, non-overlapping, within `/Size`, and include object zero as an explicitly free entry. The decompressed entry count must equal the sum of declared range lengths; every direct and compressed object must appear exactly once with verified offsets/indexes. Omitted object numbers are implicitly free, not evidence. Raw bytes, physical page locators, metadata/evidence separation, and upload limits are unchanged (Decision 098).

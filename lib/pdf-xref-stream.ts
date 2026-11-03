@@ -67,6 +67,7 @@ type XrefDictionary = {
   root: string;
   widths: [number, number, number];
   info: string | null;
+  objectIds: number[];
 };
 
 /**
@@ -81,7 +82,7 @@ function parseXrefDictionary(header: string): XrefDictionary {
     Size: /^\/Size\s+(\d+)(?=\s|\/|$)/,
     Root: /^\/Root\s+(\d+)\s+(\d+)\s+R(?=\s|\/|$)/,
     W: /^\/W\s*\[\s*(\d+)\s+(\d+)\s+(\d+)\s*\](?=\s|\/|$)/,
-    Index: /^\/Index\s*\[\s*(\d+)\s+(\d+)\s*\](?=\s|\/|$)/,
+    Index: /^\/Index\s*\[\s*(\d+(?:\s+\d+)*)\s*\](?=\s|\/|$)/,
     Length: /^\/Length\s+(\d+)(?=\s|\/|$)/,
     Filter: /^\/Filter\s+\/FlateDecode(?=\s|\/|$)/,
     Info: /^\/Info\s+(\d+)\s+(\d+)\s+R(?=\s|\/|$)/,
@@ -111,14 +112,32 @@ function parseXrefDictionary(header: string): XrefDictionary {
   if (!root || root[2] !== "0" || !Number.isSafeInteger(Number(root[1])) || Number(root[1]) < 1 || Number(root[1]) >= size) invalid("invalid Root reference");
   const info = fields.get("Info");
   if (info && (info[2] !== "0" || !Number.isSafeInteger(Number(info[1])) || Number(info[1]) < 1 || Number(info[1]) >= size)) invalid("invalid Info reference");
+  // A sparse /Index is a list of strictly ascending, disjoint [first, count]
+  // ranges. Unlisted objects are implicitly free, never inferred as live.
+  // Require an explicit free object-zero entry even for sparse snapshots.
   const index = fields.get("Index");
-  if (index && (Number(index[1]) !== 0 || Number(index[2]) !== size)) invalid("only complete Index [0 Size] is supported");
+  const values = index ? index[1].trim().split(/\s+/).map(Number) : [0, size];
+  if (values.length < 2 || values.length % 2 !== 0 || values.length > 256 ||
+      values.some((value) => !Number.isSafeInteger(value))) invalid("invalid Index ranges");
+  const objectIds: number[] = [];
+  let previousEnd = 0;
+  for (let i = 0; i < values.length; i += 2) {
+    const first = values[i];
+    const count = values[i + 1];
+    if (first < previousEnd || count < 1 || first < 0 || first >= size ||
+        count > size - first || (i === 0 && first !== 0)) {
+      invalid("overlapping, unordered, missing-zero, or out-of-range Index ranges");
+    }
+    for (let id = first; id < first + count; id += 1) objectIds.push(id);
+    previousEnd = first + count;
+  }
   return {
     size,
     length,
     root: root[1] + " 0",
     widths: widths as [number, number, number],
     info: info ? info[1] + " 0" : null,
+    objectIds,
   };
 }
 
@@ -199,7 +218,7 @@ export function validatePdfXrefStream(
   if (offsets.size !== directObjects.size || offsets.get(xrefRef) !== Number(trailer[1])) invalid("startxref does not point to the xref object");
   const header = xrefBody.split(/\bstream\r?\n/, 1)[0];
   const normalizedHeader = normalizeXrefLexical(header);
-  const { size, length, root, widths: w, info } = parseXrefDictionary(normalizedHeader);
+  const { length, root, widths: w, info, objectIds } = parseXrefDictionary(normalizedHeader);
   if (!/\/Type\s*\/Catalog\b/.test(expandedObjects.get(root) ?? "")) invalid("unproven Root catalog");
   const stream = /\bstream\r?\n([\s\S]*?)\r?\nendstream\b/.exec(xrefBody);
   if (!stream || Buffer.byteLength(stream[1], "latin1") !== length) invalid("encoded xref Length mismatch");
@@ -208,20 +227,21 @@ export function validatePdfXrefStream(
   // The encoded stream and all source bytes remain untouched.
   const decoded = decodePdfStream(normalizedHeader + xrefBody.slice(header.length), MAX_XREF_BYTES);
   const stride = w[0] + w[1] + w[2];
-  if (decoded === null || decoded.length !== size * stride) invalid("xref entry count or decoded length mismatch");
+  if (decoded === null || decoded.length !== objectIds.length * stride) invalid("xref entry count or decoded length mismatch");
   const bytes = Buffer.from(decoded, "latin1");
   const referencedDirect = new Set<string>();
   const referencedCompressed = new Set<string>();
   const claimedIndexes = new Set<string>();
   const compressedIndexCache = new Map<string, number[]>();
-  for (let id = 0; id < size; id += 1) {
-    const base = id * stride;
+  for (const [entryIndex, id] of objectIds.entries()) {
+    const base = entryIndex * stride;
     // PDF xref streams default an omitted type field to 1 (in-use),
     // and omitted offset/generation/index fields to zero.
     const kind = w[0] === 0 ? 1 : readField(bytes, base, w[0]);
     const value = readField(bytes, base + w[0], w[1]);
     const generationOrIndex = readField(bytes, base + w[0] + w[1], w[2]);
     const ref = `${id} 0`;
+    if (id === 0 && kind !== 0) invalid("object zero must be free");
     if (kind === 0) {
       if (directObjects.has(ref) || expandedObjects.has(ref) || (id === 0 && generationOrIndex !== (w[2] === 0 ? 0 : 65535))) invalid("free entry conflicts with a live object");
     } else if (kind === 1) {
@@ -241,6 +261,8 @@ export function validatePdfXrefStream(
       referencedCompressed.add(ref);
     } else invalid("unsupported xref entry type");
   }
+  // Equality with the complete parsed object maps is the sparse-index trust
+  // boundary: an omitted range cannot conceal a live direct or compressed ID.
   if (referencedDirect.size !== directObjects.size ||
       referencedCompressed.size + referencedDirect.size !== expandedObjects.size) invalid("unindexed or missing objects");
   if (info) {

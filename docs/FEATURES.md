@@ -174,3 +174,7 @@ Status: **implemented and locally regression-tested in the bounded local/demo ad
 
 ### 2026-11-02 — PAR-005b20: PDF xref-stream zero-width `/W` fields
 Status: **implemented and locally regression-tested in the bounded demo parser; production PDF parsing remains in progress**. Zero-width type fields default to in-use and zero-width offset/generation/index fields default to zero, but only documents with exact physical object references, complete decoded xref entries and verified page-tree provenance pass. Eight tests cover direct page evidence, metadata separation, lexical comments, invalid object zero, absent offsets, all-zero widths, compressed index collisions and stride mismatch. No MVP or privacy expansion (Decision 097).
+
+### 2026-11-03 — PAR-005b21 sparse PDF xref-stream `/Index` ranges
+
+Status: **implemented and regression-tested in the bounded local/demo PDF parser; production PDF/OCR remains in progress**. Strict ascending non-overlapping `/Index` ranges may omit free object IDs only. Physical direct offsets, compressed indexes, object-zero free state, exact decoded length, verified page provenance and metadata non-extraction remain mandatory. Nine new tests cover positive and adversarial cases. No assessment scope or privacy expansion. Next: PAR-005b22 bounded xref-stream indirect reference and object-generation compatibility assessment (Decision 098).

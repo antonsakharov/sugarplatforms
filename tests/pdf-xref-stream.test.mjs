@@ -36,7 +36,8 @@ function pdf(options = {}) {
   offsets.set(10, xrefOffset);
   const size = 11;
   const entries = [];
-  for (let id = 0; id < size; id += 1) {
+  const entryIds = options.entryIds ?? Array.from({ length: size }, (_, id) => id);
+  for (const id of entryIds) {
     const override = options.overrideEntry?.[id];
     const entry = override ?? (id === 0 ? [0, 0, 65535]
       : compressed && id <= 3 ? [2, 9, id - 1]
@@ -282,7 +283,7 @@ test("zero-width generation retains metadata separation and comment compatibilit
 });
 
 test("zero-width type defaults to in-use and cannot disguise a free object zero", () => {
-  reject(pdf({ w: "[0 4 2]", entryWidths: [0, 4, 2] }), /offset|free entry|unindexed/);
+  reject(pdf({ w: "[0 4 2]", entryWidths: [0, 4, 2] }), /offset|free entry|unindexed|object zero/);
 });
 
 test("zero-width offset defaults to zero and cannot invent physical positions", () => {
@@ -306,4 +307,70 @@ test("default generation cannot bypass direct object offset validation", () => {
 test("declared widths must match exact decompressed entry stride", () => {
   reject(pdf({ w: "[1 4 0]" }), /decoded length/);
   reject(pdf({ w: "[1 4 2]", entryWidths: [1, 4, 0] }), /decoded length/);
+});
+
+// Decision 098: sparse /Index ranges enumerate only the explicitly represented
+// entries. Missing ranges are implicitly free, never inferred as evidence.
+const sparseDirect = { index: "/Index [0 5 10 1]", entryIds: [0, 1, 2, 3, 4, 10] };
+const sparseCompressed = { compressed: true, index: "/Index [0 5 9 2]", entryIds: [0, 1, 2, 3, 4, 9, 10] };
+
+test("sparse disjoint Index ranges preserve direct page evidence", () => {
+  const result = parseArtifact("sparse.pdf", pdf(sparseDirect));
+  assert.equal(result.sourceSegments.length, 1);
+  assert.equal(result.sourceSegments[0].locator.page, 1);
+  assert.match(result.sourceSegments[0].content, /canonical Customer ID/);
+});
+
+test("sparse ranges preserve compressed object indexes and page evidence", () => {
+  const result = parseArtifact("sparse-compressed.pdf", pdf(sparseCompressed));
+  assert.equal(result.sourceSegments[0].locator.type, "pdf-page");
+  assert.match(result.sourceSegments[0].content, /CRM owns/);
+});
+
+test("sparse ranges support live Info metadata without promoting it to evidence", () => {
+  const result = parseArtifact("sparse-info.pdf", pdf({
+    ...sparseDirect, index: "/Index [0 5 8 1 10 1]", entryIds: [0, 1, 2, 3, 4, 8, 10],
+    infoBody: safeInfo, headerExtra: "/Info 8 0 R " + validIds,
+  }));
+  assert.equal(result.sourceSegments[0].locator.page, 1);
+  assert.doesNotMatch(JSON.stringify(result.sourceSegments), /DO NOT EXTRACT|Internal architecture tool/);
+});
+
+test("sparse ranges accept PDF comments while keeping byte offsets unchanged", () => {
+  const result = parseArtifact("sparse-comments.pdf", pdf({
+    ...sparseDirect, headerTransform: (header) => header.replace("/Index [0 5 10 1]", "/Index% sparse ranges\n[0 5 10 1]"),
+  }));
+  assert.match(result.sourceSegments[0].content, /CRM owns/);
+});
+
+test("sparse ranges reject missing direct and compressed live objects", () => {
+  reject(pdf({ index: "/Index [0 4 10 1]", entryIds: [0, 1, 2, 3, 10] }), /unindexed/);
+  reject(pdf({ compressed: true, index: "/Index [0 5 10 1]", entryIds: [0, 1, 2, 3, 4, 10] }), /unindexed/);
+  reject(pdf({ ...sparseDirect, overrideEntry: { 4: [0, 0, 0] } }), /free entry/);
+});
+
+test("sparse ranges reject overlapping, unordered, empty, and missing-zero intervals", () => {
+  for (const index of [
+    "/Index [0 5 4 2 10 1]", "/Index [0 5 2 1 10 1]",
+    "/Index [0 5 5 0 10 1]", "/Index [1 4 10 1]",
+    "/Index [0 5 10 1 8 1]", "/Index [0 5 10 2]",
+  ]) reject(pdf({ ...sparseDirect, index }), /Index/);
+});
+
+test("sparse ranges reject malformed arrays and oversized range counts", () => {
+  for (const index of ["/Index [0 5 10]", "/Index [0 5 -1 1]", "/Index [0 5 10 1 11]", "/Index []"]) {
+    reject(pdf({ ...sparseDirect, index }), /Index/);
+  }
+  const huge = "/Index [" + Array.from({ length: 130 }, (_, i) => `${i} 1`).join(" ") + "]";
+  reject(pdf({ ...sparseDirect, index: huge }), /Index/);
+});
+
+test("sparse ranges reject entry-count mismatch and fabricated physical offsets", () => {
+  reject(pdf({ index: "/Index [0 5 10 1]" }), /decoded length/);
+  reject(pdf({ ...sparseDirect, overrideEntry: { 4: [1, 1, 0] } }), /offset/);
+  reject(pdf({ ...sparseCompressed, overrideEntry: { 3: [2, 9, 0] } }), /compressed object stream\/index/);
+});
+
+test("sparse ranges cannot turn object zero into an in-use entry", () => {
+  reject(pdf({ ...sparseDirect, overrideEntry: { 0: [1, 0, 0] } }), /object zero/);
 });

@@ -264,3 +264,7 @@ Run `node --experimental-strip-types --test tests/pdf-xref-stream.test.mjs` for 
 
 ### 2026-11-02 — PDF xref-stream default-field regression
 Run `node --experimental-strip-types --test tests/pdf-xref-stream.test.mjs` to exercise PAR-005b20 zero-width `/W` defaults and adversarial offset/index checks. Run `npm run baseline:check`, `npm run typecheck`, `npm run lint`, `npm test`, `npm run build`, and `npm run recovery:verify` before approving a recovery PR. This parser remains a bounded local/demo adapter; do not upload confidential records or enable live production access. See Decision 097 and `project/VALIDATED_2026-11-02.md`.
+
+### 2026-11-03 — Sparse PDF `/Index` regression
+
+Run `node --experimental-strip-types --import ./scripts/register-test-loader.mjs --test tests/pdf-xref-stream.test.mjs tests/pdf-object-streams.test.mjs tests/parser.test.mjs tests/pdf-page-tree.test.mjs` for PAR-005b21. The local/demo parser permits at most 128 strictly ascending, disjoint `/Index` ranges with an explicit free object-zero entry; every live direct/compressed object must be indexed. For full certification run `npm ci --no-audit --no-fund && npm run validate` in a networked Node 22 runner, then live authenticated non-bypass two-tenant database/private-storage/scanner tests before confidential use. See Decision 098.
