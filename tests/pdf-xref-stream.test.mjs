@@ -26,6 +26,7 @@ function pdf(options = {}) {
     ? [[4, `<< /Length ${content.length} >> stream\n${content}\nendstream`], [9, objstm()]]
     : [[1, catalog], [2, pages], [3, page], [4, `<< /Length ${content.length} >> stream\n${content}\nendstream`]];
   if (options.infoBody !== undefined) objects.push([8, options.infoBody]);
+  if (options.lengthObjectValue !== undefined) objects.push([7, String(options.lengthObjectValue)]);
   let raw = "%PDF-1.5\n";
   const offsets = new Map();
   for (const [id, body] of objects) {
@@ -57,7 +58,7 @@ function pdf(options = {}) {
   const decoded = Buffer.concat(entries);
   const encoded = deflateSync(decoded);
   const extras = options.headerExtra ?? "";
-  const header = `<< /Type /XRef /Size ${options.size ?? size} /Root ${options.root ?? "1 0 R"} /W ${options.w ?? "[1 4 2]"} ${options.index ?? ""} /Length ${options.length ?? encoded.length} /Filter ${options.filter ?? "/FlateDecode"} ${extras} >>`;
+  const header = `<< /Type /XRef /Size ${options.size ?? size} /Root ${options.root ?? "1 0 R"} /W ${options.w ?? "[1 4 2]"} ${options.index ?? ""} /Length ${options.indirectLength ? "7 0 R" : options.length ?? encoded.length} /Filter ${options.filter ?? "/FlateDecode"} ${extras} >>`;
   const finalHeader = options.headerTransform ? options.headerTransform(header) : header;
   raw += `10 0 obj\n${finalHeader} stream\n${encoded.toString("latin1")}\nendstream\nendobj\n`;
   const trailer = `startxref\n${options.startxref ?? xrefOffset}\n%%EOF\n`;
@@ -373,4 +374,46 @@ test("sparse ranges reject entry-count mismatch and fabricated physical offsets"
 
 test("sparse ranges cannot turn object zero into an in-use entry", () => {
   reject(pdf({ ...sparseDirect, overrideEntry: { 0: [1, 0, 0] } }), /object zero/);
+});
+
+ // An indirect length is a live, generation-zero integer object. Its value
+// changes the xref offsets, so build until the compressed length stabilizes.
+function indirectPdf(options = {}) {
+  let length = 1;
+  for (let i = 0; i < 30; i += 1) {
+    const bytes = pdf({ indirectLength: true, lengthObjectValue: options.lengthValue ?? length, ...options });
+    const body = bytes.toString("latin1");
+    const encoded = /10 0 obj\n[\s\S]*?\bstream\n([\s\S]*?)\nendstream/.exec(body)?.[1];
+    assert.ok(encoded, "xref stream fixture");
+    const actual = Buffer.byteLength(encoded, "latin1");
+    if (options.lengthValue !== undefined || actual === length) return bytes;
+    length = actual;
+  }
+  throw new Error("indirect length fixture failed to converge");
+}
+
+test("indirect generation-zero xref Length verifies live integer and physical-page evidence", () => {
+  const result = parseArtifact("indirect-length.pdf", indirectPdf());
+  assert.equal(result.sourceSegments[0].locator.page, 1);
+  assert.match(result.sourceSegments[0].content, /canonical Customer ID/);
+});
+
+test("indirect Length works with sparse xref entries when its integer object is indexed", () => {
+  const result = parseArtifact("sparse-indirect.pdf", indirectPdf({
+    index: "/Index [0 5 7 1 10 1]", entryIds: [0, 1, 2, 3, 4, 7, 10],
+  }));
+  assert.match(result.sourceSegments[0].content, /CRM owns/);
+});
+
+test("indirect Length rejects missing, noninteger, negative, and mismatched values", () => {
+  reject(indirectPdf({ lengthValue: "hello" }), /indirect Length/);
+  reject(indirectPdf({ lengthValue: "-1" }), /indirect Length/);
+  reject(indirectPdf({ lengthValue: "999" }), /Length mismatch/);
+  reject(indirectPdf({ index: "/Index [0 5 10 1]", entryIds: [0, 1, 2, 3, 4, 10] }), /unproven|unindexed/);
+});
+
+test("indirect Length rejects nonzero generation, self-reference and non-direct target", () => {
+  reject(indirectPdf({ headerTransform: h => h.replace("/Length 7 0 R", "/Length 7 1 R") }), /indirect Length/);
+  reject(indirectPdf({ headerTransform: h => h.replace("/Length 7 0 R", "/Length 10 0 R") }), /indirect Length/);
+  reject(indirectPdf({ overrideEntry: { 7: [0, 0, 0] } }), /free entry/);
 });
