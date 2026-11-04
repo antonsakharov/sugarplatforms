@@ -376,7 +376,7 @@ test("sparse ranges cannot turn object zero into an in-use entry", () => {
   reject(pdf({ ...sparseDirect, overrideEntry: { 0: [1, 0, 0] } }), /object zero/);
 });
 
- // An indirect length is a live, generation-zero integer object. Its value
+// An indirect length is a live, generation-zero integer object. Its value
 // changes the xref offsets, so build until the compressed length stabilizes.
 function indirectPdf(options = {}) {
   let length = 1;
