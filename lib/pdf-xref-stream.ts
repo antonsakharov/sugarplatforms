@@ -63,7 +63,8 @@ function normalizeXrefLexical(source: string): string {
 
 type XrefDictionary = {
   size: number;
-  length: number;
+  length: number | null;
+  lengthRef: string | null;
   root: string;
   widths: [number, number, number];
   info: string | null;
@@ -83,7 +84,7 @@ function parseXrefDictionary(header: string): XrefDictionary {
     Root: /^\/Root\s+(\d+)\s+(\d+)\s+R(?=\s|\/|$)/,
     W: /^\/W\s*\[\s*(\d+)\s+(\d+)\s+(\d+)\s*\](?=\s|\/|$)/,
     Index: /^\/Index\s*\[\s*(\d+(?:\s+\d+)*)\s*\](?=\s|\/|$)/,
-    Length: /^\/Length\s+(\d+)(?=\s|\/|$)/,
+    Length: /^\/Length\s+(\d+)(?:\s+(\d+)\s+R)?(?=\s|\/|$)/,
     Filter: /^\/Filter\s+\/FlateDecode(?=\s|\/|$)/,
     Info: /^\/Info\s+(\d+)\s+(\d+)\s+R(?=\s|\/|$)/,
     // 16–64 bytes per ID; no literal strings, odd hex lengths, or nesting.
@@ -103,13 +104,16 @@ function parseXrefDictionary(header: string): XrefDictionary {
   }
   if (!fields.has("Type") || !fields.has("Filter")) invalid("unsupported xref stream dictionary");
   const size = Number(fields.get("Size")?.[1]);
-  const length = Number(fields.get("Length")?.[1]);
+  const lengthField = fields.get("Length");
+  const lengthRef = lengthField?.[2] === undefined ? null : `${lengthField[1]} ${lengthField[2]}`;
+  const length = lengthRef ? null : Number(lengthField?.[1]);
   if (!Number.isSafeInteger(size) || size < 2 || size > MAX_XREF_OBJECTS ||
-      !Number.isSafeInteger(length) || length < 1 || length > MAX_XREF_BYTES) invalid("invalid Size or Length");
+      (length !== null && (!Number.isSafeInteger(length) || length < 1 || length > MAX_XREF_BYTES))) invalid("invalid Size or Length");
   const widths = fields.get("W")?.slice(1).map(Number);
   if (!widths || widths.length !== 3 || widths.some((value) => !Number.isInteger(value) || value < 0 || value > 4) || widths.every((value) => value === 0)) invalid("unsupported W widths");
   const root = fields.get("Root");
   if (!root || root[2] !== "0" || !Number.isSafeInteger(Number(root[1])) || Number(root[1]) < 1 || Number(root[1]) >= size) invalid("invalid Root reference");
+  if (lengthRef && (lengthField?.[2] !== "0" || !Number.isSafeInteger(Number(lengthField[1])) || Number(lengthField[1]) < 1 || Number(lengthField[1]) >= size || `${lengthField[1]} 0` === `${root[1]} 0`)) invalid("invalid indirect Length reference");
   const info = fields.get("Info");
   if (info && (info[2] !== "0" || !Number.isSafeInteger(Number(info[1])) || Number(info[1]) < 1 || Number(info[1]) >= size)) invalid("invalid Info reference");
   // A sparse /Index is a list of strictly ascending, disjoint [first, count]
@@ -134,6 +138,7 @@ function parseXrefDictionary(header: string): XrefDictionary {
   return {
     size,
     length,
+    lengthRef,
     root: root[1] + " 0",
     widths: widths as [number, number, number],
     info: info ? info[1] + " 0" : null,
@@ -218,14 +223,25 @@ export function validatePdfXrefStream(
   if (offsets.size !== directObjects.size || offsets.get(xrefRef) !== Number(trailer[1])) invalid("startxref does not point to the xref object");
   const header = xrefBody.split(/\bstream\r?\n/, 1)[0];
   const normalizedHeader = normalizeXrefLexical(header);
-  const { length, root, widths: w, info, objectIds } = parseXrefDictionary(normalizedHeader);
+  const { length, lengthRef, root, widths: w, info, objectIds } = parseXrefDictionary(normalizedHeader);
+  // Only an indexed, generation-zero, direct integer object can provide an
+  // indirect stream length. Never evaluate arbitrary PDF expressions.
+  const indirectLengthBody = lengthRef ? directObjects.get(lengthRef) : null;
+  const resolvedLength = lengthRef
+    ? (/^\s*([1-9]\d{0,4})\s*$/.exec(indirectLengthBody ?? "")?.[1] ?? null)
+    : length;
+  const streamLength = resolvedLength === null ? NaN : Number(resolvedLength);
+  if (!Number.isSafeInteger(streamLength) || streamLength < 1 || streamLength > MAX_XREF_BYTES ||
+      (lengthRef && (!indirectLengthBody || lengthRef === xrefRef || !objectIds.includes(Number(lengthRef.split(" ")[0]))))) {
+    invalid("unproven indirect Length reference");
+  }
   if (!/\/Type\s*\/Catalog\b/.test(expandedObjects.get(root) ?? "")) invalid("unproven Root catalog");
   const stream = /\bstream\r?\n([\s\S]*?)\r?\nendstream\b/.exec(xrefBody);
-  if (!stream || Buffer.byteLength(stream[1], "latin1") !== length) invalid("encoded xref Length mismatch");
+  if (!stream || Buffer.byteLength(stream[1], "latin1") !== streamLength) invalid("encoded xref Length mismatch");
   // Decode with a temporary normalized dictionary so legal comments between
   // /Filter and /FlateDecode cannot confuse the shared stream-filter parser.
   // The encoded stream and all source bytes remain untouched.
-  const decoded = decodePdfStream(normalizedHeader + xrefBody.slice(header.length), MAX_XREF_BYTES);
+  const decoded = decodePdfStream(normalizedHeader.replace(/\/Length\s+\d+\s+0\s+R(?=\s|\/|>>|$)/, `/Length ${streamLength}`) + xrefBody.slice(header.length), MAX_XREF_BYTES);
   const stride = w[0] + w[1] + w[2];
   if (decoded === null || decoded.length !== objectIds.length * stride) invalid("xref entry count or decoded length mismatch");
   const bytes = Buffer.from(decoded, "latin1");
@@ -265,6 +281,7 @@ export function validatePdfXrefStream(
   // boundary: an omitted range cannot conceal a live direct or compressed ID.
   if (referencedDirect.size !== directObjects.size ||
       referencedCompressed.size + referencedDirect.size !== expandedObjects.size) invalid("unindexed or missing objects");
+  if (lengthRef && !referencedDirect.has(lengthRef)) invalid("indirect Length must be an indexed live direct object");
   if (info) {
     const metadata = directObjects.get(info);
     // /Info cannot be compressed, free, an xref, a page-tree object or a
