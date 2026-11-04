@@ -153,3 +153,6 @@ Added bounded zero-width `/W` default-field compatibility to the local/demo PDF 
 ### 2026-11-03 — PAR-005b21 local/demo PDF parsing increment
 
 Implement bounded sparse PDF 1.5 `/Index` ranges with exact live-object coverage and evidence provenance (Decision 098). Validate with focused xref/parser/upload tests, source lint, baseline, schemas and the dependency-backed GitHub CI pipeline. Maintain the existing assessment-to-report journey and MVP restrictions. Do not merge/deploy until live authenticated two-tenant PostgreSQL/RLS, private storage and malware-scanner isolation are certified. Next: PAR-005b22 xref-stream indirect references/generation compatibility assessment.
+
+### 2026-11-04 — PAR-005b22
+Bounded local/demo PDF 1.5 xref-stream indirect `/Length` references now resolve only through live indexed direct integer objects. Four grouped regression tests cover positive and adversarial cases. Production PDF/OCR and live two-tenant database/storage/scanner certification remain release blockers. Next: PAR-005b23 generation compatibility assessment.
