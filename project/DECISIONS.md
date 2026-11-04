@@ -254,3 +254,6 @@ Accept standard `/RunLengthDecode` (`/RL`) page-content and selected-font CMap s
 
 ## ADR-098 — Bounded sparse PDF xref-stream `/Index` ranges (2026-11-03)
 **Status:** Accepted for the local/demo adapter. Permit at most 128 ascending, disjoint, nonempty ranges within `/Size`, explicitly indexing free object zero. The decoded entry count equals the sum of ranges, not `/Size`. Every live direct or compressed object must be covered exactly once with exact offset/index proof; omitted IDs are implicitly free and never evidence. Reject malformed, overlapping, unordered, oversized, out-of-range, incomplete or ambiguous indexes. Preserve one-revision, metadata/evidence, privacy and page-provenance safeguards. See `project/DECISION_098.md`. No production PDF/OCR or live tenant certification.
+
+### Decision 099 (2026-11-04)
+Accept a single generation-zero direct integer object as an indirect PDF xref-stream `/Length`, provided it is live, indexed, bounded and exactly matches encoded bytes. Reject nonzero generations and arbitrary indirect fields. Preserve raw offsets, evidence provenance, and production security release gates. See `project/DECISION_099.md`.
