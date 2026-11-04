@@ -188,3 +188,6 @@ PAR-005b20 supports bounded PDF 1.5 `/W` zero-width field defaults in the local/
 ### November 3, 2026 — Bounded sparse PDF cross-reference indexes
 
 PAR-005b21 adds strictly increasing, disjoint PDF 1.5 `/Index` ranges to the local/demo xref-stream validator. Every declared live object must match its physical offset or compressed-object index, and object zero must be explicitly free. Omitted ranges are treated only as free, never inferred as architecture evidence. The guided assessment-to-report journey and server-enforced limits remain unchanged. This is not production PDF/OCR or live tenant security certification (Decision 098).
+
+### 2026-11-04 development status
+The bounded local/demo PDF parser supports verified indirect xref-stream `/Length N 0 R` integer objects. This is not full PDF/OCR coverage or confidential production certification; authenticated two-tenant database/storage/scanner tests remain outstanding.
