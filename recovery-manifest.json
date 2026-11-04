@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
   "algorithm": "sha256+git-blob-sha1",
-  "fileCount": 397,
-  "totalBytes": 1507210,
-  "treeSha256": "bafc785c4f564aad4698c02901a916ecc97e2b872848983ad06ebec876476716",
+  "fileCount": 398,
+  "totalBytes": 1515068,
+  "treeSha256": "d4ecc66ae05b4139d3062cb15bd9da59c1b30ac44e5782456410bebb99691adb",
   "files": [
     {
       "path": ".env.example",
@@ -43,9 +43,9 @@
     },
     {
       "path": "README.md",
-      "bytes": 16477,
-      "sha256": "0dc1f72291d55b6a082f63504dd99b195faea1b1e414ad7091433af7cc773a1a",
-      "gitBlobSha": "ec5524d25b725a4b7e0e3ef548caaf005143abae"
+      "bytes": 16770,
+      "sha256": "11eb5727c84a7f7b753a9850206099dc8b5f496dd83b4da80c6fa69778b40d19",
+      "gitBlobSha": "de2d2a639045d4e08fd3269e9ab10ef75b1c169f"
     },
     {
       "path": "VALIDATION.md",
@@ -355,9 +355,9 @@
     },
     {
       "path": "docs/DELIVERY_PLAN.md",
-      "bytes": 15660,
-      "sha256": "275d7e1bf62f2ce691c2125a3a278f311325f8698026edc78801c20532f6d52a",
-      "gitBlobSha": "3e7760bc91d2967446d518e6de3089a7ab1c4db7"
+      "bytes": 16047,
+      "sha256": "cbfb62d42c66170c717a542959d9e203912990b73afea582bdfe2b6ac9946c82",
+      "gitBlobSha": "a8132f03f6b402a7945d98fd99d262110f3a458b"
     },
     {
       "path": "docs/DEMO_SCENARIO.md",
@@ -391,9 +391,9 @@
     },
     {
       "path": "docs/FEATURES.md",
-      "bytes": 28584,
-      "sha256": "5844f10b400c9f2ca15dc31735d58246c4e45ed276de0500cb20ffc0e675d198",
-      "gitBlobSha": "43d17b1d88ce51dc2cbdd5f09497ef51460ccfb5"
+      "bytes": 29075,
+      "sha256": "70403f65230120153d3a023ca09b1fbbcfae8b3d9b1f49fc6e7a7e8dacb6eecf",
+      "gitBlobSha": "3b707300cf33d0c736013d869129da32db1d9013"
     },
     {
       "path": "docs/FINDING_REVIEW_PERSISTENCE.md",
@@ -541,15 +541,15 @@
     },
     {
       "path": "docs/SECURITY_AND_PRIVACY.md",
-      "bytes": 17359,
-      "sha256": "084b35af969f4ff273381ac20e546a38359f721c3d6476b155a1d9ca032451de",
-      "gitBlobSha": "7b4c4b4940468f7c195cda2b56e58f443ac894f1"
+      "bytes": 17826,
+      "sha256": "83abe3c5f8b796b2bf1ad97242f601f7bae321c5abd80fccd34981866de5bb0d",
+      "gitBlobSha": "aa4a4cf7acf8bd923f6347f03fb097d7c7ea9984"
     },
     {
       "path": "docs/SYSTEM_DESIGN.md",
-      "bytes": 12159,
-      "sha256": "c3520a251eb14da07d4b828362dff97b57da258737393ec32a9a5d43d35a86c4",
-      "gitBlobSha": "523e4f549ca4ab3a2ec0ee71507e9c93eb36c009"
+      "bytes": 12503,
+      "sha256": "3362fac2f373e31fdae3336cab16f5d276272eaeeb4085ddf32b9bdccd67e10a",
+      "gitBlobSha": "83ca91dc02e9a98bac19cd4c28b14659bb12fffa"
     },
     {
       "path": "docs/TENANCY.md",
@@ -793,9 +793,9 @@
     },
     {
       "path": "lib/pdf-xref-stream.ts",
-      "bytes": 14690,
-      "sha256": "1935d8b784804c548021a9e661aaa7464abe555564492915af18c5ec5fcf6294",
-      "gitBlobSha": "84a2e2d87970658f36b078a44471e61107943501"
+      "bytes": 16104,
+      "sha256": "9e6026372d6f2d3f4154f516e8cb42ff1fb4579e88b3ba9e0ffa102e727684bb",
+      "gitBlobSha": "14c041eb48f3109bf231321adadb174bc7772ee5"
     },
     {
       "path": "lib/pdf-xref-table.ts",
@@ -1069,9 +1069,9 @@
     },
     {
       "path": "project/BACKLOG.md",
-      "bytes": 34642,
-      "sha256": "9a8f808752164b8c5079d573a1d4eb059f5fa5798dc9573dfe42833f6c24f1c7",
-      "gitBlobSha": "9c53c59eebd26bc9f9038bd90a32055d084032d4"
+      "bytes": 35362,
+      "sha256": "8c42b4e508177a7ff803e4fa42e8c5bb087b7b689ef2b62f9ab1ef4a9b821a12",
+      "gitBlobSha": "a2071c7e5c3c263207926799b6748d602eade54e"
     },
     {
       "path": "project/BUILD_STATUS.md",
@@ -1081,15 +1081,15 @@
     },
     {
       "path": "project/DAILY_BUILD_PROTOCOL.md",
-      "bytes": 2190,
-      "sha256": "e36988a5f99413a59327ad2e777000679dd0e4e50744226b7ce7212212030805",
-      "gitBlobSha": "4cbe3e031182b7d2a6f9a93aeba926b611c4e65c"
+      "bytes": 2436,
+      "sha256": "814133930e2205e77be084561c0631492ee7afddcc10ab0007c88b6d373d6138",
+      "gitBlobSha": "6473a91708126d052b2889884721cc97a3558fbe"
     },
     {
       "path": "project/DECISIONS.md",
-      "bytes": 32776,
-      "sha256": "ec07e54cac5f86f8d0e39e5884a9186323517e584e7f53155b3ce7be26ebdad8",
-      "gitBlobSha": "045dcf2979ab91976b5464ebf90fbc6641843aad"
+      "bytes": 33147,
+      "sha256": "0a0ea1436de91736bc63006e265800ebee2cef3408dcabad44b143eee9402364",
+      "gitBlobSha": "ae9efe73fdba6a1f5e5c181c831c691b30cbfbc4"
     },
     {
       "path": "project/DECISION_037.md",
@@ -1456,6 +1456,12 @@
       "bytes": 2392,
       "sha256": "9d09293778db7e1a913db7d599fb3c7e8461838f3cf62a043fef5aff0f8d4fe6",
       "gitBlobSha": "b9a7f0d2b5c057239fb383fc378bd50fd502cb68"
+    },
+    {
+      "path": "project/DECISION_099.md",
+      "bytes": 799,
+      "sha256": "1db56b19e2944e4b63d916542a820defc36d653d686c2e4f3bbd738cc6548307",
+      "gitBlobSha": "5f968acd5106e7f93c28e2602e629ab9ea365e5c"
     },
     {
       "path": "project/GITHUB_SYNC_2026-10-09.md",
@@ -2215,9 +2221,9 @@
     },
     {
       "path": "tests/pdf-xref-stream.test.mjs",
-      "bytes": 20203,
-      "sha256": "8624eeb16535530a22826428d411cfec51e1e27013d0efbcd00e2f3729fca6c5",
-      "gitBlobSha": "e89b2c66a8474987cd38dfcd2ad5afd10e3c3786"
+      "bytes": 22529,
+      "sha256": "0ee6b3823bb41df57ee5037d7e2f229551a64f04526ab10000af24c787da4565",
+      "gitBlobSha": "794459be2fc0883b54ed65e92a14d0daf3c9e508"
     },
     {
       "path": "tests/pdf-xref-table.test.mjs",
