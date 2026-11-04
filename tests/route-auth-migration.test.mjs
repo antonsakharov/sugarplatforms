@@ -1,0 +1,7 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+import { readFileSync, readdirSync, statSync } from "node:fs";
+import { join } from "node:path";
+function routeFiles(root) { const out = []; for (const name of readdirSync(root)) { const path = join(root, name); if (statSync(path).isDirectory()) out.push(...routeFiles(path)); else if (name === "route.ts") out.push(path); } return out; }
+test("all protected API routes use request-scoped authorization", () => { const protectedRoutes = routeFiles(new URL("../app/api", import.meta.url).pathname).map((path) => ({ path, source: readFileSync(path, "utf8") })).filter(({ source }) => source.includes("requireServerPermission")); assert.ok(protectedRoutes.length >= 14, "expected the complete protected route surface"); for (const { path, source } of protectedRoutes) { assert.doesNotMatch(source, /requireServerPermission\((?:permission|\"[^\"]+\")\)/, `${path} still uses local-only authorization`); assert.match(source, /requireServerPermission\(request,\s*(?:permission|\"[^\"]+\")\)/, `${path} must authorize from the incoming request`); } });
+test("production invalid sessions normalize to the shared authentication-required boundary", () => { const source = readFileSync(new URL("../lib/server-auth.ts", import.meta.url), "utf8"); assert.match(source, /error instanceof InvalidSessionError/); assert.match(source, /throw new AuthenticationRequiredError\(\)/); });

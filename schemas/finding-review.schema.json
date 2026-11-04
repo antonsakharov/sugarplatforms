@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sugarplatforms.local/schemas/finding-review.schema.json",
+  "title": "Sugar Platform Diagnostic Finding Review",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "assessmentId", "diagnosticGeneratedAt", "findings"],
+  "properties": {
+    "schemaVersion": { "const": "1.0" },
+    "assessmentId": { "type": "string", "minLength": 1 },
+    "diagnosticGeneratedAt": { "type": "string", "format": "date-time" },
+    "reviewedAt": { "type": "string", "format": "date-time" },
+    "findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["findingId", "status", "edits"],
+        "properties": {
+          "findingId": { "type": "string", "minLength": 1 },
+          "status": { "enum": ["pending", "accepted", "rejected"] },
+          "reviewerNote": { "type": "string", "maxLength": 1000 },
+          "edits": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "title": { "type": "string", "minLength": 1, "maxLength": 180 },
+              "description": { "type": "string", "minLength": 1, "maxLength": 1600 },
+              "businessImpact": { "type": "string", "minLength": 1, "maxLength": 1200 },
+              "technicalImpact": { "type": "string", "minLength": 1, "maxLength": 1200 },
+              "recommendation": { "type": "string", "minLength": 1, "maxLength": 1200 },
+              "severity": { "enum": ["low", "medium", "high"] }
+            }
+          }
+        }
+      }
+    }
+  }
+}
