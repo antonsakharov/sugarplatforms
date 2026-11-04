@@ -336,3 +336,10 @@ A feature is complete only when the intended user action works, tests exist, bui
 - [-] PAR-005/006 Production-grade PDF/OCR, complex font/layout support and broader structural compatibility remain in progress.
 - [!] SEC-LIVE-TENANT Real authenticated non-`BYPASSRLS` PostgreSQL/RLS, private storage and malware-scanner two-tenant certification requires provisioned infrastructure.
 - [ ] PAR-005b22 Next: assess bounded indirect xref-stream dictionary references and nonzero object-generation compatibility without weakening object identity or evidence provenance.
+
+### 2026-11-04 — Indirect xref-stream Length
+- [x] PAR-005b22 Accept only indexed, live generation-zero direct integer `/Length N 0 R` in the PDF xref stream, with bounded value and encoded-length equality.
+- [x] PAR-005b22-TEST Add positive, sparse-index, malformed, missing, generation and orphan-reference regression coverage.
+- [-] PAR-005/006 Full production PDF/OCR, complex font/layout and revision support remain in progress.
+- [!] SEC-LIVE Authenticated non-BYPASSRLS two-tenant PostgreSQL, private storage and malware scanning require provisioned infrastructure.
+- [ ] PAR-005b23 Next: evaluate strict PDF object-generation compatibility across xref entries and page-tree references; do not infer evidence.
