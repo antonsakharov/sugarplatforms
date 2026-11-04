@@ -360,3 +360,6 @@ The bounded PDF 1.5 local/demo validator accepts zero-width `/W` fields only und
 ### Bounded sparse PDF xref-stream indexes (2026-11-03)
 
 The local/demo PDF adapter accepts a single Flate `/XRef` stream with optional bounded `/Index` pairs. Ranges must be nonempty, strictly increasing, non-overlapping, within `/Size`, and include object zero as an explicitly free entry. The decompressed entry count must equal the sum of declared range lengths; every direct and compressed object must appear exactly once with verified offsets/indexes. Omitted object numbers are implicitly free, not evidence. Raw bytes, physical page locators, metadata/evidence separation, and upload limits are unchanged (Decision 098).
+
+### 2026-11-04 — PDF xref indirect Length
+The local/demo PDF xref-stream integrity gate resolves `/Length` only from a live indexed direct generation-zero integer object, validates the bounded encoded length, and preserves original physical offsets and page evidence. General indirect xref fields and nonzero generations remain unsupported.
