@@ -150,3 +150,6 @@ Omitted `/W` fields in PDF 1.5 xref streams are interpreted only as specificatio
 ### 2026-11-03 — Sparse xref stream evidence boundary
 
 A bounded sparse `/Index` may omit only objects that are genuinely absent. The local/demo validator rejects overlapping, descending, empty, out-of-bounds, oversized or missing-object-zero ranges; rejects orphan live objects, invalid offsets and compressed indexes; and requires exact decompressed entry counts. No omitted range is used to infer architecture evidence, and `/Info`/`/ID` remain non-evidence metadata. Existing malware/secret scanning, tenant authorization, 10-file/25-MB/150-page limits and the prohibition on customer records and credentials remain unchanged. Live non-`BYPASSRLS` PostgreSQL, private storage and malware-scanner certification is still required (Decision 098).
+
+### 2026-11-04 — Indirect xref stream length trust boundary
+A PDF xref `/Length` indirect reference is accepted only if it resolves to an indexed live direct generation-zero integer, within the 64 KiB xref byte budget and equal to actual encoded stream length. Arbitrary PDF expressions, generation changes, unindexed or compressed targets fail closed. This does not change upload limits, metadata-only policy, malware scanning, or tenant isolation certification.
