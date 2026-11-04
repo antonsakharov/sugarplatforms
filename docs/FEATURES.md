@@ -178,3 +178,6 @@ Status: **implemented and locally regression-tested in the bounded demo parser; 
 ### 2026-11-03 — PAR-005b21 sparse PDF xref-stream `/Index` ranges
 
 Status: **implemented and regression-tested in the bounded local/demo PDF parser; production PDF/OCR remains in progress**. Strict ascending non-overlapping `/Index` ranges may omit free object IDs only. Physical direct offsets, compressed indexes, object-zero free state, exact decoded length, verified page provenance and metadata non-extraction remain mandatory. Nine new tests cover positive and adversarial cases. No assessment scope or privacy expansion. Next: PAR-005b22 bounded xref-stream indirect reference and object-generation compatibility assessment (Decision 098).
+
+### 2026-11-04 — PAR-005b22 bounded indirect xref-stream Length
+Implemented strict generation-zero direct-integer `/Length N 0 R` support in the bounded PDF 1.5 xref validator. The referenced object must be live and indexed, its value must be 1–65536 bytes and match the encoded stream. No arbitrary indirect dictionary values or nonzero generations are accepted; physical-page evidence remains verified. Production PDF/OCR and live two-tenant certification remain open (Decision 099).
